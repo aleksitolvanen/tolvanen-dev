@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saarenmaa-roadtrip — kohdeideat</title>
+    <meta name="description" content="Neljän päivän autoreitti: Tallinna → Haapsalu → Muhu → Saarenmaa. Kohteet, ravintolat, aukiolot ja reittilinkit.">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --card: #161616;
+            --card-border: #262626;
+            --text: #e0e0e0;
+            --muted: #9a9a9a;
+            --accent: #4fd1a5;
+            --warn-bg: #2a1d12;
+            --warn-border: #6b4a1f;
+            --warn-text: #f0c987;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        main {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 2rem 1.25rem 4rem;
+        }
+        header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            margin: 0 0 .25rem;
+        }
+        header p.lead {
+            color: var(--muted);
+            margin-top: 0;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin: 2.5rem 0 .75rem;
+            color: var(--accent);
+        }
+        h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin: 1.5rem 0 .5rem;
+        }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .warn {
+            background: var(--warn-bg);
+            border: 1px solid var(--warn-border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+        }
+        .warn strong { color: var(--warn-text); }
+        .warn ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+        ul.places { list-style: none; padding: 0; margin: 0; }
+        ul.places li {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: .8rem 1rem;
+            margin: .5rem 0;
+        }
+        ul.places li .meta {
+            display: block;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+        .star { color: #ffd166; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .95rem;
+        }
+        th, td {
+            text-align: left;
+            padding: .5rem .6rem;
+            border-bottom: 1px solid var(--card-border);
+            vertical-align: top;
+        }
+        th { color: var(--muted); font-weight: 500; }
+        .routes a {
+            display: block;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: .7rem 1rem;
+            margin: .5rem 0;
+        }
+        footer {
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--card-border);
+            color: var(--muted);
+            font-size: .85rem;
+        }
+        .tablewrap { overflow-x: auto; }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <h1>Saarenmaa-roadtrip — kohdeideat</h1>
+        <p class="lead">Neljän päivän autoreitti Helsingistä lautalla: Tallinna → Rummu → Haapsalu → Muhu → Saarenmaa → paluu. Koottu heinäkuussa 2026 — aukiolot ja hinnat olivat silloisia, tarkista ennen menoa.</p>
+    </header>
+
+    <div class="warn">
+        <strong>⚠️ Hyvä tietää etukäteen</strong>
+        <ul>
+            <li><strong>Pädaste Manor (Muhu) on kiinni pysyvästi</strong> — omistajayhtiö konkurssiin 11/2025.</li>
+            <li><a href="https://guide.michelin.com/en/laane-maakond/haapsalu_3522187/restaurant/rado-1202087">Rado</a> (Haapsalun Michelin-listattu) on <strong>kiinni maanantaisin</strong>.</li>
+            <li><a href="https://www.muhu.info/en/news/muhu-pagarid">Muhu Pagarid</a> -struudelileipomo auki ma–ke vain <strong>9–14</strong>.</li>
+            <li>Varaa Virtsu–Kuivastu-lautan autopaikat etukäteen: <a href="https://www.praamid.ee/">praamid.ee</a> — heinäkuussa vuorot täyttyvät.</li>
+            <li>Kuressaaren illallispaikat kannattaa varata sesongissa 1–3 päivää etukäteen.</li>
+        </ul>
+    </div>
+
+    <h2>Päivä 1 (ma) — Tallinna → Rummu → Haapsalu</h2>
+    <ul class="places">
+        <li><span class="star">⭐</span> <a href="https://www.schlossfall.com/">Keila-Joa juga + Schloss Fall -puisto</a><span class="meta">6 m vesiputous, riippusillat, kartanopuisto. Rannikkotien kautta +10–15 min. Puisto aina auki, ilmainen (linnan museo ma kiinni yleisöltä).</span></li>
+        <li><a href="https://visitestonia.com/en/turisalu-limestone-cliff-and-platform">Türisalu pank</a><span class="meta">~30 m jyrkänne mereen, 5 min Keila-Joasta. Nopea vau-pysähdys.</span></li>
+        <li><a href="https://rummu.ee/">Rummu karjäär</a> + <a href="https://rummu.ee/ee/cafe">kohvik</a><span class="meta">Vedellä täyttynyt louhos + vankilarauniot. Lounas louhoksen rannalla (kohvik auki kesällä joka päivä 10–20).</span></li>
+        <li><a href="https://padise.ee/en/good-to-know/">Padise klooster</a><span class="meta">1200-luvun luostarirauniot reitillä — museo ma kiinni (kesällä ti–su 11–18), joten maanantaina korkeintaan drive-by.</span></li>
+        <li><span class="star">⭐</span> <a href="https://www.visithaapsalu.com/en/objekt/ungru-manor-ruins/">Ungru lossivaremed</a><span class="meta">Kesken jäänyt uusbarokkilinnan raunio 5 min ennen Haapsalua. Outo ja kuvauksellinen, vapaa pääsy.</span></li>
+        <li>Haapsalun iltakävely<span class="meta">Piispanlinnan rauniot, promenadi, Tšaikovski-penkki, Aafrika rand ja <a href="https://salm.ee/en/railway-and-communications-museum/">rautatieaseman 216 m katettu puulaituri</a> (museo ma kiinni, ulkoalue aina).</span></li>
+        <li>Illallinen: <a href="https://muuriaarekohvik.ee/">Müüriääre kohvik</a> tai <a href="https://dietrich.ee/">Hapsal Dietrich</a><span class="meta">Müüriääre ma 8–21 (linnanmuurin vieressä). Dietrichin keittiö sulkeutuu jo klo 20. <a href="https://kuursaal.ee/en/">Kuursaalin</a> kesäravintolan ma-aukiolo vaihtelee — tarkista ovelta.</span></li>
+    </ul>
+
+    <h2>Päivä 2 (ti) — Virtsu → Muhu → Kuressaare</h2>
+    <ul class="places">
+        <li><a href="https://www.muhu.info/en/news/muhu-pagarid">Muhu Pagarid</a> + <a href="https://puhkaeestis.ee/et/muhu-katariina-kirik">Katariina kirkko</a> (Liiva)<span class="meta">Kuuluisat struudelit (vain 9–14!) ja 1200-luvun freskokirkko päätien varressa.</span></li>
+        <li><span class="star">⭐</span> <a href="https://www.muhumuuseum.ee/en/">Koguva kalastajakylä + Muhun museo</a><span class="meta">Viron parhaiten säilynyt kyläkokonaisuus: kiviaidat, olkikatot. 8 km pisto Liivasta. Auki kesällä joka päivä 10–17.</span></li>
+        <li><a href="https://visitestonia.com/en/uugu-bluff">Üügu pank</a><span class="meta">Muhun kaareva kalkkikivijyrkänne, portaat rantaan — rauhallisempi kuin Panga. 20 min pisto.</span></li>
+        <li><a href="https://www.jaanalind.ee/en/">Muhu jaanalinnufarm</a><span class="meta">Strutseja, emuja, kenguruita; sopivan absurdi. 3 km päätieltä, auki 10–18.</span></li>
+        <li><a href="https://puhkaeestis.ee/et/eemu-tuulik">Eemu-mylly</a><span class="meta">Päätien varressa, 5 min pikapysäkki.</span></li>
+        <li>Ilta Kuressaaressa: <a href="https://poide.ee/en/">Pöide Grillhouse &amp; Taproom</a><span class="meta">Saaremaan craft-panimon hanapaikka (Uus 20), auki 12–23.</span></li>
+    </ul>
+
+    <h2>Päivä 3 (ke) — Saarenmaan lenkit</h2>
+
+    <h3>Pohjoinen</h3>
+    <ul class="places">
+        <li><a href="https://visitestonia.com/en/angla-windmill-hill">Anglan tuulimyllyt</a> + <a href="https://puhkaeestis.ee/et/karja-katariina-kirik">Karja kirkko</a><span class="meta">Ikoniset myllyt; 3 min päässä kirkko, jossa Viron hienoimmat keskiaikaiset kiviveistokset (ma–pe 11–17).</span></li>
+        <li><a href="https://visitestonia.com/en/panga-cliff">Panga pank</a><span class="meta">Saaren korkein kalkkikivijyrkänne pohjoisrannikolla.</span></li>
+        <li><a href="https://visitestonia.com/en/tuhkana-beach-and-recreation-area">Tuhkana beach</a><span class="meta">Pohjoisrannikon paras hiekkaranta, 10 km Pangalta pienen hiekkatien päässä.</span></li>
+        <li><a href="https://visitestonia.com/en/odalatsi-springs">Odalätsi allikad</a><span class="meta">Kirkasvetiset lähteet metsässä, 5 min pisto.</span></li>
+        <li><a href="https://pidulaforell.ee/en/">Pidula Forell</a><span class="meta">Ongi oma kirjolohi, savustetaan siinä; kalakahvila (~12–20, varmista +372 5662 7637).</span></li>
+        <li><a href="https://visitestonia.com/en/lake-karujarv-and-beach">Karujärv</a><span class="meta">Hiekkapohjainen järviuimaranta mäntyjen keskellä, paluureitillä.</span></li>
+    </ul>
+
+    <h3>Länsi</h3>
+    <ul class="places">
+        <li><span class="star">⭐</span> <a href="https://loodusegakoos.ee/kuhuminna/rahvuspargid/vilsandi-rahvuspark/1329">Harilaid + Kiipsaaren kalteva majakka</a><span class="meta">Meressä nojaava hylätty majakka hiekkaniemen kärjessä (Vilsandin kansallispuisto) — vaikuttavin luontokohde. ~1 h ajo Kuressaaresta + 8–11 km rantakävely (2–3,5 h). Juomat mukaan, ei varjoa.</span></li>
+        <li><a href="https://www.puhkaeestis.ee/et/viidumae-vaatetorn">Viidumäen Rauna-torni</a><span class="meta">26 m näkötorni saaren korkeimmalla kohdalla, reitin varrella.</span></li>
+        <li><a href="https://soogimaja.ee/">Lümanda söögimaja</a> + <a href="https://www.lahhentagge.com/">Lahhentagge</a><span class="meta">Aito saarelaisruokala vanhassa kyläkoulussa (~12–20 joka päivä). Samassa kylässä gin-tislaamo (Ösel Dry Gin) — maistelu vain etukäteen sopien.</span></li>
+    </ul>
+
+    <h3>Sõrven niemi</h3>
+    <ul class="places">
+        <li><a href="https://www.tripadvisor.com/Attraction_Review-g2548729-d3530717-Reviews-Monument_to_the_Night_Battle_of_Tehumardi-Salme_Saaremaa_Saare_County.html">Tehumardi yötaistelun muistomerkki</a><span class="meta">Jättimäinen betonimiekka tien varressa, 15 min pysähdys.</span></li>
+        <li><span class="star">⭐</span> <a href="https://visitestonia.com/en/sorve-lighthouse">Sõrve majakka</a> + <a href="https://puhkaeestis.ee/et/sorve-muuseum">militaarmuseo</a> + Sääre tirp<span class="meta">Niemen kärki: majakka, WW2-kalustoa (auki kesällä ~10–20, pieni käteismaksu) ja mereen jatkuva sorasärkkä (30 min kävely).</span></li>
+        <li><a href="https://www.puhkaeestis.ee/et/stebeli-rannakaitsepatarei">Stebelin rannikkopatteri</a><span class="meta">Maanalaiset neuvostopatterin rauniot, urbex-henkinen — taskulamppu mukaan, omalla vastuulla. 5–10 min majakalta.</span></li>
+        <li><a href="https://saaremaatuulik.ee/">Ohessaare pank + Tuulik-rantakahvila</a><span class="meta">Fossiilikallio + tuulimyllykahvila (kesällä joka päivä 11–18). Lenkin paluupysähdys.</span></li>
+    </ul>
+
+    <h3>Ja lisäksi</h3>
+    <ul class="places">
+        <li><a href="https://kaali.saaremaa-top.ee/kaali/en/">Kaali-meteoriittikraatteri</a><span class="meta">~4000 v vanha törmäysjärvi, 18 km Kuressaaresta — käytännössä Muhun-reitin varrella. 30 min.</span></li>
+        <li><a href="https://visitestonia.com/en/kuressaare-castle">Kuressaaren linna</a><span class="meta">Baltian parhaiten säilynyt keskiaikainen linna vallihautoineen + museo.</span></li>
+        <li><a href="https://visitestonia.com/en/mandjala-beach">Mändjala</a> &amp; Järve<span class="meta">Tunnetuimmat hiekkarannat ~10 km Kuressaaresta lounaaseen, mäntymetsän ja dyynien reunustamat.</span></li>
+    </ul>
+
+    <h2>Ruoka &amp; juoma Kuressaaressa</h2>
+    <div class="tablewrap">
+    <table>
+        <tr><th>Paikka</th><th>Mikä</th><th>Huom</th></tr>
+        <tr><td><a href="https://www.prelude.ee/">Vinoteek Prelude</a></td><td>Viinibaari-resto, Saaremaan raaka-aineet (ahven, ankeriaskeitto, villisika)</td><td>Pieni — varaa etukäteen</td></tr>
+        <tr><td><a href="https://saaremaaveski.ee/en/">Saaremaa Veski</a></td><td>Ravintola v. 1899 tuulimyllyssä, grilliruokaa, Pihtla koduõlu hanasta</td><td>Suosittu, varaa</td></tr>
+        <tr><td><a href="https://kuressaarekuursaal.ee/en/homepage/">Ku-Kuu (Kuursaal)</a></td><td>Kalaravintola, terassi linnan vallihaudalle</td><td>Varaa terassipaikat</td></tr>
+        <tr><td><a href="https://www.castello.ee/">Castello</a></td><td>Italialainen paikallisilla raaka-aineilla, ~30–40 €/hlö</td><td>Paikallisten suosikki</td></tr>
+        <tr><td><a href="https://gospa.ee/">GOSPA</a></td><td>Rannassa, auringonlaskuterassi</td><td>Tasokkain, silti rento</td></tr>
+    </table>
+    </div>
+    <ul class="places">
+        <li><span class="star">⭐</span> <a href="https://pihtlapruul.ee/en/visit/">Pihtla Õlleköök / Mekituba</a><span class="meta">Viron vanhin pienpanimo (1990) 12 km Kuressaaresta: kierros + maistelu 12 €/hlö (mekituba@pihtlapruul.ee), taproom kesällä ti–su 11–18. Perinteinen saarelainen koduõlu.</span></li>
+        <li>Pubit ja terassit<span class="meta"><a href="https://poide.ee/en/">Pöide Taproom</a> (craft), <a href="https://www.villemipubid.ee/monus-villem/">Mõnus Villem</a> (saaren isoin valikoima), <a href="https://www.vaekoda.ee/en/">Pub Vaekoda</a> (v. 1666 vaakahuone torilla), <a href="https://johnbull.ee/">John Bull</a> (linnan puistossa).</span></li>
+        <li>Sauna/spa<span class="meta"><a href="https://grandrose.ee/en/saaremaa-spa-and-sauna-centre/">Grand Rose Spa</a> (7 saunaa, päivälippu ~10–20 €) tai <a href="https://asaspa.ee/en/">Asa Spa</a>.</span></li>
+        <li>Maista ainakin<span class="meta">Pihtla koduõlu, lest (kampela), savukala, Muhun musta leipä, kadakas-teemaiset tuotteet.</span></li>
+    </ul>
+
+    <h2>Paluupäivä (to)</h2>
+    <ul class="places">
+        <li><a href="https://www.facebook.com/koostmuhuresto/">Koost Muhu Resto</a> (Liiva)<span class="meta">Myöhäinen lounas vanhassa meijerissä 10 min ennen Kuivastun satamaa — tuore kala, kalakeitto. Soita etukäteen sesongissa. Samasta kylästä Muhu Pagaridin leivät laivamatkalle.</span></li>
+        <li><a href="https://rotermann.ee/en/parking/">Rotermannin kvartal</a> (Tallinna)<span class="meta">Ruokakortteli 600 m D-terminaalista, Europark-halli Ahtri-kadulta. Esim. <a href="https://r14.ee/">R14</a>. Hyvä vaihtoehto ennen iltalauttaa.</span></li>
+        <li>Ajoaika<span class="meta">Kuressaare → Tallinna ~4 h + Kuivastu–Virtsu-lautta (27 min). Varaa lauttapaikka ja lähde ajoissa.</span></li>
+    </ul>
+
+    <h2>Tapahtumia heinäkuussa 2026</h2>
+    <ul class="places">
+        <li><a href="https://muhuvain.ee/regatt-2026/">Moonsund Regatta (Muhu Väina regatt)</a><span class="meta">10.–17.7.2026 — purjehduskilpailu saaristossa, päätöspäivät Kuressaaren satamassa 16.–17.7.</span></li>
+        <li><a href="https://ilandsound.ee/en/">I Land Sound</a><span class="meta">16.–19.7.2026, Illiku laid, Orissaare — elektronisen musiikin saarifestivaali. Lisää liikennettä lautoille noina päivinä.</span></li>
+        <li><a href="https://visitestonia.com/en/saaremaa-opera-festival">Saaremaa ooperipäivät</a><span class="meta">18.–25.7.2026, Kuressaaren linnanpiha.</span></li>
+    </ul>
+
+    <h2>Reittilinkit (Google Maps)</h2>
+    <div class="routes">
+        <a href="https://www.google.com/maps/dir/Tallinna+sadama+D-terminal/Türisalu+pank/Keila-Joa+juga/Rummu+karjäär/Ungru+lossi+varemed/Haapsalu">Päivä 1: satama → Türisalu → Keila-Joa → Rummu → Ungru → Haapsalu</a>
+        <a href="https://www.google.com/maps/dir/Haapsalu/Virtsu+sadam/Muhu+Pagarid/Muhu+Muuseum+Koguva/Üügu+pank/Kuressaare">Päivä 2: Haapsalu → Virtsu → Liiva → Koguva → Üügu → Kuressaare</a>
+        <a href="https://www.google.com/maps/dir/Kuressaare/Angla+Tuulikumägi/Karja+kirik/Panga+pank/Tuhkana+rand/Odalätsi+allikad/Pidula+Forell/Karujärve+rand/Kuressaare">Päivä 3A: pohjois-/länsilenkki</a>
+        <a href="https://www.google.com/maps/dir/Kuressaare/Tehumardi+memoriaal/Sõrve+tuletorn/Sõrve+militaarmuuseum/Ohessaare+tuulik/Kuressaare">Päivä 3B: Sõrve-lenkki</a>
+        <a href="https://www.google.com/maps/dir/Kuressaare/Kaali+kraater/Koost+Muhu+Resto/Kuivastu+sadam/Rotermanni+kvartal+Tallinn/Tallinna+sadama+D-terminal">Päivä 4: paluu Kaalin ja Liivan kautta</a>
+    </div>
+
+    <footer>
+        Koottu heinäkuussa 2026. Aukiolot ja hinnat voivat muuttua — tarkista kohteiden omilta sivuilta. · <a href="https://tolvanen.dev">tolvanen.dev</a>
+    </footer>
+</main>
+</body>
+</html>
