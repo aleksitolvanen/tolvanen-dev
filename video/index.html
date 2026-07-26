@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elokuvat ja pelit</title>
+<meta name="description" content="Viivakoodilla skannattu kokoelma elokuvia, tv-sarjoja ja pelejä — työlista, jota täydennetään.">
+<meta property="og:title" content="Elokuvat ja pelit">
+<meta property="og:description" content="Viivakoodilla skannattu kokoelma elokuvia, tv-sarjoja ja pelejä — työlista, jota täydennetään.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg:#fbfbfa; --card:#fff; --ink:#16181d; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#1f6feb; --ok:#15803d; --guess:#b45309; --open:#b91c1c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f1115; --card:#171a20; --ink:#e8eaed; --muted:#9aa3ad; --line:#252a32;
+            --accent:#6ea8fe; --ok:#4ade80; --guess:#fbbf24; --open:#f87171; }
+  }
+  :root[data-theme="light"] { --bg:#fbfbfa; --card:#fff; --ink:#16181d; --muted:#6b7280;
+            --line:#e5e7eb; --accent:#1f6feb; --ok:#15803d; --guess:#b45309; --open:#b91c1c; }
+  :root[data-theme="dark"] { --bg:#0f1115; --card:#171a20; --ink:#e8eaed; --muted:#9aa3ad;
+            --line:#252a32; --accent:#6ea8fe; --ok:#4ade80; --guess:#fbbf24; --open:#f87171; }
+
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+         -webkit-text-size-adjust:100%; }
+  .wrap { max-width:840px; margin:0 auto; padding:26px 16px 60px; }
+  header h1 { font-size:24px; margin:0 0 4px; letter-spacing:-.02em; }
+  header p { margin:0; color:var(--muted); font-size:13.5px; }
+
+  .bar { height:7px; background:var(--line); border-radius:99px; overflow:hidden; margin:16px 0 6px; }
+  .bar i { display:block; height:100%; background:var(--ok); }
+  .barlab { font-size:12.5px; color:var(--muted); margin-bottom:18px; }
+
+  .controls { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;
+              position:sticky; top:0; z-index:5; padding:10px 0;
+              background:linear-gradient(var(--bg) 78%, transparent); }
+  input, button { font:inherit; color:var(--ink); background:var(--card);
+                  border:1px solid var(--line); border-radius:9px; padding:8px 12px; }
+  #q { flex:1 1 180px; min-width:0; }
+  button { cursor:pointer; }
+  button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+  .list { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .row { display:grid; grid-template-columns:1fr auto; gap:2px 12px;
+         padding:11px 14px; border-top:1px solid var(--line); align-items:center; }
+  .row:first-child { border-top:0; }
+  .name { font-size:14.5px; }
+  .name.unknown { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:14px; }
+  .sub { grid-column:1; font-size:12px; color:var(--muted); }
+  .tags { display:flex; gap:5px; align-items:center; flex-wrap:wrap; }
+  .tag { font-size:11px; padding:2px 8px; border-radius:99px; border:1px solid var(--line);
+         color:var(--muted); white-space:nowrap; }
+  .tag.ok { color:var(--ok); border-color:color-mix(in srgb, var(--ok) 40%, transparent); }
+  .tag.guess { color:var(--guess); border-color:color-mix(in srgb, var(--guess) 40%, transparent); }
+  .tag.open { color:var(--open); border-color:color-mix(in srgb, var(--open) 40%, transparent); }
+  #none { display:none; color:var(--muted); padding:26px 0; }
+  footer { margin-top:26px; font-size:12.5px; color:var(--muted); }
+  footer a { color:var(--accent); }
+  @media (max-width:560px) { .row { grid-template-columns:1fr; } .tags { margin-top:4px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Elokuvat ja pelit</h1>
+    <p>Skannattu viivakoodilla · päivitetty 2026-07-26</p>
+  </header>
+
+  <div class="bar"><i id="bar"></i></div>
+  <div class="barlab" id="barlab"></div>
+
+  <div class="controls">
+    <input id="q" type="search" placeholder="Hae nimellä tai koodilla…" autocomplete="off">
+    <button data-f="all" class="on">Kaikki</button>
+    <button data-f="elokuva">Elokuvat</button>
+    <button data-f="peli">Pelit</button>
+    <button data-f="missing">Puuttuvat</button>
+    <button id="theme" title="Vaihda teema">◐</button>
+  </div>
+
+  <div class="list" id="list"></div>
+  <p id="none">Ei osumia.</p>
+
+  <footer>
+    Nimet ja tyypit haettu UPCitemdb:stä ja Discogsista. Osa tyypeistä on päätelty
+    julkaisijan viivakoodietuliitteestä, ei varmistettu. Hintoja ei ole —
+    käytetyille elokuville ja peleille ei ole ilmaista hintalähdettä.
+    <a href="/cd">CD-kokoelma</a>
+  </footer>
+</div>
+
+<script>
+const ITEMS = [{"input": "4250137238821", "title": "Alamaailman Vasarat - Haudasta Lomilla", "kind": "muu", "format": "", "country": "Saksa", "note": "", "status": "ok"}, {"input": "3307212314701", "title": "Assassin's Creed II", "kind": "peli", "format": "peli", "country": "Ranska", "note": "PS3", "status": "ok"}, {"input": "5030945087199", "title": "Battlefield: Bad Company 2", "kind": "peli", "format": "peli", "country": "Britannia", "note": "PC", "status": "ok"}, {"input": "5051893128185", "title": "Blade Runner – 30th Anniversary Collector's Edition", "kind": "elokuva", "format": "Blu-ray", "country": "Britannia", "note": "4 levyä", "status": "ok"}, {"input": "8436028690176", "title": "Calypso Music History: One Hand Don't Clap", "kind": "elokuva", "format": "", "country": "Espanja", "note": "", "status": "ok"}, {"input": "5023940535864", "title": "Das Boot -- Superbit [dvd] By Jürgen Prochnow,herbert Grönemeyer,wolfgang Pet.", "kind": "elokuva", "format": "DVD", "country": "Britannia", "note": "", "status": "ok"}, {"input": "022891453994", "title": "Hated: GG Allin and the Murder Junkies (Special Edition) (DVD)", "kind": "elokuva", "format": "DVD", "country": "", "note": "", "status": "ok"}, {"input": "5050070005172", "title": "Joseph Sweeney, Jack Klugman-12 Angry Men (uk Import) Dvd", "kind": "elokuva", "format": "DVD", "country": "Britannia", "note": "", "status": "ok"}, {"input": "5026555400374", "title": "L.a. Noire Ps3", "kind": "peli", "format": "peli", "country": "Britannia", "note": "", "status": "ok"}, {"input": "711719172376", "title": "LittleBigPlanet 2", "kind": "peli", "format": "peli", "country": "", "note": "PS3", "status": "ok"}, {"input": "5026555035774", "title": "Mafia", "kind": "peli", "format": "peli", "country": "Britannia", "note": "PC", "status": "ok"}, {"input": "6418959001841", "title": "Max Payne", "kind": "peli", "format": "peli", "country": "Suomi", "note": "PC – suomalainen julkaisu", "status": "ok"}, {"input": "5030930103668", "title": "Nhl 12 2012 - And Sealed - Sony Ps3 Playstation 3 Game", "kind": "peli", "format": "peli", "country": "Britannia", "note": "", "status": "ok"}, {"input": "5026555053907", "title": "Pc Games Reorderable-gta 4 Pc (uk Import) Game", "kind": "peli", "format": "peli", "country": "Britannia", "note": "", "status": "ok"}, {"input": "5051892066716", "title": "Playstation 3 : Batman: Arkham City For Playstation 3 By Videogames Great Value", "kind": "peli", "format": "peli", "country": "Britannia", "note": "", "status": "ok"}, {"input": "5703976151480", "title": "Prey of the Jaguar", "kind": "elokuva", "format": "DVD", "country": "Tanska", "note": "Bellevue Entertainment", "status": "ok"}, {"input": "4012927052280", "title": "Pro Evolution Soccer 2011 (PES 2011)", "kind": "peli", "format": "peli", "country": "Saksa", "note": "PS3", "status": "ok"}, {"input": "711719124191", "title": "Ps3 - Uncharted 3 Drake's Deception - & Sealed English Pal Nordic", "kind": "peli", "format": "peli", "country": "", "note": "", "status": "ok"}, {"input": "828766132496", "title": "Ramones: Raw (dvd) (2004)", "kind": "elokuva", "format": "DVD", "country": "Italia", "note": "", "status": "ok"}, {"input": "022891440499", "title": "Raw Brutal Rough & Bloody: Best of 1991 Live (DVD)  MVD Visual  Music & Performance", "kind": "elokuva", "format": "DVD", "country": "", "note": "", "status": "ok"}, {"input": "5014437810434", "title": "Rosemarys Baby Dvd (phe8104)", "kind": "elokuva", "format": "DVD", "country": "Britannia", "note": "", "status": "ok"}, {"input": "023272998479", "title": "Star Wars Episode 1: Phantom Menace, Windows 98, Windows 95", "kind": "peli", "format": "peli", "country": "", "note": "", "status": "ok"}, {"input": "022891448396", "title": "Terror in America: Live 1993 (DVD)  MVD Visual  Music & Performance", "kind": "elokuva", "format": "DVD", "country": "", "note": "", "status": "ok"}, {"input": "711719275251", "title": "The Last of Us", "kind": "peli", "format": "peli", "country": "", "note": "PS3", "status": "ok"}, {"input": "7321944177379", "title": "The Matrix", "kind": "elokuva", "format": "DVD", "country": "Ruotsi", "note": "pohjoismainen julkaisu", "status": "ok"}, {"input": "7333018000629", "title": "The Walking Dead - Season 1 (blu-ray) [danish Import] Blu-ray", "kind": "elokuva", "format": "Blu-ray", "country": "Ruotsi", "note": "", "status": "ok"}, {"input": "7333018000537", "title": "The Walking Dead - Season 2 (blu-ray) [danish Import] Blu-ray", "kind": "elokuva", "format": "Blu-ray", "country": "Ruotsi", "note": "", "status": "ok"}, {"input": "7333018000643", "title": "The Walking Dead - Season 3 (blu-ray) [danish Import] Blu-ray", "kind": "elokuva", "format": "Blu-ray", "country": "Ruotsi", "note": "", "status": "ok"}, {"input": "7333018000544", "title": "The Walking Dead - Season 4 (blu-ray) [danish Import] Blu-ray", "kind": "elokuva", "format": "Blu-ray", "country": "Ruotsi", "note": "", "status": "ok"}, {"input": "7333018002135", "title": "The Walking Dead - Season 5 (blu-ray) [danish Import] Blu-ray", "kind": "elokuva", "format": "Blu-ray", "country": "Ruotsi", "note": "", "status": "ok"}, {"input": "711719186366", "title": "Uncharted 2: Among Thieves - Platinum Edition (ps3) Factory Sealed", "kind": "peli", "format": "peli", "country": "", "note": "", "status": "ok"}, {"input": "5050070010657", "title": "West Side Story - Special Edition Dvd (15930cdvd)", "kind": "elokuva", "format": "DVD", "country": "Britannia", "note": "", "status": "ok"}, {"input": "711719687214", "title": "WRC: World Rally Championship", "kind": "peli", "format": "peli", "country": "", "note": "PS2", "status": "ok"}];
+const list = document.getElementById('list');
+const q = document.getElementById('q');
+let filter = 'all';
+
+const esc = s => String(s ?? '').replace(/[&<>"]/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function render() {
+  const term = q.value.trim().toLowerCase();
+  const rows = ITEMS.filter(it => {
+    if (filter === 'missing' && it.status === 'ok') return false;
+    if (filter !== 'all' && filter !== 'missing' && it.kind !== filter) return false;
+    if (term && !(it.title + ' ' + it.input + ' ' + it.country).toLowerCase().includes(term)) return false;
+    return true;
+  });
+
+  document.getElementById('none').style.display = rows.length ? 'none' : 'block';
+  list.innerHTML = rows.map(it => {
+    const known = it.status === 'ok';
+    const name = known
+      ? `<div class="name">${esc(it.title)}</div>`
+      : `<div class="name unknown">${esc(it.input)}</div>`;
+    const sub = [
+      known ? it.input : '',
+      it.country,
+      it.note,
+    ].filter(Boolean).join(' · ');
+    const tags = [
+      it.format ? `<span class="tag">${esc(it.format)}</span>` : '',
+      it.kind ? `<span class="tag">${esc(it.kind)}</span>` : '',
+      known ? `<span class="tag ok">tunnistettu</span>`
+        : it.status === 'guess' ? `<span class="tag guess">arvio</span>`
+        : `<span class="tag open">tunnistamatta</span>`,
+    ].filter(Boolean).join('');
+    return `<div class="row">${name}<div class="tags">${tags}</div>
+      ${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div>`;
+  }).join('');
+}
+
+const total = ITEMS.length;
+const done = ITEMS.filter(i => i.status === 'ok').length;
+document.getElementById('bar').style.width = (done / total * 100).toFixed(1) + '%';
+document.getElementById('barlab').textContent =
+  `${done}/${total} tunnistettu · ${ITEMS.filter(i => i.status === 'guess').length} arvioitu · `
+  + `${ITEMS.filter(i => i.status === 'open').length} auki`;
+
+document.querySelectorAll('.controls button[data-f]').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.controls button[data-f]').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    filter = b.dataset.f;
+    render();
+  });
+});
+document.getElementById('theme').addEventListener('click', () => {
+  const now = document.documentElement.getAttribute('data-theme');
+  const dark = now ? now === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+});
+q.addEventListener('input', render);
+render();
+</script>
+</body>
+</html>
