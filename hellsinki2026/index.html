@@ -1,0 +1,4424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lineup</title>
+<style>
+/* ---------------------------------------------------------------------------
+   THEME. build-festival.py replaces the region between the sentinels with the
+   tokens it derived from spec.theme, for light and dark.
+
+   Keep the sentinel comments EXACTLY as they are or --rebuild cannot find them.
+   Do not restyle a single event by editing anything below the theme region: the
+   mobile and contrast guarantees live in this file and every future page
+   inherits them.
+   --------------------------------------------------------------------------- */
+/* @al-festival:theme:begin */
+:root, :root[data-theme="light"] {
+  --bg: #e9e9ea; --surface: #fafafa; --surface-2: #dedee0; --surface-3: #d0d0d3;
+  --ink: #0f1011; --ink-2: #45474a; --ink-3: #686b6e;
+  --line: #cdcdd0; --line-2: #b0b1b4;
+  --accent: #c8102e; --accent-soft: #e5cfd3; --accent-ink: #ffffff; --accent-text: #c8102e;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+  --bg: #08090a; --surface: #111213; --surface-2: #191b1c; --surface-3: #232527;
+  --ink: #f0f1f2; --ink-2: #a9acaf; --ink-3: #7e8184;
+  --line: #1e2022; --line-2: #2e3134;
+  --accent: #c8102e; --accent-soft: #270a10; --accent-ink: #ffffff; --accent-text: #d4455c;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #08090a; --surface: #111213; --surface-2: #191b1c; --surface-3: #232527;
+  --ink: #f0f1f2; --ink-2: #a9acaf; --ink-3: #7e8184;
+  --line: #1e2022; --line-2: #2e3134;
+  --accent: #c8102e; --accent-soft: #270a10; --accent-ink: #ffffff; --accent-text: #d4455c;
+}
+:root {
+  --display: "Archivo Narrow", "Roboto Condensed", "Liberation Sans Narrow", "Arial Narrow", Impact, system-ui, sans-serif;
+}
+/* @al-festival:theme:end */
+
+:root {
+  --radius: 3px;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --tap: 44px;
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: light dark; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-size: 15px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;
+}
+.wrap {
+  max-width: 1080px; margin: 0 auto;
+  padding: 0 max(14px, env(safe-area-inset-left)) 80px max(14px, env(safe-area-inset-right));
+}
+a { color: var(--accent-text); }
+button { font: inherit; color: inherit; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .card, .chip, .plbtn, .lnk, .detbtn { transition: border-color .12s ease, background .12s ease; }
+}
+:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+
+/* ---- masthead ---------------------------------------------------------- */
+.mast { padding: 26px 0 16px; border-bottom: 2px solid var(--ink); }
+.mast.grad {
+  margin: 0 calc(-1 * max(14px, env(safe-area-inset-left))) 0 calc(-1 * max(14px, env(safe-area-inset-right)));
+  padding: 26px max(14px, env(safe-area-inset-left)) 16px;
+  background: linear-gradient(160deg, var(--accent-soft), transparent 70%);
+}
+.mast.bars { position: relative; }
+.mast.bars::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0 22px, transparent 22px 34px);
+}
+.mast.bars { padding-top: 32px; }
+.eyebrow {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--accent-text); margin: 0 0 8px;
+}
+h1 {
+  font-family: var(--display);
+  font-size: clamp(27px, 8vw, 44px); line-height: 1.08; margin: 0 0 8px;
+  letter-spacing: -.02em; text-wrap: balance;
+}
+.sub { margin: 0; color: var(--ink-2); font-size: 14px; }
+/* The official schedule belongs at the top, not only in the footer: this page is a
+   copy of a lineup that can change, and the reader should be one tap from the
+   source without scrolling past 32 acts to find it. */
+.src { margin: 4px 0 0; font-size: 13.5px; }
+.src a { text-decoration: underline; text-underline-offset: 3px; }
+.note {
+  margin: 12px 0 0; padding: 9px 12px; font-size: 13.5px; color: var(--ink-2);
+  background: var(--accent-soft); border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+.themebtn {
+  margin-top: 14px; min-height: var(--tap); padding: 6px 14px;
+  background: var(--surface); border: 1px solid var(--line-2);
+  border-radius: var(--radius); font-family: var(--mono); font-size: 11px;
+  letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+}
+
+/* ---- playlists --------------------------------------------------------- */
+.pl { margin: 20px 0 0; }
+h2 {
+  font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-2);
+  margin: 26px 0 10px; padding-bottom: 7px; border-bottom: 1px solid var(--line);
+}
+/* Plain text links, not buttons. They still need to be comfortably tappable, so
+   they carry vertical padding rather than a box: the hit area is ~34px without
+   any of them looking like a control. */
+.plrow { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: baseline; }
+.plbtn {
+  display: inline-block; padding: 8px 0;
+  color: var(--accent-text); font-weight: 600; font-size: 15px;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.plbtn .n { font-family: var(--mono); font-size: 11.5px; opacity: .75; margin-left: 3px; }
+.plhint { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-3); }
+
+/* ---- controls ---------------------------------------------------------- */
+.controls {
+  position: sticky; top: 0; z-index: 20;
+  margin: 22px 0 4px; padding: 10px 0 9px;
+  background: linear-gradient(var(--bg) 82%, transparent);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  min-height: var(--tap); padding: 5px 14px;
+  background: var(--surface); border: 1px solid var(--line-2);
+  border-radius: 999px; font-size: 13px; cursor: pointer; white-space: nowrap;
+}
+.chip[aria-pressed="true"] {
+  background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 600;
+}
+.srch {
+  width: 100%; margin-top: 8px; min-height: var(--tap); padding: 9px 12px;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-2); border-radius: var(--radius); font-size: 15px;
+}
+.count { margin: 6px 0 0; font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+         letter-spacing: .06em; text-transform: uppercase; }
+
+/* ---- act cards --------------------------------------------------------- */
+.acts { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-left: 3px solid var(--accent); border-radius: var(--radius);
+  padding: 13px 14px;
+}
+.chead { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; min-width: 0; }
+.ord {
+  font-family: var(--mono); font-size: 11px; color: var(--accent-ink);
+  background: var(--accent); border-radius: var(--radius);
+  padding: 2px 6px; flex: none;
+}
+/* min-width:0 plus break-anywhere on every flex child that holds researched text.
+   A flex item will not shrink below the width of its content, so one long
+   unbreakable string -- a song title with no spaces, a band name written as one
+   word -- pushes the whole page into horizontal scroll at 360px. The default
+   overflow-wrap on body does not reach inside a flex item without this. */
+.aname {
+  font-family: var(--display); font-size: 21px; line-height: 1.15; margin: 0;
+  letter-spacing: -.01em; min-width: 0; overflow-wrap: anywhere;
+}
+.slot { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); letter-spacing: .04em; }
+.gen { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0 0; }
+.tag {
+  font-size: 11.5px; padding: 2px 8px; color: var(--ink-2);
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px;
+}
+.blurb { margin: 7px 0 0; color: var(--ink-2); font-size: 14.5px; }
+.arow { display: flex; flex-wrap: wrap; gap: 2px 16px; align-items: baseline; margin: 6px 0 0; }
+.detbtn, .ext {
+  display: inline-block; padding: 7px 0; background: none; border: 0;
+  font-size: 13.5px; cursor: pointer; color: var(--accent-text);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.detbtn:hover, .ext:hover { color: var(--ink); }
+
+/* ---- songs ------------------------------------------------------------- */
+/* Two lines per song instead of five: title and its links on one row, then album,
+   year and the reason on a single muted line under it. On a 32-act bill that is
+   the difference between a page you can scan and one you scroll past. */
+.songs { list-style: none; margin: 9px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.song { padding: 7px 0 8px; border-bottom: 1px solid var(--line); }
+.song:last-child { border-bottom: 0; padding-bottom: 1px; }
+/* space-between rather than margin-left:auto on .links: with one item per line
+   after a wrap, auto-margin would shove the links to the right edge of their own
+   line, which reads as a stray fragment. space-between leaves them left-aligned
+   when wrapped and still pushes them right when they fit. */
+.stitle {
+  display: flex; gap: 2px 12px; align-items: baseline; flex-wrap: wrap;
+  justify-content: space-between; min-width: 0;
+}
+/* The number and the title are one unit -- letting them break apart orphans a
+   bare "5" on its own line above a long song title. */
+.shead { display: flex; gap: 8px; align-items: baseline; min-width: 0; flex: 1 1 auto; }
+.snum { font-family: var(--mono); font-size: 11px; color: var(--ink-3); flex: none; }
+.sname { font-weight: 600; font-size: 14.5px; min-width: 0; overflow-wrap: anywhere; }
+.links { display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; flex: 0 0 auto; }
+.lnk {
+  display: inline-block; padding: 8px 0; font-size: 12.5px;
+  color: var(--accent-text); text-decoration: underline; text-underline-offset: 3px;
+}
+.lnk:hover { color: var(--ink); }
+.smeta { margin: 1px 0 0 20px; font-size: 12.5px; color: var(--ink-3); }
+
+/* ---- dialog ------------------------------------------------------------ */
+dialog {
+  width: min(660px, 100vw); max-width: 100vw; max-height: 100dvh;
+  margin: auto; padding: 0; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line-2); border-radius: var(--radius);
+}
+dialog::backdrop { background: rgba(0,0,0,.6); }
+.dhead {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 14px max(14px, env(safe-area-inset-right)) 12px 14px;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.dhead h3 {
+  font-family: var(--display); font-size: 22px; line-height: 1.15; margin: 0;
+  flex: 1; min-width: 0; overflow-wrap: anywhere;
+}
+.dx {
+  flex: none; width: var(--tap); height: var(--tap); cursor: pointer;
+  font-size: 22px; line-height: 1; background: var(--surface-2);
+  border: 1px solid var(--line-2); border-radius: var(--radius);
+}
+.dbody { padding: 14px; padding-bottom: max(18px, env(safe-area-inset-bottom)); }
+.dmeta { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); margin: 0 0 10px; }
+.dbody h4 {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-3); margin: 18px 0 7px; padding-bottom: 5px; border-bottom: 1px solid var(--line);
+}
+.dbody p { margin: 0 0 10px; color: var(--ink-2); }
+.dl { list-style: none; margin: 0; padding: 0; }
+.dl li { padding: 5px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.dl li:last-child { border-bottom: 0; }
+.dl .r { color: var(--ink-3); font-size: 12.5px; }
+.yr { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+
+@media (max-width: 560px) {
+  dialog { width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
+}
+@media (min-width: 620px) {
+  .wrap { padding-left: 20px; padding-right: 20px; }
+  .smeta, .swhy, .links { margin-left: 24px; }
+}
+
+footer {
+  margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--line);
+  color: var(--ink-3); font-size: 13px;
+}
+footer p { margin: 0 0 6px; }
+.empty { padding: 30px 0; color: var(--ink-3); text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast" id="mast">
+    <p class="eyebrow" id="eyebrow"></p>
+    <h1 id="title"></h1>
+    <p class="sub" id="sub"></p>
+    <p class="src" id="src"></p>
+    <div id="noteslot"></div>
+    <button class="themebtn" id="themebtn" type="button">Theme</button>
+  </header>
+
+  <section class="pl" id="plsec" hidden>
+    <h2 id="plhead">Playlists</h2>
+    <div class="plrow" id="plrow"></div>
+    <p class="plhint" id="plhint"></p>
+  </section>
+
+  <h2>Lineup</h2>
+  <div class="controls">
+    <div class="chips" id="chips"></div>
+    <input class="srch" id="srch" type="search" placeholder="Filter by name or genre" aria-label="Filter by name or genre">
+    <p class="count" id="count"></p>
+  </div>
+
+  <div class="acts" id="acts"></div>
+
+  <footer>
+    <p id="prov"></p>
+    <p>Act descriptions, line-ups and discographies come from web research and may contain errors.
+       Song picks are an introduction to each act, not a ranking.</p>
+  </footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgtitle">
+  <div class="dhead">
+    <h3 id="dlgtitle"></h3>
+    <button class="dx" id="dlgx" type="button" aria-label="Close">&times;</button>
+  </div>
+  <div class="dbody" id="dlgbody"></div>
+</dialog>
+
+<script>
+/* @al-festival:config:begin */
+var CONFIG = {
+  "slug": "hellsinki2026",
+  "event": "Hellsinki Metal Festival 2026",
+  "dates": "7–8 August 2026",
+  "venue": "Helsinki, Finland",
+  "source": "https://hellsinkimetalfestival.fi/aikataulu/",
+  "generated": "2026-07-30",
+  "hero": "bars"
+};
+/* @al-festival:config:end */
+/* @al-festival:data:begin */
+var DATA = {
+  "days": [
+    {
+      "id": "fri",
+      "label": "Friday 7 August"
+    },
+    {
+      "id": "sat",
+      "label": "Saturday 8 August"
+    }
+  ],
+  "stages": [
+    {
+      "id": "h01",
+      "label": "HELLSINKI-01"
+    },
+    {
+      "id": "h02",
+      "label": "HELLSINKI-02"
+    },
+    {
+      "id": "h03",
+      "label": "HELLSINKI-03"
+    }
+  ],
+  "acts": [
+    {
+      "id": "horizon-ignited",
+      "name": "Horizon Ignited",
+      "origin": "Kouvola, Finland",
+      "formed": "2017",
+      "genres": [
+        "melodic death metal",
+        "metalcore"
+      ],
+      "blurb": "Melodic death metal with metalcore mechanics — twin-guitar Gothenburg leads, keyboard atmosphere, growled verses against clean-sung choruses. From Kouvola in south-east Finland, three albums deep.",
+      "detail": "Founded in 2017 by guitarists Johannes Mäkinen and Vili Vottonen, who self-released the debut After the Storm in January 2019. Nuclear Blast signed them in early 2022 and issued Towards the Dying Lands that July, which put them on European tours. The third album, Tides (February 2025), came out on Reaper Entertainment and extends the debut's closer into the six-minute \"My Grave Shall Be the Sea (Leviathan pt. II)\"; a standalone single, \"Monument\", followed in March 2026, written during the Tides sessions but held back from the record. Founding drummer Jiri Vanhatalo left in May 2026 after nine years, the band's first line-up change since the bass seat turned over in 2021.",
+      "members": [
+        {
+          "name": "Okko Solanterä",
+          "role": "vocals"
+        },
+        {
+          "name": "Johannes Mäkinen",
+          "role": "guitar",
+          "since": "2017"
+        },
+        {
+          "name": "Vili Vottonen",
+          "role": "guitar",
+          "since": "2017"
+        },
+        {
+          "name": "Miska Ek",
+          "role": "keyboards",
+          "since": "2017"
+        },
+        {
+          "name": "Jukka \"Jugi\" Haarala",
+          "role": "bass",
+          "since": "2021"
+        },
+        {
+          "name": "Lauri Virén",
+          "role": "drums (live; announced for the 2026 shows after founding drummer Jiri Vanhatalo left in May 2026)"
+        }
+      ],
+      "albums": [
+        {
+          "title": "After the Storm",
+          "year": 2019,
+          "note": "self-released debut"
+        },
+        {
+          "title": "Towards the Dying Lands",
+          "year": 2022,
+          "note": "first for Nuclear Blast"
+        },
+        {
+          "title": "Tides",
+          "year": 2025,
+          "note": "third album, on Reaper Entertainment"
+        },
+        {
+          "title": "Monument",
+          "year": 2026,
+          "note": "standalone single, a Tides outtake"
+        }
+      ],
+      "links": {
+        "official": "https://horizonignited.com/",
+        "wikipedia": "https://fi.wikipedia.org/wiki/Horizon_Ignited",
+        "spotify": "https://open.spotify.com/artist/6ckq60ZYOQgb3qpcBIWt1E"
+      },
+      "songs": [
+        {
+          "title": "Equal in Death",
+          "album": "After the Storm",
+          "year": 2019,
+          "why": "by a wide margin their most-played song, and the one that got them noticed unsigned",
+          "yt_audio": "MhO1mlkjwQg",
+          "yt_video": null
+        },
+        {
+          "title": "Beyond Your Reach",
+          "album": "Towards the Dying Lands",
+          "year": 2022,
+          "why": "the video single that opened the Nuclear Blast era",
+          "yt_audio": "Ob_URzALjUg",
+          "yt_video": null
+        },
+        {
+          "title": "Towards the Dying Lands",
+          "album": "Towards the Dying Lands",
+          "year": 2022,
+          "why": "title track and the catchiest chorus in the set",
+          "yt_audio": "o9yxDzo7o7g",
+          "yt_video": null
+        },
+        {
+          "title": "Beneath the Dark Waters",
+          "album": "Tides",
+          "year": 2025,
+          "why": "lead single off the current album, and its opener",
+          "yt_audio": "Fpr3mij8e8s",
+          "yt_video": null
+        },
+        {
+          "title": "My Grave Shall Be the Sea (Leviathan pt. II)",
+          "album": "Tides",
+          "year": 2025,
+          "why": "the six-minute one that shows the other side, a sequel to the debut's closer",
+          "yt_audio": "Kmmjfki4JwU",
+          "yt_video": null
+        }
+      ],
+      "order": 1,
+      "day": "fri",
+      "stage": "h02",
+      "time": "13:30"
+    },
+    {
+      "id": "unleashed",
+      "name": "Unleashed",
+      "origin": "Stockholm, Sweden",
+      "formed": "1989",
+      "genres": [
+        "death metal",
+        "Viking metal"
+      ],
+      "blurb": "Swedish death metal from Stockholm, counted with Entombed, Dismember and Grave as the genre's \"big four\" — mid-paced, riff-driven and blunt, with lyrics about Norse mythology and pre-Christian Europe.",
+      "detail": "Founded in 1989 by bassist-vocalist Johnny Hedlund after he left Nihilist, the band that became Entombed. Hedlund has written the material and fronted it since the debut Where No Life Dwells (Century Media, 1991), and the line-up has been unchanged since Fredrik Folkare joined on lead guitar in 1995. From Across the Open Sea (1993) onward the lyrics moved from horror to Viking and Norse subject matter, later formalised into a running \"World of Odalheim\" storyline — a thread continued on the 15th album, Fire Upon Your Lands (Napalm Records, August 2025). Folkare also produces, mixes and masters the records. Original lead guitarist Fredrik Lindgren, who played on the first four albums, died in January 2025.",
+      "members": [
+        {
+          "name": "Johnny Hedlund",
+          "role": "vocals, bass; founder and sole songwriter",
+          "since": "1989"
+        },
+        {
+          "name": "Anders Schultz",
+          "role": "drums",
+          "since": "1989"
+        },
+        {
+          "name": "Tomas Måsgard",
+          "role": "rhythm guitar",
+          "since": "1990"
+        },
+        {
+          "name": "Fredrik Folkare",
+          "role": "lead guitar; also produces, mixes and masters the albums",
+          "since": "1995"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Where No Life Dwells",
+          "year": 1991,
+          "note": "debut, one of the founding Swedish death metal records"
+        },
+        {
+          "title": "Shadows in the Deep",
+          "year": 1992
+        },
+        {
+          "title": "Across the Open Sea",
+          "year": 1993,
+          "note": "first album recorded in Sweden; where the Viking material takes over"
+        },
+        {
+          "title": "Warrior",
+          "year": 1997,
+          "note": "last album before a five-year studio gap"
+        },
+        {
+          "title": "Hammer Battalion",
+          "year": 2008,
+          "note": "late-2000s return to form"
+        },
+        {
+          "title": "Fire Upon Your Lands",
+          "year": 2025,
+          "note": "15th studio album, and the record they are touring now"
+        }
+      ],
+      "links": {
+        "official": "https://www.unleashed.se/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Unleashed_(band)",
+        "spotify": "https://open.spotify.com/artist/3MKwCexzAd8YTdsSjRkKbv"
+      },
+      "songs": [
+        {
+          "title": "Death Metal Victory",
+          "album": "Warrior",
+          "year": 1997,
+          "why": "their most-played song live and the two-minute genre anthem to start with",
+          "yt_audio": "EFP6BOE5odA",
+          "yt_video": null
+        },
+        {
+          "title": "Before the Creation of Time",
+          "album": "Where No Life Dwells",
+          "year": 1991,
+          "why": "the debut's calling card, still in the set thirty-five years on",
+          "yt_audio": "R3UHfA5dCAw",
+          "yt_video": null
+        },
+        {
+          "title": "To Asgaard We Fly",
+          "album": "Across the Open Sea",
+          "year": 1993,
+          "why": "the galloping, chorus-led side of the band, and where the Viking material begins",
+          "yt_audio": "zcLpBzbvwWQ",
+          "yt_video": null
+        },
+        {
+          "title": "Hammer Battalion",
+          "album": "Hammer Battalion",
+          "year": 2008,
+          "why": "the modern-era staple, showing the heavier late production",
+          "yt_audio": "uVI0ajtgg8Y",
+          "yt_video": null
+        },
+        {
+          "title": "Hold Your Hammers High!",
+          "album": "Fire Upon Your Lands",
+          "year": 2025,
+          "why": "single off the current album and the closer on the 2025 shows",
+          "yt_audio": "WchonypTXP8",
+          "yt_video": null
+        }
+      ],
+      "order": 2,
+      "day": "fri",
+      "stage": "h01",
+      "time": "14:15"
+    },
+    {
+      "id": "omnium-gatherum",
+      "name": "Omnium Gatherum",
+      "origin": "Karhula (Kotka), Finland",
+      "formed": "1996",
+      "genres": [
+        "melodic death metal",
+        "progressive death metal"
+      ],
+      "blurb": "Melodic death metal from Karhula in south-east Finland, ten albums deep since 1996: Gothenburg twin-guitar melody with the keyboards well forward and songs that often run past six minutes. They call it “adult-oriented death metal”.",
+      "detail": "Founded in Karhula in autumn 1996 and anchored throughout by guitarist Markus Vanhala, who has also been Insomnium's lead guitarist since 2011; Jukka Pelkonen has fronted the band since 2006. The reference points are At the Gates and Dark Tranquillity, but with prominent keyboards, clean-vocal counterpoint and long-form songs. Origin (2021) reached No. 5 on the Finnish album chart, and the tenth album, May the Bridges We Burn Light the Way, arrived in November 2025 on Century Media, mixed by Jens Bogren and co-produced with Soilwork's Björn Strid. Guitarist Joonas Koto, in the band from 2010 to 2020, rejoined in January 2025 when Nick Cordle left.",
+      "members": [
+        {
+          "name": "Jukka Pelkonen",
+          "role": "vocals",
+          "since": "2006"
+        },
+        {
+          "name": "Markus Vanhala",
+          "role": "lead guitar, clean vocals; founder, also Insomnium",
+          "since": "1996"
+        },
+        {
+          "name": "Joonas Koto",
+          "role": "rhythm guitar, clean vocals; rejoined January 2025, previously in the band 2010–2020"
+        },
+        {
+          "name": "Aapo Koivisto",
+          "role": "keyboards",
+          "since": "2005"
+        },
+        {
+          "name": "Mikko Kivistö",
+          "role": "bass, clean vocals",
+          "since": "2020"
+        },
+        {
+          "name": "Atte Pesonen",
+          "role": "drums",
+          "since": "2021"
+        }
+      ],
+      "albums": [
+        {
+          "title": "The Redshift",
+          "year": 2008,
+          "note": "the leaner, pre-progressive era"
+        },
+        {
+          "title": "New World Shadows",
+          "year": 2011,
+          "note": "produced by Dan Swanö; where the long-form, keyboard-heavy songs took over"
+        },
+        {
+          "title": "Beyond",
+          "year": 2013,
+          "note": "supplies more of the live set than any other album"
+        },
+        {
+          "title": "Grey Heavens",
+          "year": 2016,
+          "note": "home of their two most-streamed tracks"
+        },
+        {
+          "title": "Origin",
+          "year": 2021,
+          "note": "No. 5 in Finland"
+        },
+        {
+          "title": "May the Bridges We Burn Light the Way",
+          "year": 2025,
+          "note": "current album; mixed by Jens Bogren"
+        }
+      ],
+      "links": {
+        "official": "https://omniumgatherum.org/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Omnium_Gatherum",
+        "spotify": "https://open.spotify.com/artist/52xuvlUvnxqH0xzxGPKXSu",
+        "bandcamp": "https://omniumgatherum.bandcamp.com"
+      },
+      "songs": [
+        {
+          "title": "Frontiers",
+          "album": "Grey Heavens",
+          "year": 2016,
+          "why": "their most-streamed song and the standard entry point",
+          "yt_audio": "ubmuUiozKyo",
+          "yt_video": null
+        },
+        {
+          "title": "New Dynamic",
+          "album": "Beyond",
+          "year": 2013,
+          "why": "the five-minute distillation of the whole formula; played live 300-plus times",
+          "yt_audio": "hi8k78f8OvQ",
+          "yt_video": null
+        },
+        {
+          "title": "New World Shadows",
+          "album": "New World Shadows",
+          "year": 2011,
+          "why": "the title track that closes most shows, and the progressive side of them",
+          "yt_audio": "H_wwnGrRraU",
+          "yt_video": null
+        },
+        {
+          "title": "Reckoning",
+          "album": "Origin",
+          "year": 2021,
+          "why": "the modern-era single, cleaner production and heavier at once",
+          "yt_audio": "gowDWEr5SDY",
+          "yt_video": null
+        },
+        {
+          "title": "The Last Hero",
+          "album": "May the Bridges We Burn Light the Way",
+          "year": 2025,
+          "why": "lead single off the current album and the current set opener",
+          "yt_audio": "Uj1-_ZpDug4",
+          "yt_video": null
+        }
+      ],
+      "order": 3,
+      "day": "fri",
+      "stage": "h02",
+      "time": "15:00"
+    },
+    {
+      "id": "wormwood",
+      "name": "Wormwood",
+      "origin": "Stockholm, Sweden",
+      "formed": "2014",
+      "genres": [
+        "melodic black metal",
+        "blackened folk metal",
+        "atmospheric black metal"
+      ],
+      "blurb": "Melodic black metal with Nordic folk melody, long ambient stretches and a rock-and-roll swing, from Stockholm. Songs in both Swedish and English about famine, collapse and cosmic extinction.",
+      "detail": "Formed in Stockholm in 2014 and now on Black Lodge Records, Wormwood describe their own mix of extreme metal, folk melody and garage-rock momentum as \"atmospheric blackened folk'n roll\". Nattarvet (2019), Arkivet (2021) and The Star (2024) form a loose trilogy about death — rural hunger and hardship, then ecological and societal collapse, then total cosmic extinction. Their label credits Nattarvet with putting the band on the Swedish national charts. A two-track EP, Å, is released on 7 August 2026, the same day as this slot; drummer Tatu Kerttula, who played on The Star, has since been replaced by Simon Samuelsson. Several other bands share the name Wormwood, including an American death metal act.",
+      "members": [
+        {
+          "name": "Nine",
+          "role": "vocals"
+        },
+        {
+          "name": "Tobias Rydsheim",
+          "role": "guitar, keys, vocals"
+        },
+        {
+          "name": "Jerry Engström",
+          "role": "guitar"
+        },
+        {
+          "name": "Oskar Tornborg",
+          "role": "bass, vocals"
+        },
+        {
+          "name": "Simon Samuelsson",
+          "role": "drums, replaced Tatu Kerttula"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Ghostlands: Wounds from a Bleeding Earth",
+          "year": 2017,
+          "note": "debut album, originally on Non Serviam Records"
+        },
+        {
+          "title": "Nattarvet",
+          "year": 2019,
+          "note": "all-Swedish-titled breakthrough, first part of the death trilogy"
+        },
+        {
+          "title": "Arkivet",
+          "year": 2021,
+          "note": "second part of the trilogy"
+        },
+        {
+          "title": "The Plague Tapes",
+          "year": 2022,
+          "note": "live studio performance streamed instead of touring Arkivet"
+        },
+        {
+          "title": "The Star",
+          "year": 2024,
+          "note": "closes the trilogy with cosmic collapse"
+        },
+        {
+          "title": "Å",
+          "year": 2026,
+          "note": "two-track EP, out 7 August 2026"
+        }
+      ],
+      "links": {
+        "official": "https://wormwood-official.com/",
+        "spotify": "https://open.spotify.com/artist/2CltEmcrT4ypj6WxaBej5c",
+        "bandcamp": "https://wormwood-official.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "The Archive",
+          "album": "Arkivet",
+          "year": 2021,
+          "why": "the single and opener of their most-streamed record — the usual way in",
+          "yt_audio": "d80HOdRS00c",
+          "yt_video": null
+        },
+        {
+          "title": "Under Hennes Vingslag",
+          "album": "Ghostlands: Wounds from a Bleeding Earth",
+          "year": 2017,
+          "why": "their most-played track anywhere, and the early folk-black side",
+          "yt_audio": "xaXadOBWqkk",
+          "yt_video": null
+        },
+        {
+          "title": "The Isolationist",
+          "album": "Nattarvet",
+          "year": 2019,
+          "why": "the long closer that shows the atmospheric post-black end; still in the live set",
+          "yt_audio": "ciDZw2_JXrg",
+          "yt_video": null
+        },
+        {
+          "title": "Stjärnfall",
+          "album": "The Star",
+          "year": 2024,
+          "why": "lead video from the newest album — organ, melodeath, a prog break and two languages",
+          "yt_audio": "qR_rOUwaOyc",
+          "yt_video": null
+        }
+      ],
+      "order": 4,
+      "day": "fri",
+      "stage": "h03",
+      "time": "15:00"
+    },
+    {
+      "id": "carcass",
+      "name": "Carcass",
+      "origin": "Liverpool, England",
+      "formed": "1985",
+      "genres": [
+        "death metal",
+        "melodic death metal",
+        "grindcore"
+      ],
+      "blurb": "English death metal from Liverpool, formed 1985 — goregrind pioneers who then wrote the template for melodic death metal with 1993's Heartwork. Guitarist Bill Steer and bassist-vocalist Jeff Walker are the two constants.",
+      "detail": "Carcass began in 1985 as a grindcore band whose first record, Reek of Putrefaction (1988), was so murky and so relentlessly medical in its vocabulary that it effectively named the goregrind subgenre. Across Symphonies of Sickness (1989) and Necroticism – Descanting the Insalubrious (1991) the playing sharpened into technical death metal, and Heartwork (1993) traded the gore for melody and harmonised leads — the album most often credited as a direct blueprint for the Gothenburg melodic death metal scene. The band broke up after the rock-inflected Swansong (1996) and reunited in 2007 without founding drummer Ken Owen, who suffered a brain haemorrhage in 1999 and has since appeared only as an occasional guest. Two albums have followed the reunion, Surgical Steel (2013) and Torn Arteries (2021), both on Nuclear Blast.",
+      "members": [
+        {
+          "name": "Jeff Walker",
+          "role": "bass, lead vocals",
+          "since": "1985"
+        },
+        {
+          "name": "Bill Steer",
+          "role": "guitar, vocals",
+          "since": "1986"
+        },
+        {
+          "name": "Daniel Wilding",
+          "role": "drums",
+          "since": "2012"
+        },
+        {
+          "name": "James 'Nip' Blackford",
+          "role": "guitar, replaced Tom Draper in 2021",
+          "since": "2021"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Reek of Putrefaction",
+          "year": 1988,
+          "note": "the debut that gave goregrind its name"
+        },
+        {
+          "title": "Symphonies of Sickness",
+          "year": 1989
+        },
+        {
+          "title": "Necroticism – Descanting the Insalubrious",
+          "year": 1991,
+          "note": "the technical-death peak of the early line-up"
+        },
+        {
+          "title": "Heartwork",
+          "year": 1993,
+          "note": "widely credited as a blueprint for melodic death metal"
+        },
+        {
+          "title": "Surgical Steel",
+          "year": 2013,
+          "note": "first album after the 2007 reunion"
+        },
+        {
+          "title": "Torn Arteries",
+          "year": 2021,
+          "note": "most recent studio album"
+        }
+      ],
+      "links": {
+        "wikipedia": "https://en.wikipedia.org/wiki/Carcass_(band)",
+        "spotify": "https://open.spotify.com/artist/5lhaM01nwvsMZpmPY2HVER",
+        "bandcamp": "https://carcass.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Heartwork",
+          "album": "Heartwork",
+          "year": 1993,
+          "why": "the obvious entry point — title track, the one with the video, and the song everything called melodic death metal points back to",
+          "yt_audio": "ZpbpOgUybBM",
+          "yt_video": null
+        },
+        {
+          "title": "Corporal Jigsore Quandary",
+          "album": "Necroticism – Descanting the Insalubrious",
+          "year": 1991,
+          "why": "the technical side, and a set fixture for thirty years",
+          "yt_audio": "F5nGo7yUtlE",
+          "yt_video": null
+        },
+        {
+          "title": "Exhume to Consume",
+          "album": "Symphonies of Sickness",
+          "year": 1989,
+          "why": "the early goregrind they came from, and the one old song still played live constantly",
+          "yt_audio": "DGDTwit60xo",
+          "yt_video": null
+        },
+        {
+          "title": "Captive Bolt Pistol",
+          "album": "Surgical Steel",
+          "year": 2013,
+          "why": "the free-download single that announced the comeback actually worked",
+          "yt_audio": "d3fRKGD2GW0",
+          "yt_video": null
+        },
+        {
+          "title": "Kelly's Meat Emporium",
+          "album": "Torn Arteries",
+          "year": 2021,
+          "why": "lead single off the newest record — where the band is now",
+          "yt_audio": "hdcfhccjk78",
+          "yt_video": null
+        }
+      ],
+      "order": 5,
+      "day": "fri",
+      "stage": "h01",
+      "time": "16:00"
+    },
+    {
+      "id": "brymir",
+      "name": "Brymir",
+      "origin": "Helsinki, Finland",
+      "formed": "2006",
+      "genres": [
+        "melodic death metal",
+        "symphonic metal"
+      ],
+      "blurb": "Symphonic melodic death metal from Helsinki — orchestral arrangements and folk-tinged melodies over blastbeats and harsh vocals. Known for a cinematic studio sound and a high-energy live show.",
+      "detail": "The band met at a music summer camp in 2006 as teenagers and first played under the name Lai Lai Hei, after the Ensiferum song, before settling on Brymir, which fuses the Norse names Ymir and Brimir. Vocalist Viktor Storm Gullichsen works as a film sound designer, which the band credits for the cinematic layering of the records. Guitarist Joona Björkroth is also a full-time member of Battle Beast. Fourth album Voices in the Sky (2022) was their first for Napalm Records and pushed them onto festival bills outside Finland. Fifth album What We Leave Behind is due 2 October 2026, which the band describes as their darkest, trading the folk motifs for sci-fi imagery and an explicitly anti-war theme.",
+      "members": [
+        {
+          "name": "Viktor Storm Gullichsen",
+          "role": "lead vocals",
+          "since": "2006"
+        },
+        {
+          "name": "Joona Björkroth",
+          "role": "guitars, backing vocals (also Battle Beast)",
+          "since": "2006"
+        },
+        {
+          "name": "Jarkko Niemi",
+          "role": "bass, vocals",
+          "since": "2006"
+        },
+        {
+          "name": "Patrik Fält",
+          "role": "drums",
+          "since": "2013"
+        },
+        {
+          "name": "Antti Nieminen",
+          "role": "guitars (live member); a four-piece on record since Sean Haslam left in 2025",
+          "since": "2017"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Breathe Fire to the Sun",
+          "year": 2011,
+          "note": "debut, released via Spinefarm"
+        },
+        {
+          "title": "Slayer of Gods",
+          "year": 2016,
+          "note": "on Ranka Kustannus"
+        },
+        {
+          "title": "Wings of Fire",
+          "year": 2019,
+          "note": "still the source of most of the live set"
+        },
+        {
+          "title": "Voices in the Sky",
+          "year": 2022,
+          "note": "first album for Napalm Records and their international breakthrough"
+        },
+        {
+          "title": "What We Leave Behind",
+          "year": 2026,
+          "note": "fifth album, out 2 October 2026"
+        }
+      ],
+      "links": {
+        "official": "https://www.brymir.com",
+        "wikipedia": "https://en.wikipedia.org/wiki/Brymir",
+        "spotify": "https://open.spotify.com/artist/3YDtlBGmfvE2Xw0avhHeK5",
+        "bandcamp": "https://brymir.bandcamp.com"
+      },
+      "songs": [
+        {
+          "title": "Voices in the Sky",
+          "album": "Voices in the Sky",
+          "year": 2022,
+          "why": "the title track and lead single of the album that took them beyond Finland — the obvious first listen",
+          "yt_audio": "3XEF1DmxEjA",
+          "yt_video": null
+        },
+        {
+          "title": "Ride On, Spirit",
+          "album": "Wings of Fire",
+          "year": 2019,
+          "why": "the folk-melody singalong, in the set almost every night",
+          "yt_audio": "tyhOFQWfOyE",
+          "yt_video": null
+        },
+        {
+          "title": "Starportal",
+          "album": "Wings of Fire",
+          "year": 2019,
+          "why": "their most-played live song, and the fast, blasting end of the range",
+          "yt_audio": "r8BURTBL49A",
+          "yt_video": null
+        },
+        {
+          "title": "All as One",
+          "album": "Voices in the Sky",
+          "year": 2022,
+          "why": "the near-eight-minute closer, for the orchestral side rather than the riffs",
+          "yt_audio": "MW4hbVwrxz8",
+          "yt_video": null
+        },
+        {
+          "title": "What We Leave Behind",
+          "album": "What We Leave Behind",
+          "year": 2026,
+          "why": "the current single — keys-driven and darker, and what the new set is built around",
+          "yt_audio": "BbQJHRzEBhw",
+          "yt_video": null
+        }
+      ],
+      "order": 6,
+      "day": "fri",
+      "stage": "h03",
+      "time": "16:30"
+    },
+    {
+      "id": "ikina",
+      "name": "IKINÄ & The Choir of Hecate",
+      "origin": "Kouvola, Finland",
+      "formed": "2015",
+      "genres": [
+        "metalcore",
+        "alternative metal"
+      ],
+      "blurb": "Finnish-language metalcore fronted by two women vocalists, blending 2000s metal with pop hooks and punk bite. Formed in Kouvola in 2015, they turned markedly heavier on their 2023 self-titled album.",
+      "detail": "IKINÄ were signed to Sakara Records in November 2015 after label head Tuomo Saikkonen heard their debut single \"Terapiaa\", and put out two albums for the label before going independent under their own Ikinä Records imprint. Sung entirely in Finnish and built around the contrast between Tuuli Paju's and Katariina Sorsa's voices, the material moved from the pop-punk-leaning millennial commentary of Millenniaalin itsehoito-opas epävarmaan aikuisuuteen (2019) toward outright metalcore on IKINÄ (2023). The March 2025 single \"Jumalatar\" gathered 18 Finnish women vocalists from the metal scene, drew mainstream TV coverage and pushed an equality debate in the Finnish scene; it later closed onto Valkyria, released 10 April 2026. They have supported Mokoma, Stam1na and Soilwork. At Hellsinki 2026 they appear as IKINÄ & The Choir of Hecate, a special festival line-up with a choir the festival describes as bringing a larger and more theatrical sound to the stage; the timetable lists the slot simply as IKINÄ.",
+      "members": [
+        {
+          "name": "Tuuli Paju",
+          "role": "vocals",
+          "since": "2015"
+        },
+        {
+          "name": "Katariina Sorsa",
+          "role": "vocals",
+          "since": "2015"
+        },
+        {
+          "name": "Samuli Suokas",
+          "role": "guitar"
+        },
+        {
+          "name": "Aake Lämsä",
+          "role": "bass, replaced Lauri Hämäläinen in 2020",
+          "since": "2020"
+        },
+        {
+          "name": "Santeri Paju",
+          "role": "drums",
+          "since": "2015"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Samoista soluista",
+          "year": 2017,
+          "note": "debut, on Sakara Records"
+        },
+        {
+          "title": "Millenniaalin itsehoito-opas epävarmaan aikuisuuteen",
+          "year": 2019,
+          "note": "the millennial-adulthood record, still closer to pop-punk than metalcore"
+        },
+        {
+          "title": "IKINÄ",
+          "year": 2023,
+          "note": "self-titled and self-released; the turn to a heavier sound"
+        },
+        {
+          "title": "Valkyria",
+          "year": 2026,
+          "note": "fourth album, 10 April 2026; darkest to date"
+        }
+      ],
+      "links": {
+        "wikipedia": "https://fi.wikipedia.org/wiki/Ikin%C3%A4",
+        "spotify": "https://open.spotify.com/artist/4xg4NsqU77gUm4ZmMRAxxe",
+        "bandcamp": "https://ikinacamp.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Syvämeri",
+          "album": "IKINÄ",
+          "year": 2023,
+          "why": "the obvious entry point — their most-streamed original, and the song that made the heavier era stick",
+          "yt_audio": "xy6vbjUvVyQ",
+          "yt_video": null
+        },
+        {
+          "title": "Lautturi",
+          "album": "Lautturi (single)",
+          "year": 2025,
+          "why": "their PMMP cover, a song every Finn already knows, and now their biggest track by streams",
+          "yt_audio": "AggbcyFahQ4",
+          "yt_video": null
+        },
+        {
+          "title": "Jumalatar",
+          "album": "Valkyria",
+          "year": 2026,
+          "why": "the 18-vocalist collaboration that got them on national TV",
+          "yt_audio": "7KmbQJM1FyI",
+          "yt_video": null
+        },
+        {
+          "title": "Aurora",
+          "album": "Valkyria",
+          "year": 2026,
+          "why": "the latest single and video — what the current live set is built around",
+          "yt_audio": "yEak3EAYVms",
+          "yt_video": null
+        },
+        {
+          "title": "Terapiaa",
+          "album": "Terapiaa (single)",
+          "year": 2016,
+          "why": "the 2016 debut single that got them signed, and the clearest look at the poppier early band",
+          "yt_audio": "BGa6UvZbIZM",
+          "yt_video": null
+        }
+      ],
+      "songs_by": "IKINÄ",
+      "order": 7,
+      "day": "fri",
+      "stage": "h02",
+      "time": "17:00"
+    },
+    {
+      "id": "bloodbath",
+      "name": "Bloodbath",
+      "origin": "Stockholm, Sweden",
+      "formed": "1998",
+      "genres": [
+        "death metal",
+        "blackened death metal"
+      ],
+      "blurb": "Old-school Swedish death metal — Boss HM-2 buzzsaw guitar and Entombed-style riffing — begun in Stockholm in 1998 as a side project by members of Katatonia, Opeth and Edge of Sanity. Paradise Lost's Nick Holmes has fronted them since 2014.",
+      "detail": "Named after the Cancer song \"Blood Bath\", the band wrote and recorded its first EP, Breeding Death, within two days of forming, and has kept that fast-and-no-regrets method since. The vocal chair is the band's running story: Mikael Åkerfeldt (Opeth) sang on the first two releases, Peter Tägtgren (Hypocrisy) came in for Nightmares Made Flesh in 2004 and left within a year, Åkerfeldt returned for The Fathomless Mastery and quit for good in 2012, and Nick Holmes was recruited that year but not revealed until September 2014 — which is why sources list him as either 2012 or 2014. The line-up thinned after the latest album: founding bassist Jonas Renkse left in 2023 and guitarist Tomas Åkvik departed in 2024, leaving Nyström, Axenrot and Holmes as the official members with Joakim Antman of Lik on bass live.",
+      "members": [
+        {
+          "name": "Anders \"Blakkheim\" Nyström",
+          "role": "guitars, backing vocals; sole guitarist on paper since Tomas Åkvik left in 2024",
+          "since": "1998"
+        },
+        {
+          "name": "Nick \"Old Nick\" Holmes",
+          "role": "lead vocals (also Paradise Lost); recruited 2012, announced September 2014",
+          "since": "2014"
+        },
+        {
+          "name": "Martin \"Axe\" Axenrot",
+          "role": "drums",
+          "since": "2004"
+        },
+        {
+          "name": "Joakim Antman",
+          "role": "bass, live/session member after Jonas Renkse left in 2023",
+          "since": "2023"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Resurrection Through Carnage",
+          "year": 2002,
+          "note": "debut album; the HM-2 buzzsaw template, Åkerfeldt on vocals"
+        },
+        {
+          "title": "Nightmares Made Flesh",
+          "year": 2004,
+          "note": "Peter Tägtgren's only album with them, and the one carrying their best-known song"
+        },
+        {
+          "title": "The Fathomless Mastery",
+          "year": 2008,
+          "note": "Åkerfeldt's last studio album with the band"
+        },
+        {
+          "title": "Grand Morbid Funeral",
+          "year": 2014,
+          "note": "first with Nick Holmes; slower and murkier"
+        },
+        {
+          "title": "The Arrow of Satan Is Drawn",
+          "year": 2018
+        },
+        {
+          "title": "Survival of the Sickest",
+          "year": 2022,
+          "note": "latest album, on Napalm"
+        }
+      ],
+      "links": {
+        "official": "https://www.bloodbath.biz/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Bloodbath",
+        "spotify": "https://open.spotify.com/artist/7eYmDBinb760MUIfoRdlGQ",
+        "bandcamp": "https://bloodbath.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Eaten",
+          "album": "Nightmares Made Flesh",
+          "year": 2004,
+          "why": "the entry point — their most-streamed track by a wide margin and the song that closes the set",
+          "yt_audio": "AIeVnN9cFmw",
+          "yt_video": null
+        },
+        {
+          "title": "So You Die",
+          "album": "Resurrection Through Carnage",
+          "year": 2002,
+          "why": "opens the current set; the debut's buzzsaw formula in three minutes",
+          "yt_audio": "trRLdA2mbqI",
+          "yt_video": null
+        },
+        {
+          "title": "Mock the Cross",
+          "album": "The Fathomless Mastery",
+          "year": 2008,
+          "why": "the fastest, meanest end of the catalogue, from Åkerfeldt's last album",
+          "yt_audio": "1nMy3uspyQI",
+          "yt_video": null
+        },
+        {
+          "title": "Let the Stillborn Come to Me",
+          "album": "Grand Morbid Funeral",
+          "year": 2014,
+          "why": "the first song of the Holmes era — slow and cavernous instead of fast, which is the other side of the band",
+          "yt_audio": "rdaXEhCJuuw",
+          "yt_video": null
+        },
+        {
+          "title": "Carved",
+          "album": "Survival of the Sickest",
+          "year": 2022,
+          "why": "the current line-up on record, and still in the 2026 set",
+          "yt_audio": "W7Pi_T_DtlU",
+          "yt_video": null
+        }
+      ],
+      "order": 8,
+      "day": "fri",
+      "stage": "h01",
+      "time": "18:00"
+    },
+    {
+      "id": "vreid",
+      "name": "Vreid",
+      "origin": "Sogndal, Norway",
+      "formed": "2004",
+      "genres": [
+        "melodic black metal",
+        "black 'n' roll",
+        "Sognametal"
+      ],
+      "blurb": "Melodic black metal and black 'n' roll from Sogndal in western Norway, self-described as \"Sognametal forged in the mountains\". Formed in 2004 by three surviving members of Windir after the death of that band's founder Valfar.",
+      "detail": "Hváll, Steingrim and Sture carried on as Vreid with guitarist Ese, who played on the first four albums before leaving in 2009 and being replaced by former Windir guitarist Strom. I Krig (2007) and Milorg (2009) built on Norwegian WWII resistance history and drew on poems by resistance member Gunnar Reiss-Andersen; Wild North West (2021) was released as an album and a feature-length film together. Tenth album The Skies Turn Black arrived on 6 March 2026 on Indie Recordings, and its short track \"Kraken\" doubles as the soundtrack to the 2026 film of that name. The band's own line-up page now lists a fifth member, Espen Bakketeig on synth, where Wikipedia and Metal Archives still show a four-piece.",
+      "members": [
+        {
+          "name": "Sture Dingsøyr",
+          "role": "vocals, guitar",
+          "since": "2004"
+        },
+        {
+          "name": "Jarle \"Hváll\" Kvåle",
+          "role": "bass",
+          "since": "2004"
+        },
+        {
+          "name": "Jørn \"Steingrim\" Holen",
+          "role": "drums",
+          "since": "2004"
+        },
+        {
+          "name": "Stian \"Strom\" Bakketeig",
+          "role": "guitar, replaced Ese after his 2009 departure; also ex-Windir"
+        },
+        {
+          "name": "Espen Bakketeig",
+          "role": "synth, listed on the band's own line-up page and credited on The Skies Turn Black (2026)"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Kraft",
+          "year": 2004,
+          "note": "debut, made by Windir's remaining members plus Ese"
+        },
+        {
+          "title": "I Krig",
+          "year": 2007,
+          "note": "Norwegian WWII resistance theme, using Gunnar Reiss-Andersen's poetry"
+        },
+        {
+          "title": "Milorg",
+          "year": 2009,
+          "note": "the companion piece to I Krig, named after the Norwegian military resistance"
+        },
+        {
+          "title": "Sólverv",
+          "year": 2015
+        },
+        {
+          "title": "Wild North West",
+          "year": 2021,
+          "note": "released as an album and a feature-length film of the same name"
+        },
+        {
+          "title": "The Skies Turn Black",
+          "year": 2026,
+          "note": "tenth album, 6 March 2026 on Indie Recordings; \"Kraken\" is also the soundtrack to the 2026 film Kraken"
+        }
+      ],
+      "links": {
+        "official": "https://www.vreid.no",
+        "wikipedia": "https://en.wikipedia.org/wiki/Vreid",
+        "spotify": "https://open.spotify.com/artist/2KvwC4Kmp2U8XnKr5Yr1hm",
+        "bandcamp": "https://vreid.bandcamp.com"
+      },
+      "songs": [
+        {
+          "title": "Pitch Black",
+          "album": "Pitch Black Brigade",
+          "year": 2006,
+          "why": "their most-played song by a wide margin, and still in the 2026 sets",
+          "yt_audio": "EpuiETqsEzs",
+          "yt_video": null
+        },
+        {
+          "title": "Sólverv",
+          "album": "Sólverv",
+          "year": 2015,
+          "why": "the 2015 title track and the melodic, slower end of the range",
+          "yt_audio": "VWMG9-8De38",
+          "yt_video": null
+        },
+        {
+          "title": "Lifehunger",
+          "album": "Lifehunger",
+          "year": 2018,
+          "why": "the black 'n' roll single that closes the current set",
+          "yt_audio": "qEClBK460L4",
+          "yt_video": null
+        },
+        {
+          "title": "Into the Mountains",
+          "album": "Wild North West",
+          "year": 2021,
+          "why": "the live standout from the album-and-film project",
+          "yt_audio": "JydaB8G2bbk",
+          "yt_video": null
+        },
+        {
+          "title": "From These Woods",
+          "album": "The Skies Turn Black",
+          "year": 2026,
+          "why": "first single off the new album, and the seven-minute opener",
+          "yt_audio": "91cyd3LDo1Y",
+          "yt_video": null
+        }
+      ],
+      "order": 9,
+      "day": "fri",
+      "stage": "h03",
+      "time": "18:00"
+    },
+    {
+      "id": "blackbraid",
+      "name": "Blackbraid",
+      "origin": "Adirondack Mountains, New York, USA",
+      "formed": "2022",
+      "genres": [
+        "black metal",
+        "atmospheric black metal"
+      ],
+      "blurb": "Atmospheric black metal from the Adirondack wilderness of upstate New York — the solo project of Native American multi-instrumentalist Sgah'gahsowáh, whose 2022 debut landed on Rolling Stone's and Decibel's year-end lists.",
+      "detail": "Blackbraid is written and performed almost entirely by Sgah'gahsowáh (Jon Krieger), a Mohawk stage name he translates as \"the witch hawk\"; the exception is drums, recorded, mixed and mastered by Neil Schneider since the first album. The material swings between tremolo-driven black metal, native flute and acoustic guitar interludes, and thirteen-minute atmospheric pieces, with lyrics drawn from Adirondack landscape, indigenous history and spirituality. Three albums have appeared in four years — Blackbraid I (2022), II (2023) and III (2025) — plus the Nocturnal Womb EP in March 2026. On stage the project becomes a full band: Krieger fronts a live line-up of friends assembled for touring, whose members are not named publicly and who are not part of the studio project. Recent 2026 sets run about an hour, opening with \"Celestial Bloodlust\" and closing with \"Barefoot Ghost Dance on Blood Soaked Soil\".",
+      "members": [
+        {
+          "name": "Sgah'gahsowáh (Jon Krieger)",
+          "role": "vocals, guitars, bass, songwriting — writes and performs everything but drums",
+          "since": "2022"
+        },
+        {
+          "name": "Neil Schneider",
+          "role": "drums on the studio albums, plus recording, mixing and mastering",
+          "since": "2022"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Barefoot Ghost Dance on Blood Soaked Soil",
+          "year": 2022,
+          "note": "the first thing released under the name, a stand-alone single in January 2022"
+        },
+        {
+          "title": "Blackbraid I",
+          "year": 2022,
+          "note": "debut album; named in Rolling Stone's best metal albums of 2022 and Decibel's top 40"
+        },
+        {
+          "title": "Blackbraid II",
+          "year": 2023,
+          "note": "ten tracks ending on a cover of Bathory's \"A Fine Day to Die\""
+        },
+        {
+          "title": "Blackbraid III",
+          "year": 2025,
+          "note": "released 8 August 2025 via Wolf Mountain Productions; Randy Moore of Spiritworld guests on \"God of Black Blood\", and it closes with a Lord Belial cover"
+        },
+        {
+          "title": "Nocturnal Womb",
+          "year": 2026,
+          "note": "three-track EP, March 2026, including an acoustic reworking of \"Barefoot Ghost Dance on Blood Soaked Soil\""
+        }
+      ],
+      "links": {
+        "official": "https://blackbraid.us/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Blackbraid",
+        "spotify": "https://open.spotify.com/artist/47nBZhrImXWXTWVSWt09MY",
+        "bandcamp": "https://blackbraid.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "The River of Time Flows Through Me",
+          "album": "Blackbraid I",
+          "year": 2022,
+          "why": "the obvious entry point — opens the debut and still opens the album side of every set",
+          "yt_audio": "6_trwgiplz8",
+          "yt_video": null
+        },
+        {
+          "title": "Barefoot Ghost Dance on Blood Soaked Soil",
+          "album": "Blackbraid I",
+          "year": 2022,
+          "why": "the very first single, and what closes the live set",
+          "yt_audio": "je7Su03SyL4",
+          "yt_video": null
+        },
+        {
+          "title": "The Wolf That Guides the Hunters Hand",
+          "album": "Blackbraid II",
+          "year": 2023,
+          "why": "the direct, fast one, a fixture of the current setlist",
+          "yt_audio": "2oh73TkfAjY",
+          "yt_video": null
+        },
+        {
+          "title": "Moss Covered Bones on the Altar of the Moon",
+          "album": "Blackbraid II",
+          "year": 2023,
+          "why": "the thirteen-minute centrepiece that shows the atmospheric other side",
+          "yt_audio": "ZrVgiqoGr_g",
+          "yt_video": null
+        },
+        {
+          "title": "The Dying Breath of a Sacred Stag",
+          "album": "Blackbraid III",
+          "year": 2025,
+          "why": "lead single off the newest album, and where the live set is now",
+          "yt_audio": "2OVkcez6ozo",
+          "yt_video": "VCbPd0Jekz8"
+        }
+      ],
+      "order": 10,
+      "day": "fri",
+      "stage": "h02",
+      "time": "19:00"
+    },
+    {
+      "id": "sanguisugabogg",
+      "name": "Sanguisugabogg",
+      "origin": "Columbus, Ohio, United States",
+      "formed": "2019",
+      "genres": [
+        "death metal",
+        "brutal death metal"
+      ],
+      "blurb": "Downtuned brutal death metal from Columbus, Ohio, built on slow, thick riffs, guttural vocals and deliberately crude gore-comedy song titles. Formed in 2019 and signed by Century Media two years later off the back of a cassette demo.",
+      "detail": "Founded in 2019 by guitarist Cameron Boggs, whose surname the band name plays on alongside 'sanguisuga' (Latin for leech) and British slang 'bog' for toilet. The 2019 Maggot Stomp demo Pornographic Seizures led to a Century Media deal and the 2021 debut Tortured Whole; Homicidal Ecstasy followed in 2023 and Hideous Aftermath in October 2025, the latter recorded with Kurt Ballou at God City Studio in Salem, Massachusetts and stacked with guests from Full of Hell, Cattle Decapitation, Defeated Sanity, PeelingFlesh and Nails. The line-up changed in March 2026, when the band announced a mutual split with long-serving guitarist Cedrik Davis; founding drummer Cody Davidson moved to guitar beside Drew Arnold, with Eric Morotti taking over drums. Third-party sources including Last.fm still list Davis, but the band's own statement is the basis for the line-up given here.",
+      "members": [
+        {
+          "name": "Devin Swank",
+          "role": "vocals",
+          "since": "2019"
+        },
+        {
+          "name": "Cody Davidson",
+          "role": "guitar; founding drummer, moved to guitar in 2026 after Cedrik Davis left",
+          "since": "2019"
+        },
+        {
+          "name": "Drew Arnold",
+          "role": "guitar, bass",
+          "since": "2021"
+        },
+        {
+          "name": "Eric Morotti",
+          "role": "drums (touring)",
+          "since": "2026"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Pornographic Seizures",
+          "year": 2019,
+          "note": "four-track demo/EP on Maggot Stomp, limited cassette; the release that got them signed"
+        },
+        {
+          "title": "Tortured Whole",
+          "year": 2021,
+          "note": "debut album, first for Century Media"
+        },
+        {
+          "title": "The Devil's Eyes",
+          "year": 2022,
+          "note": "live album"
+        },
+        {
+          "title": "Homicidal Ecstasy",
+          "year": 2023,
+          "note": "mixed by Kurt Ballou, mastered by Alan Douches"
+        },
+        {
+          "title": "Hideous Aftermath",
+          "year": 2025,
+          "note": "produced by Kurt Ballou at God City Studio; guests from Full of Hell, Cattle Decapitation, Defeated Sanity, PeelingFlesh and Nails"
+        }
+      ],
+      "links": {
+        "official": "https://www.sanguisugabogg.com",
+        "wikipedia": "https://en.wikipedia.org/wiki/Sanguisugabogg",
+        "spotify": "https://open.spotify.com/artist/0n98EIfTSiyxUZHUojHykN",
+        "bandcamp": "https://sanguisugabogg.bandcamp.com"
+      },
+      "songs": [
+        {
+          "title": "Menstrual Envy",
+          "album": "Tortured Whole",
+          "year": 2021,
+          "why": "the first single off the debut, and the track that pulled them out of the tape-trading underground",
+          "yt_audio": "QYFcdFHuk8c",
+          "yt_video": null
+        },
+        {
+          "title": "Dead As Shit",
+          "album": "Tortured Whole",
+          "year": 2021,
+          "why": "their most-streamed song and still the set closer",
+          "yt_audio": "AjTa3tmsHNQ",
+          "yt_video": null
+        },
+        {
+          "title": "Face Ripped Off",
+          "album": "Homicidal Ecstasy",
+          "year": 2023,
+          "why": "the short, hardcore-leaning one, with a guest vocal from Aaron Heard; a fixture in the live set",
+          "yt_audio": "M-5u0FiCW28",
+          "yt_video": null
+        },
+        {
+          "title": "Rotted Entanglement",
+          "album": "Hideous Aftermath",
+          "year": 2025,
+          "why": "opens the current set, and at five and a half minutes shows the longer, less blunt side",
+          "yt_audio": "V3kfMnzyb_w",
+          "yt_video": null
+        },
+        {
+          "title": "Abhorrent Contraception",
+          "album": "Hideous Aftermath",
+          "year": 2025,
+          "why": "lead single from the newest album, guest vocal by Defeated Sanity's Josh Welshman",
+          "yt_audio": "7_03HaBcJsE",
+          "yt_video": "moaTy4vQ2BY"
+        }
+      ],
+      "order": 11,
+      "day": "fri",
+      "stage": "h03",
+      "time": "19:30"
+    },
+    {
+      "id": "black-label-society",
+      "name": "Black Label Society",
+      "origin": "Los Angeles, California, USA",
+      "formed": "1998",
+      "genres": [
+        "heavy metal",
+        "southern metal",
+        "hard rock"
+      ],
+      "blurb": "Southern-tinged American heavy metal built on Zakk Wylde's pinch-harmonic riffing and blues-rock grooves, formed in Los Angeles in 1998 during a break from his job as Ozzy Osbourne's guitarist. Also known for straight piano ballads.",
+      "detail": "Wylde founded the band in 1998 and has fronted it as singer, lead guitarist and pianist ever since; the current four-piece has been stable since 2014. The catalogue swings between the riff records (Stronger Than Death, Mafia) and openly acoustic or piano-led ones (Hangover Music Vol. VI, the Unblackened live set), which is why a set tends to drop from a downtuned groove straight into a ballad. Twelfth album Engines of Demolition arrived on 27 March 2026 via MNRK, their first full-length in five years, trailed by four singles from 2024 onward and closing with \"Ozzy's Song\", written as a tribute to Ozzy Osbourne. Wylde's parallel commitments — Ozzy's band, and the Pantera celebration tour during which he began writing this album — have historically set the gaps between Black Label Society records.",
+      "members": [
+        {
+          "name": "Zakk Wylde",
+          "role": "lead vocals, lead and rhythm guitar, piano",
+          "since": "1998"
+        },
+        {
+          "name": "John \"JD\" DeServio",
+          "role": "bass, backing vocals (first stint 1999–2001)",
+          "since": "2005"
+        },
+        {
+          "name": "Dario Lorina",
+          "role": "rhythm and lead guitar, backing vocals",
+          "since": "2014"
+        },
+        {
+          "name": "Jeff Fabb",
+          "role": "drums",
+          "since": "2012"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Sonic Brew",
+          "year": 1999,
+          "note": "debut; issued in Japan in October 1998, held back elsewhere until May 1999 over the mix"
+        },
+        {
+          "title": "The Blessed Hellride",
+          "year": 2003,
+          "note": "carries \"Stillborn\", with Ozzy Osbourne on the chorus"
+        },
+        {
+          "title": "Mafia",
+          "year": 2005,
+          "note": "three singles, including the ballad \"In This River\", since dedicated to Dimebag Darrell"
+        },
+        {
+          "title": "Grimmest Hits",
+          "year": 2018
+        },
+        {
+          "title": "Doom Crew Inc.",
+          "year": 2021
+        },
+        {
+          "title": "Engines of Demolition",
+          "year": 2026,
+          "note": "twelfth album, March 2026; first in five years, ends with \"Ozzy's Song\""
+        }
+      ],
+      "links": {
+        "official": "https://blacklabelsociety.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Black_Label_Society",
+        "spotify": "https://open.spotify.com/artist/0zfT626RwO6zN3RDYeRit5",
+        "bandcamp": "https://blacklabelsocietyband.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Stillborn",
+          "album": "The Blessed Hellride",
+          "year": 2003,
+          "why": "the obvious entry point — the single that broke them, with Ozzy Osbourne singing the chorus",
+          "yt_audio": "O5Oo3InIlfw",
+          "yt_video": null
+        },
+        {
+          "title": "Suicide Messiah",
+          "album": "Mafia",
+          "year": 2005,
+          "why": "the second-most-played song in their history, and the plainest statement of the riff-and-squeal formula",
+          "yt_audio": "0zExXVK3ISI",
+          "yt_video": "b3qdm16ruWY"
+        },
+        {
+          "title": "In This River",
+          "album": "Mafia",
+          "year": 2005,
+          "why": "the piano ballad that shows the other side, and the one the crowd sings",
+          "yt_audio": "qz88qOS1Rwg",
+          "yt_video": null
+        },
+        {
+          "title": "Destroy and Conquer",
+          "album": "Doom Crew Inc.",
+          "year": 2021,
+          "why": "the last album's calling card, still in the 2026 festival set",
+          "yt_audio": "VVjBdobpl3c",
+          "yt_video": null
+        },
+        {
+          "title": "Name in Blood",
+          "album": "Engines of Demolition",
+          "year": 2026,
+          "why": "opens the new record and sits second in current sets, so expect it here",
+          "yt_audio": "KLbfqyi_-90",
+          "yt_video": "u4C0g5gFr1Y"
+        }
+      ],
+      "order": 12,
+      "day": "fri",
+      "stage": "h01",
+      "time": "20:00"
+    },
+    {
+      "id": "cryptopsy",
+      "name": "Cryptopsy",
+      "origin": "Montreal, Quebec, Canada",
+      "formed": "1988",
+      "genres": [
+        "technical death metal",
+        "brutal death metal"
+      ],
+      "blurb": "Technical and brutal death metal from Montreal, playing since 1988. Their 1996 second album None So Vile is one of the most cited records in the style, and the band spent 2026 touring its 30th anniversary.",
+      "detail": "Formed in Montreal in 1988 under the names Obsessive Compulsive Disorder and then Necrosis, the band became Cryptopsy in 1992 when Flo Mounier took over on drums; he is the only continuous member. The vocal chair has turned over repeatedly: Dan 'Lord Worm' Greening sang on the first two albums, Mike DiSalvo on Whisper Supremacy (1998) and ...And Then You'll Beg (2000), Lord Worm returned for Once Was Not (2005), and Matt McGachy has held it since 2007 — longer than anyone. The current four-piece has been stable since bassist Olivier Pinard joined in 2012, and has put out three records in that formation, most recently An Insatiable Violence (Season of Mist, 20 June 2025), a concept album about social-media addiction on which DiSalvo guests on 'Embrace the Nihility'. The 2026 live set pairs most of None So Vile with the new album.",
+      "members": [
+        {
+          "name": "Flo Mounier",
+          "role": "drums, backing vocals",
+          "since": "1992"
+        },
+        {
+          "name": "Christian Donaldson",
+          "role": "guitar",
+          "since": "2005"
+        },
+        {
+          "name": "Matt McGachy",
+          "role": "vocals",
+          "since": "2007"
+        },
+        {
+          "name": "Olivier 'Oli' Pinard",
+          "role": "bass",
+          "since": "2012"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Blasphemy Made Flesh",
+          "year": 1994,
+          "note": "Debut, with Lord Worm on vocals."
+        },
+        {
+          "title": "None So Vile",
+          "year": 1996,
+          "note": "The landmark record and the one the current tour celebrates 30 years of."
+        },
+        {
+          "title": "Whisper Supremacy",
+          "year": 1998,
+          "note": "First with Mike DiSalvo; cleaner production and jazz-inflected playing."
+        },
+        {
+          "title": "The Unspoken King",
+          "year": 2008,
+          "note": "Matt McGachy's debut, and the band's most divisive album — clean vocals and keyboards."
+        },
+        {
+          "title": "As Gomorrah Burns",
+          "year": 2023,
+          "note": "Eighth album, on Nuclear Blast."
+        },
+        {
+          "title": "An Insatiable Violence",
+          "year": 2025,
+          "note": "Ninth album, on Season of Mist; a concept record about social media."
+        }
+      ],
+      "links": {
+        "official": "https://linktr.ee/Cryptopsy",
+        "wikipedia": "https://en.wikipedia.org/wiki/Cryptopsy",
+        "spotify": "https://open.spotify.com/artist/29PgYwTelpNl6370XLqFtN",
+        "bandcamp": "https://cryptopsyofficial.bandcamp.com"
+      },
+      "songs": [
+        {
+          "title": "Phobophile",
+          "album": "None So Vile",
+          "year": 1996,
+          "why": "the obvious entry point — the song they have played live more than any other, and the one None So Vile is remembered for",
+          "yt_audio": "dbkT4WoGalk",
+          "yt_video": null
+        },
+        {
+          "title": "Graves of the Fathers",
+          "album": "None So Vile",
+          "year": 1996,
+          "why": "their most-streamed track by a wide margin, and the Lord Worm era at its most direct",
+          "yt_audio": "H-ZRotpj9Yw",
+          "yt_video": null
+        },
+        {
+          "title": "Cold Hate, Warm Blood",
+          "album": "Whisper Supremacy",
+          "year": 1998,
+          "why": "the other side of the band — the Mike DiSalvo pivot into cleaner, jazz-inflected technicality",
+          "yt_audio": "Ly4OpyV-0r0",
+          "yt_video": "DVfncUkUCFE"
+        },
+        {
+          "title": "Godless Deceiver",
+          "album": "As Gomorrah Burns",
+          "year": 2023,
+          "why": "from the 2023 comeback record, and the track from it that stayed in the set",
+          "yt_audio": "tKkrKGoYAEw",
+          "yt_video": null
+        },
+        {
+          "title": "Until There's Nothing Left",
+          "album": "An Insatiable Violence",
+          "year": 2025,
+          "why": "lead single off the newest album and the current sound, played early every night in 2026",
+          "yt_audio": "pa60caEMWpU",
+          "yt_video": "MYjdfXLFHqA"
+        }
+      ],
+      "order": 13,
+      "day": "fri",
+      "stage": "h02",
+      "time": "21:15"
+    },
+    {
+      "id": "mawiza",
+      "name": "MAWIZA",
+      "origin": "Santiago / Wallmapu, Chile",
+      "formed": "2014",
+      "genres": [
+        "groove metal",
+        "Mapuche folk metal",
+        "progressive metal"
+      ],
+      "blurb": "Groove metal from Wallmapu, Chile, sung entirely in Mapudungun and threaded with kultrun, pifilka and Mapuche chant. Won a Chilean Pulsar Award for Kollong and reached a far wider audience with ÜL on Season of Mist.",
+      "detail": "Founded in Santiago in 2014 as Nunca Seremos Dichosos, the band abandoned Spanish and renamed itself Mawiza — 'mountain' in Mapudungun — in 2021. Kollong (2019) carried 'Mawiza Ñi Piwke', reported as the first metal song sung wholly in Mapuzungun, and took the 2020 Pulsar Award for Best Metal Artist; it was re-released in December 2024 with vocals and drums re-recorded. ÜL (July 2025, Season of Mist) brought in traditional instruments and a guest vocal from Gojira's Joe Duplantier on the closing track, and followed support slots with Gojira, Mastodon and King Diamond plus Knotfest Chile and Taiwan's Pasiwali Festival. Their newest release, the June 2026 single 'MÜR' ('together'), is largely acoustic and features Mira Ceti of Heilung and Anne Olsen of Danefae. The band styles the 2025 album ÜL in capitals; Spanish Wikipedia writes it Ül.",
+      "members": [
+        {
+          "name": "Awka Mondaka",
+          "role": "lead vocals, rhythm guitar"
+        },
+        {
+          "name": "Karü",
+          "role": "lead guitar, backing vocals"
+        },
+        {
+          "name": "Zewü",
+          "role": "bass, backing vocals"
+        },
+        {
+          "name": "Txalkan",
+          "role": "drums, percussion"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Tierra",
+          "year": 2017,
+          "note": "released as Nunca Seremos Dichosos, largely in Spanish"
+        },
+        {
+          "title": "Kollong",
+          "year": 2019,
+          "note": "won the 2020 Pulsar Award for Best Metal Artist; re-released December 2024 as a Mawiza record with vocals and drums re-recorded, all in Mapuzungun"
+        },
+        {
+          "title": "Killari",
+          "year": 2025,
+          "note": "standalone single, April 2025, with a music video"
+        },
+        {
+          "title": "ÜL",
+          "year": 2025,
+          "note": "first album for Season of Mist; Joe Duplantier of Gojira guests on the closer"
+        },
+        {
+          "title": "MÜR",
+          "year": 2026,
+          "note": "standalone single, June 2026, largely acoustic, with Mira Ceti of Heilung and Anne Olsen of Danefae"
+        }
+      ],
+      "links": {
+        "wikipedia": "https://es.wikipedia.org/wiki/Mawiza",
+        "spotify": "https://open.spotify.com/artist/4oJP24bXA2fbdVmNGNmCtt",
+        "bandcamp": "https://mawizakvlt.bandcamp.com"
+      },
+      "songs": [
+        {
+          "title": "Wingkawnoam",
+          "album": "ÜL",
+          "year": 2025,
+          "why": "the lead single and album opener that introduced them internationally — start here",
+          "yt_audio": "xmGW3emx36Y",
+          "yt_video": null
+        },
+        {
+          "title": "Ngulutu",
+          "album": "ÜL",
+          "year": 2025,
+          "why": "the heaviest single, built on a historical Mapuche battle against the Spanish",
+          "yt_audio": "4YKRpCSpH5k",
+          "yt_video": null
+        },
+        {
+          "title": "Ti Inan Paw-Pawkan",
+          "album": "ÜL",
+          "year": 2025,
+          "why": "the album closer, with Joe Duplantier of Gojira on guest vocals",
+          "yt_audio": "Lpyl1He4K6A",
+          "yt_video": null
+        },
+        {
+          "title": "Mawiza Ñi Piwke",
+          "album": "Kollong",
+          "year": 2019,
+          "why": "the song that started the project — reported as the first metal track sung entirely in Mapuzungun",
+          "yt_audio": "GtSUjknFAzI",
+          "yt_video": null
+        },
+        {
+          "title": "MÜR",
+          "album": "MÜR (single)",
+          "year": 2026,
+          "why": "the newest release and the other side of the band: acoustic, kultrun and pifilka, with Heilung's Mira Ceti",
+          "yt_audio": "gHMHrbsLTU4",
+          "yt_video": null
+        }
+      ],
+      "order": 14,
+      "day": "fri",
+      "stage": "h03",
+      "time": "22:00"
+    },
+    {
+      "id": "accept",
+      "name": "Accept",
+      "origin": "Solingen, Germany",
+      "formed": "1976",
+      "genres": [
+        "heavy metal",
+        "speed metal"
+      ],
+      "blurb": "German heavy metal, and one of the templates the genre was built from: chanted gang choruses, twin guitars and the double-kick sprint of \"Fast as a Shark\". Guitarist Wolf Hoffmann is the only constant across fifty years.",
+      "detail": "Formed in Solingen in 1976, Accept broke internationally with Restless and Wild (1982) and Balls to the Wall (1983), the latter still their only US gold record. Founding singer Udo Dirkschneider left in the 1980s and again in the 1990s and now fronts U.D.O.; American vocalist Mark Tornillo has fronted Accept since 2009, and every album since Blood of the Nations (2010) is his. In September 2025 the band parted ways with guitarist Uwe Lulis and went back to a two-guitar line-up, leaving Philip Shouse alongside Hoffmann. 2026 is the band's 50th-anniversary year: a guest-stacked re-recording album, Teutonic Titans 1976–2026, is due 4 September on Napalm Records, and the anniversary shows are near-all-classics sets with guest players joining for individual songs (Todd La Torre and Fredrik Åkesson at Hellfest, John Norum and Ola Englund in Stockholm).",
+      "members": [
+        {
+          "name": "Wolf Hoffmann",
+          "role": "lead guitar, backing vocals; founder and the band's only constant member",
+          "since": "1976"
+        },
+        {
+          "name": "Mark Tornillo",
+          "role": "lead vocals",
+          "since": "2009"
+        },
+        {
+          "name": "Christopher Williams",
+          "role": "drums, backing vocals",
+          "since": "2015"
+        },
+        {
+          "name": "Martin Motnik",
+          "role": "bass, backing vocals",
+          "since": "2019"
+        },
+        {
+          "name": "Philip Shouse",
+          "role": "rhythm guitar, backing vocals; sole second guitarist since Uwe Lulis left in 2025",
+          "since": "2019"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Restless and Wild",
+          "year": 1982,
+          "note": "opens with \"Fast as a Shark\", routinely cited as a speed-metal blueprint"
+        },
+        {
+          "title": "Balls to the Wall",
+          "year": 1983,
+          "note": "their US breakthrough and only gold record there; peaked at 74 on the Billboard 200"
+        },
+        {
+          "title": "Metal Heart",
+          "year": 1985,
+          "note": "title track laces classical quotes into the riff and solo"
+        },
+        {
+          "title": "Blood of the Nations",
+          "year": 2010,
+          "note": "first album with Mark Tornillo, after 14 years without a studio record"
+        },
+        {
+          "title": "Humanoid",
+          "year": 2024,
+          "note": "most recent album of new material"
+        },
+        {
+          "title": "Teutonic Titans 1976–2026",
+          "year": 2026,
+          "note": "50th-anniversary re-recordings of early material with around 50 guests, due 4 September 2026"
+        }
+      ],
+      "links": {
+        "official": "https://www.acceptworldwide.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Accept_(band)",
+        "spotify": "https://open.spotify.com/artist/3JDIAtVrJdQ7GFOX26LYpv",
+        "bandcamp": "https://accept.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Balls to the Wall",
+          "album": "Balls to the Wall",
+          "year": 1983,
+          "why": "the signature song and the obvious way in; still the last thing they play",
+          "yt_audio": "-PXddU0T4d8",
+          "yt_video": "IrwXSfcJmnU"
+        },
+        {
+          "title": "Fast as a Shark",
+          "album": "Restless and Wild",
+          "year": 1982,
+          "why": "folk-yodel intro into a double-kick sprint, the one the speed metal genre took its cue from",
+          "yt_audio": "R0YOm5-iaO4",
+          "yt_video": "qXnpNcupRnY"
+        },
+        {
+          "title": "Metal Heart",
+          "album": "Metal Heart",
+          "year": 1985,
+          "why": "opens every show on the anniversary tour; the solo quotes Beethoven's \"Für Elise\"",
+          "yt_audio": "YkVGDywoGrc",
+          "yt_video": null
+        },
+        {
+          "title": "Princess of the Dawn",
+          "album": "Restless and Wild",
+          "year": 1982,
+          "why": "the long, slow-grinding one that shows the other side of the band",
+          "yt_audio": "y65U8omaAq4",
+          "yt_video": null
+        },
+        {
+          "title": "Teutonic Terror",
+          "album": "Blood of the Nations",
+          "year": 2010,
+          "why": "the Tornillo-era anthem that made the second act stick; sits second in the current set",
+          "yt_audio": "req-oDf2ZRc",
+          "yt_video": null
+        }
+      ],
+      "order": 15,
+      "day": "fri",
+      "stage": "h01",
+      "time": "22:30"
+    },
+    {
+      "id": "carpenter-brut",
+      "name": "Carpenter Brut",
+      "origin": "Poitiers, France",
+      "formed": "2012",
+      "genres": [
+        "darksynth",
+        "synthwave",
+        "horror synth"
+      ],
+      "blurb": "French darksynth: 1980s horror-film synthesizers played at metal speed and volume. A solo studio project of Franck Hueso, taken on the road as a strictly instrumental trio with a live guitarist and drummer.",
+      "detail": "Carpenter Brut is the studio project of Franck Hueso, who writes and records it alone; live it is a trio, with Hueso on synths flanked by guitarist Adrien Grousset and drummer Florent Marcadet, both of the French tech-metal band Hacride. Hueso keeps his face out of the project deliberately, and the live show runs to film and video projection rather than a frontman. Three EPs released between 2012 and 2015 were collected as Trilogy; two of those tracks, \"Le Perv\" and \"Roller Mobster\", reached a much wider audience through the Hotline Miami 2: Wrong Number soundtrack. The Seth Ickerman video for \"Turbo Killer\" grew into the feature film Blood Machines, which Hueso scored in 2020. The Leather trilogy of Leather Teeth (2018), Leather Terror (2022) and Leather Temple (27 February 2026) is one continuous dystopian storyline, and the 2026 tour is built around its conclusion.",
+      "members": [
+        {
+          "name": "Franck Hueso",
+          "role": "synthesizers, production; sole member of the studio project",
+          "since": "2012"
+        },
+        {
+          "name": "Adrien Grousset",
+          "role": "guitar (live band); also of Hacride"
+        },
+        {
+          "name": "Florent Marcadet",
+          "role": "drums (live band); also of Hacride"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Trilogy",
+          "year": 2015,
+          "note": "collects EP I (2012), EP II (2013) and EP III (2015) as the debut album"
+        },
+        {
+          "title": "Leather Teeth",
+          "year": 2018,
+          "note": "first part of the Leather trilogy; guest vocals from Kristoffer Rygg and Mat McNerney"
+        },
+        {
+          "title": "Blood Machines OST",
+          "year": 2020,
+          "note": "score for the Seth Ickerman film that began as the \"Turbo Killer\" video"
+        },
+        {
+          "title": "Leather Terror",
+          "year": 2022,
+          "note": "guests include Gunship, Greg Puciato, Ulver and Sylvaine"
+        },
+        {
+          "title": "Leather Temple",
+          "year": 2026,
+          "note": "released 27 February 2026; closes the trilogy and is the basis of the current set"
+        }
+      ],
+      "links": {
+        "official": "https://www.carpenterbrut.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Carpenter_Brut",
+        "spotify": "https://open.spotify.com/artist/1l2oLiukA9i5jEtIyNWIEP",
+        "bandcamp": "https://carpenterbrut.bandcamp.com"
+      },
+      "songs": [
+        {
+          "title": "Turbo Killer",
+          "album": "Trilogy",
+          "year": 2015,
+          "why": "the obvious entry point, and the Seth Ickerman video that carried the project well past synthwave circles",
+          "yt_audio": "er416Ad3R1g",
+          "yt_video": null
+        },
+        {
+          "title": "Roller Mobster",
+          "album": "Trilogy",
+          "year": 2015,
+          "why": "the Hotline Miami 2 cut, still in the set eleven years later",
+          "yt_audio": "qFfybn_W8Ak",
+          "yt_video": null
+        },
+        {
+          "title": "Cheerleader Effect",
+          "album": "Leather Teeth",
+          "year": 2018,
+          "why": "the sung, almost pop side of the project, with Ulver's Kristoffer Rygg on vocals",
+          "yt_audio": "QZUxLq7I-lU",
+          "yt_video": null
+        },
+        {
+          "title": "Imaginary Fire",
+          "album": "Leather Terror",
+          "year": 2022,
+          "why": "the heaviest end of the catalogue, with Greg Puciato shouting over it",
+          "yt_audio": "6_t_ZXavIOo",
+          "yt_video": null
+        },
+        {
+          "title": "Leather Temple",
+          "album": "Leather Temple",
+          "year": 2026,
+          "why": "title track of the new album and a fixture of every 2026 setlist",
+          "yt_audio": "EabS2RdjZ3E",
+          "yt_video": null
+        }
+      ],
+      "order": 16,
+      "day": "fri",
+      "stage": "h03",
+      "time": "00:00"
+    },
+    {
+      "id": "assemble-the-chariots",
+      "name": "Assemble the Chariots",
+      "origin": "Espoo / Helsinki, Finland",
+      "formed": "2008",
+      "genres": [
+        "symphonic deathcore",
+        "symphonic death metal",
+        "extreme metal"
+      ],
+      "blurb": "Symphonic deathcore from Espoo: full orchestral arrangements over blast beats, blackened tremolo riffing and low harsh vocals. They call it “orchestral extreme metal and mythopoeic storytelling”, with lyrics built on cosmic concepts.",
+      "detail": "Formed in 2008 by drummer Alexi Lehto and guitarist Niklas Turunen, the band spent fifteen years on EPs before a full-length: Reflections (2009), The Sulphur Voids (2012), World Architects and The Celestials, the last of which was picked up by Seek and Strike in September 2020. Debut album Unyielding Night followed on 19 July 2024, billed on their own site as \"Ephemeral Trilogy Episode 1\" and launched with a sold-out Helsinki release show. In 2025 they toured Europe supporting Caliban, In Hearts Wake and Cabal, signed with Avocado Booking for the EU, and re-recorded the 2015 World Architects EP as World Architects: Integration. Line-up note: the band's own site presents them as a quartet \"reborn in 2024\" and lists no second guitarist, while Wikipedia still has co-founder Niklas Turunen on guitars as a current member — the four below are the ones the band itself names.",
+      "members": [
+        {
+          "name": "Onni Holmström",
+          "role": "vocals",
+          "since": "2017"
+        },
+        {
+          "name": "Kevin Apostol",
+          "role": "guitar; joined months after the 2008 founding",
+          "since": "2008"
+        },
+        {
+          "name": "Mikael Reinikka",
+          "role": "bass, replaced Taneli \"Tauno\" Kaalikoski in 2024",
+          "since": "2024"
+        },
+        {
+          "name": "Sami Mäntylä",
+          "role": "drums, keyboards",
+          "since": "2011"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Reflections",
+          "year": 2009,
+          "note": "debut EP"
+        },
+        {
+          "title": "World Architects",
+          "year": 2015,
+          "note": "third EP; the band's own Bandcamp dates it 1 August 2015, Wikipedia gives 2014"
+        },
+        {
+          "title": "The Celestials",
+          "year": 2020,
+          "note": "EP that got them signed — self-released in July, re-released 25 September 2020 by Seek and Strike"
+        },
+        {
+          "title": "Unyielding Night",
+          "year": 2024,
+          "note": "debut full-length, 19 July 2024; fourteen tracks, subtitled Ephemeral Trilogy Episode 1"
+        },
+        {
+          "title": "World Architects: Integration",
+          "year": 2025,
+          "note": "the 2015 EP re-recorded by the current line-up, 3 October 2025"
+        }
+      ],
+      "links": {
+        "official": "https://www.assemblethechariots.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Assemble_the_Chariots",
+        "spotify": "https://open.spotify.com/artist/6MWE8Xn602R4dRfbmJaNRJ",
+        "bandcamp": "https://assemblethechariots.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Empress",
+          "album": "Unyielding Night",
+          "year": 2024,
+          "why": "the entry point — a 2021 standalone single, and by a wide margin their most-streamed track",
+          "yt_audio": "eEsXA_GETp8",
+          "yt_video": null
+        },
+        {
+          "title": "Evermurk",
+          "album": "Unyielding Night",
+          "year": 2024,
+          "why": "the album's lead single and music video",
+          "yt_audio": "1b26bNUzF7A",
+          "yt_video": null
+        },
+        {
+          "title": "Galactic Order",
+          "album": "Unyielding Night",
+          "year": 2024,
+          "why": "five minutes with the orchestra fully out front, released as a single a year ahead of the album",
+          "yt_audio": "vFoC7Nlf9b8",
+          "yt_video": null
+        },
+        {
+          "title": "Equinox",
+          "album": "Unyielding Night",
+          "year": 2024,
+          "why": "the six-and-a-half-minute closer, the widest and slowest thing they have recorded",
+          "yt_audio": "J1Vcv8U3qaI",
+          "yt_video": null
+        },
+        {
+          "title": "The Astral Creator",
+          "album": "The Celestials",
+          "year": 2020,
+          "why": "opens the pre-album EP, for how the band sounded before the label",
+          "yt_audio": "rwhVCQszaNM",
+          "yt_video": null
+        }
+      ],
+      "order": 17,
+      "day": "sat",
+      "stage": "h02",
+      "time": "13:30"
+    },
+    {
+      "id": "numento",
+      "name": "Numento",
+      "origin": "Helsinki, Finland",
+      "formed": "2004",
+      "genres": [
+        "progressive melodic death metal",
+        "extreme progressive metal"
+      ],
+      "blurb": "Progressive melodic death metal from Helsinki, built around a vocalist who moves between operatic soprano and death growls. The Finnish kantele turns up often, which is what most sets them apart from the melodeath field.",
+      "detail": "Numento formed in 2004 around guitarist Aleksi Vehmassalo and have released three albums: The Cataclysm (2019), The Vile Entity (2022) and The Antimatter Fantasy (2024), the last of which drew strongly positive reviews. Katri Hiovain-Asikainen has fronted the band since 2011, doubling on kantele; recent material such as the 2026 single The Extortionist runs the kantele through distortion rather than using it as decoration. They won the Tuska-torstai band competition in 2022 and played the main Tuska festival the same year, took the Finnish Wacken Metal Battle and then finished second in the international final in Germany in 2025, and in February 2026 became the first Finnish band booked for Sandstorm Metal Festival in Dubai. Bass changed hands in 2025, with Johnny Grinds replacing Simo Mattila, and an EP plus a fourth album are in progress. At Hellsinki they are a late addition, stepping into the slot vacated by Ill Niño.",
+      "members": [
+        {
+          "name": "Katri Hiovain-Asikainen",
+          "role": "lead vocals, kantele",
+          "since": "2011"
+        },
+        {
+          "name": "Aleksi Vehmassalo",
+          "role": "guitar",
+          "since": "2004"
+        },
+        {
+          "name": "Atte Asikainen",
+          "role": "guitar, backing vocals",
+          "since": "2016"
+        },
+        {
+          "name": "Johnny Grinds",
+          "role": "bass, backing vocals, replaced Simo Mattila in 2025",
+          "since": "2025"
+        },
+        {
+          "name": "Mikko Virtanen",
+          "role": "drums",
+          "since": "2013"
+        }
+      ],
+      "albums": [
+        {
+          "title": "The Cataclysm",
+          "year": 2019,
+          "note": "debut album, themed on technology and its effect on the environment"
+        },
+        {
+          "title": "The Vile Entity",
+          "year": 2022,
+          "note": "second album, out through Inverse Records; the year they won Tuska-torstai"
+        },
+        {
+          "title": "The Antimatter Fantasy",
+          "year": 2024,
+          "note": "third album, June 2024, their best-reviewed record and the one most of the current set comes from"
+        },
+        {
+          "title": "Wrath",
+          "year": 2025,
+          "note": "single, first taste of an EP due late 2026"
+        },
+        {
+          "title": "One With the Void",
+          "year": 2026,
+          "note": "most recent single, June 2026"
+        }
+      ],
+      "links": {
+        "official": "https://numento.fi/",
+        "spotify": "https://open.spotify.com/artist/3t5HzeySOZvzNSEpvDiA5M",
+        "bandcamp": "https://numento.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Timetrap",
+          "album": "The Antimatter Fantasy",
+          "year": 2024,
+          "why": "the single with the video off the newest album, and the shortest route in",
+          "yt_audio": "s0hXvdYhfPQ",
+          "yt_video": "2P7n8Xj5ZsU"
+        },
+        {
+          "title": "Singularity",
+          "album": "The Antimatter Fantasy",
+          "year": 2024,
+          "why": "the near-ballad with kantele and operatic vocals out front, i.e. the other half of what they do",
+          "yt_audio": "Fw7-kJtDGEg",
+          "yt_video": "PqJ6D5K1i0k"
+        },
+        {
+          "title": "The Extortionist",
+          "album": "single",
+          "year": 2026,
+          "why": "current material, true-crime lyric and a distorted kantele",
+          "yt_audio": "OAWNl1NQ7DM",
+          "yt_video": "g1NnOFmXBhc"
+        },
+        {
+          "title": "Hadal Ground",
+          "album": "The Vile Entity",
+          "year": 2022,
+          "why": "the seven-minute one, where the progressive side gets room",
+          "yt_audio": "jJRcD5-Y68c",
+          "yt_video": "UwO6LU9tYkc"
+        },
+        {
+          "title": "Vultures",
+          "album": "The Cataclysm",
+          "year": 2019,
+          "why": "opens the debut; the leaner, straighter melodeath they started from",
+          "yt_audio": "myRxoO6wTXU",
+          "yt_video": null
+        }
+      ],
+      "order": 18,
+      "day": "sat",
+      "stage": "h01",
+      "time": "14:15"
+    },
+    {
+      "id": "iotunn",
+      "name": "IOTUNN",
+      "origin": "Copenhagen, Denmark",
+      "formed": "2015",
+      "genres": [
+        "progressive death metal",
+        "melodic death metal",
+        "epic metal"
+      ],
+      "blurb": "Progressive death metal from Copenhagen with a Danish/Faroese line-up, built on long, melodic, cosmically-themed songs. Jón Aldará carries them from semi-operatic cleans through growls to black-metal snarls.",
+      "detail": "Founded in 2015 by guitarist brothers Jesper and Jens Nicolai Gräs, who took the name from the Old Norse word for giant. The 2016 EP The Wizard Falls had a different singer; Faroese vocalist Jón Aldará (also of Hamferð and Barren Earth) joined in 2018 and has fronted both full-lengths — the Metal Blade debut Access All Worlds (2021) and Kinship (2024), a concept album following a prehistoric tribesman through unity and disunity, light and dark. Songs routinely run past ten minutes and the writing leans on melody and atmosphere as much as on weight. Aldará sat out most of the band's 2025 touring for personal reasons, with Heidra's Morten Bryld standing in; he is the credited vocalist for the 2026 Kinship European run. A live album, Waves over Copenhell, taken from their Copenhell 2023 set, appeared on 9 January 2026.",
+      "members": [
+        {
+          "name": "Jón Aldará",
+          "role": "vocals",
+          "since": "2018"
+        },
+        {
+          "name": "Jens Nicolai Gräs",
+          "role": "guitar",
+          "since": "2015"
+        },
+        {
+          "name": "Jesper Gräs",
+          "role": "guitar",
+          "since": "2015"
+        },
+        {
+          "name": "Eskil Rask",
+          "role": "bass",
+          "since": "2019"
+        },
+        {
+          "name": "Bjørn Wind Andersen",
+          "role": "drums"
+        }
+      ],
+      "albums": [
+        {
+          "title": "The Wizard Falls",
+          "year": 2016,
+          "note": "debut EP, recorded before Jón Aldará joined"
+        },
+        {
+          "title": "Access All Worlds",
+          "year": 2021,
+          "note": "Metal Blade debut and Aldará's first album with the band"
+        },
+        {
+          "title": "Kinship",
+          "year": 2024,
+          "note": "second album; eight tracks, over an hour, one continuous narrative"
+        },
+        {
+          "title": "Waves over Copenhell",
+          "year": 2026,
+          "note": "live album from their Copenhell 2023 set, released 9 January 2026"
+        }
+      ],
+      "links": {
+        "official": "https://iotunn.com/",
+        "wikipedia": "https://de.wikipedia.org/wiki/Iotunn",
+        "spotify": "https://open.spotify.com/artist/3yJvUOZq6oH130RTa68hQz",
+        "bandcamp": "https://iotunn.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Mistland",
+          "album": "Kinship",
+          "year": 2024,
+          "why": "the lead single and the easiest way in",
+          "yt_audio": "yVTDjdHuivg",
+          "yt_video": null
+        },
+        {
+          "title": "Access All Worlds",
+          "album": "Access All Worlds",
+          "year": 2021,
+          "why": "the eleven-minute title track that got them noticed",
+          "yt_audio": "UHKBbiQ_4Ts",
+          "yt_video": null
+        },
+        {
+          "title": "Iridescent Way",
+          "album": "Kinship",
+          "year": 2024,
+          "why": "the short, direct one, under six minutes",
+          "yt_audio": "EoAfM9BTkU0",
+          "yt_video": null
+        },
+        {
+          "title": "Waves Below",
+          "album": "Access All Worlds",
+          "year": 2021,
+          "why": "live-set staple and the video pulled off the live album",
+          "yt_audio": "eYNGhLmqnzg",
+          "yt_video": null
+        },
+        {
+          "title": "Kinship Elegiac",
+          "album": "Kinship",
+          "year": 2024,
+          "why": "the fourteen-minute opener, if you want the whole vocal range at once",
+          "yt_audio": "ULYaUz6O-WU",
+          "yt_video": null
+        }
+      ],
+      "order": 19,
+      "day": "sat",
+      "stage": "h02",
+      "time": "15:00"
+    },
+    {
+      "id": "sepulchral-curse",
+      "name": "Sepulchral Curse",
+      "origin": "Turku, Finland",
+      "formed": "2013",
+      "genres": [
+        "death metal",
+        "blackened death metal",
+        "death-doom"
+      ],
+      "blurb": "Blackened death metal from Turku, formed in 2013 by players from the same circle as Solothus and Yawning Void. Three albums in, they keep the murk of classic Finnish death metal and push it somewhere off-kilter.",
+      "detail": "The band spent its first six years on short releases — A Birth in Death (2014) for Chaos and Hell Productions, then At the Onset of Extinction (2016) for Transcending Obscurity — before the debut full-length Only Ashes Remain arrived in 2020. Founding drummer Tommi Ilmanen left in 2022 and was replaced by Johannes Rantala; the two EPs on either side of that change, Deathbed Sessions and Howl of the Cursed, carry covers of Demigod and Autopsy that name the lineage plainly enough. Abhorrent Dimensions (2023) was the second album, and 2025's Crimson Moon Evocations is their Dark Descent Records debut, recorded at Oxroad Studios with Tomi Uusitupa and sleeved by Mark Erskine. Vocalist Kari Kankaanpää describes the method as death metal at the backbone with new influences layered over it; Metal Archives files them as blackened death metal, while the band's own Bandcamp says only \"Death Metal from Turku, Finland\".",
+      "members": [
+        {
+          "name": "Kari Kankaanpää",
+          "role": "vocals",
+          "since": "2013"
+        },
+        {
+          "name": "Jaakko Riihimäki",
+          "role": "guitar",
+          "since": "2013"
+        },
+        {
+          "name": "Aleksi Luukka",
+          "role": "guitar",
+          "since": "2015"
+        },
+        {
+          "name": "Niilas Nissilä",
+          "role": "bass, backing vocals",
+          "since": "2013"
+        },
+        {
+          "name": "Johannes Rantala",
+          "role": "drums, replaced founding drummer Tommi Ilmanen in 2022",
+          "since": "2022"
+        }
+      ],
+      "albums": [
+        {
+          "title": "At the Onset of Extinction",
+          "year": 2016,
+          "note": "second EP; first release for Transcending Obscurity"
+        },
+        {
+          "title": "Only Ashes Remain",
+          "year": 2020,
+          "note": "debut full-length, seven years after forming"
+        },
+        {
+          "title": "Deathbed Sessions",
+          "year": 2022,
+          "note": "EP; closes with a Demigod cover"
+        },
+        {
+          "title": "Howl of the Cursed",
+          "year": 2023,
+          "note": "self-released two-track EP with an Autopsy cover"
+        },
+        {
+          "title": "Abhorrent Dimensions",
+          "year": 2023,
+          "note": "second album, the shortest and most direct of the three"
+        },
+        {
+          "title": "Crimson Moon Evocations",
+          "year": 2025,
+          "note": "third album and Dark Descent Records debut"
+        }
+      ],
+      "links": {
+        "official": "https://linktr.ee/sepulchralcurse",
+        "spotify": "https://open.spotify.com/artist/1BErAfRIE2RyEfcgiUdLmw",
+        "bandcamp": "https://sepulchralcurse.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Onward the Legions",
+          "album": "Abhorrent Dimensions",
+          "year": 2023,
+          "why": "the one with the official video, and the obvious way in",
+          "yt_audio": "3fGDGa_XrLc",
+          "yt_video": "kApSXyN_kc8"
+        },
+        {
+          "title": "Wildfires",
+          "album": "Crimson Moon Evocations",
+          "year": 2025,
+          "why": "opens the current album, so it is what the band sounds like now",
+          "yt_audio": "gazKY0NPIsc",
+          "yt_video": null
+        },
+        {
+          "title": "From Within the Bowels of the Earth",
+          "album": "Only Ashes Remain",
+          "year": 2020,
+          "why": "the debut album's opener and its lead promo track",
+          "yt_audio": "PQK50m8HGPQ",
+          "yt_video": null
+        },
+        {
+          "title": "Circular Aeons",
+          "album": "Deathbed Sessions",
+          "year": 2022,
+          "why": "nearly eight minutes, and the doomier long-form side of the band",
+          "yt_audio": "NQq2y0j_1nQ",
+          "yt_video": null
+        },
+        {
+          "title": "Maan tuhkien uneen",
+          "album": "Only Ashes Remain",
+          "year": 2020,
+          "why": "the eleven-minute Finnish-language closer, at the far end from the short ones",
+          "yt_audio": "HP3DXpw-ahk",
+          "yt_video": null
+        }
+      ],
+      "order": 20,
+      "day": "sat",
+      "stage": "h03",
+      "time": "15:00"
+    },
+    {
+      "id": "misthyrming",
+      "name": "Misþyrming",
+      "origin": "Reykjavík, Iceland",
+      "formed": "2013",
+      "genres": [
+        "black metal"
+      ],
+      "blurb": "Icelandic black metal from Reykjavík, sung entirely in Icelandic — tremolo-driven and melodic over a raw Nordic base, keyboards used for scale rather than atmosphere. Began in 2013 as D.G.'s solo project.",
+      "detail": "Misþyrming began in June 2013 as a one-man project of D.G. (Dagur Gíslason), who recorded the 2015 debut Söngvar elds og óreiðu essentially alone apart from drums; a full live band formed around it from 2014. The debut landed on year-end lists at Stereogum and MetalSucks and led to an artist-in-residence slot at Roadburn 2016. The 2019 follow-up Algleymi, made for the French label Norma Evangelium Diaboli, pushed the keyboards forward and aimed for what the band called a grandiose, clear-sounding record; D.G. described the third album, Með hamri (2022), as a deliberately harsher counterweight — 'a very aggressive and bitter manifesto'. That album also introduced drummer M.S., who replaced founding drummer H.R.H. after nine years. D.G. and guitarist T.Í. also run the Vánagandr label, which has released much of the surrounding Reykjavík scene.",
+      "members": [
+        {
+          "name": "D.G. (Dagur Gíslason)",
+          "role": "vocals, guitar, keyboards",
+          "since": "2013"
+        },
+        {
+          "name": "T.Í. (Tómas Ísdal)",
+          "role": "guitar, backing vocals",
+          "since": "2014"
+        },
+        {
+          "name": "G.E. (Gústaf Evensen)",
+          "role": "bass, backing vocals",
+          "since": "2014"
+        },
+        {
+          "name": "M.S. (Magnús Skúlason)",
+          "role": "drums, replaced founding drummer H.R.H. (2013–2022)",
+          "since": "2022"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Söngvar elds og óreiðu",
+          "year": 2015,
+          "note": "Debut, recorded by D.G. with H.R.H. on drums; the record that drew international attention to Icelandic black metal"
+        },
+        {
+          "title": "Ivory Stone / Hof",
+          "year": 2017,
+          "note": "Split with fellow Reykjavík band Sinmara; Misþyrming's side is the single track 'Hof'"
+        },
+        {
+          "title": "Algleymi",
+          "year": 2019,
+          "note": "Second album, rerecorded from scratch after a scrapped 2016 session; Decibel placed it 29th in its 2019 list"
+        },
+        {
+          "title": "Með hamri",
+          "year": 2022,
+          "note": "Third album and first with drummer M.S.; six tracks, harsher and more direct than Algleymi"
+        },
+        {
+          "title": "Með hamri í lifandi formi",
+          "year": 2023,
+          "note": "Live album and video from the Með hamri release show at Iðnó, Reykjavík, March 2023"
+        }
+      ],
+      "links": {
+        "wikipedia": "https://en.wikipedia.org/wiki/Mis%C3%BEyrming",
+        "spotify": "https://open.spotify.com/artist/32zyj5MW8nhKGMaGlp4njt",
+        "bandcamp": "https://misthyrming.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Orgia",
+          "album": "Algleymi",
+          "year": 2019,
+          "why": "the most-streamed track and the door most people come in through",
+          "yt_audio": "4Gx3DhDrRxc",
+          "yt_video": null
+        },
+        {
+          "title": "Söngur heiftar",
+          "album": "Söngvar elds og óreiðu",
+          "year": 2015,
+          "why": "opens the debut and their single most-played song live — the raw 2015 sound",
+          "yt_audio": "UIoDxdP7bUk",
+          "yt_video": null
+        },
+        {
+          "title": "Ísland, steingelda krummaskuð",
+          "album": "Algleymi",
+          "year": 2019,
+          "why": "the anthem, in almost every set since 2019",
+          "yt_audio": "x-5YO-o15yk",
+          "yt_video": null
+        },
+        {
+          "title": "Með harmi",
+          "album": "Með hamri",
+          "year": 2022,
+          "why": "the eight-minute one from the newest album, and a current live fixture",
+          "yt_audio": "nIVJ8tmAzCo",
+          "yt_video": null
+        },
+        {
+          "title": "Ég byggði dyr í eyðimörkinni",
+          "album": "Söngvar elds og óreiðu",
+          "year": 2015,
+          "why": "the long, melodic closer they still end sets with",
+          "yt_audio": "bukkcXYUIm4",
+          "yt_video": null
+        }
+      ],
+      "order": 21,
+      "day": "sat",
+      "stage": "h01",
+      "time": "16:00"
+    },
+    {
+      "id": "orly",
+      "name": "Orly",
+      "origin": "Lyon, France",
+      "genres": [
+        "post-black metal",
+        "blackened hardcore",
+        "post-metal"
+      ],
+      "blurb": "Post-black metal and blackened hardcore from Lyon — doom-weighted riffs, cinematic sweeps and French titles pitched at the ugliness of being human. One album deep: the self-released On.Rouvrira.Les.Yeux (2025).",
+      "detail": "A Lyon quartet whose debut On.Rouvrira.Les.Yeux arrived on 24 September 2025 — eight tracks, about forty minutes, released on their own, with a gatefold vinyl issue following on Eye of Storm Records in April 2026. The line-up overlaps two established French bands: vocalist Maxime Febvet and Frédéric Franczak both appear in Déluge, and Cult of Occult's bassist is in Orly too (credited there under a pseudonym, so which of the four he is stays unclear). Sources disagree on tense — French press calls these former memberships, while Metal Archives still lists Febvet and Franczak in Déluge's current line-up. No source gives a formation year, and only Febvet's instrument is stated anywhere. Their own bio is the whole aesthetic in a sentence: the band draws on the pain of existence and on man's conviction that he is the gold of this world when he is only its dregs.",
+      "members": [
+        {
+          "name": "Maxime Febvet",
+          "role": "vocals; also vocalist of Déluge"
+        },
+        {
+          "name": "Frédéric Franczak",
+          "role": "instrument not listed by any source; plays bass in Déluge"
+        },
+        {
+          "name": "Julien Ropert",
+          "role": "instrument not listed by any source"
+        },
+        {
+          "name": "Fabien Limare",
+          "role": "instrument not listed by any source"
+        }
+      ],
+      "albums": [
+        {
+          "title": "On.Rouvrira.Les.Yeux",
+          "year": 2025,
+          "note": "debut and so far only release — eight tracks in 39:47, out 24 September 2025; gatefold vinyl on Eye of Storm Records, April 2026"
+        }
+      ],
+      "links": {
+        "official": "https://linktr.ee/orlyband",
+        "spotify": "https://open.spotify.com/artist/5hgtwR0WDInQFfG2o4bcVc",
+        "bandcamp": "https://orlyband.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Porcs.Pendre",
+          "album": "On.Rouvrira.Les.Yeux",
+          "year": 2025,
+          "why": "the opener, and the quickest read on what the band does",
+          "yt_audio": "UPlizQ3BIKo",
+          "yt_video": null
+        },
+        {
+          "title": "Noir.Rupt",
+          "album": "On.Rouvrira.Les.Yeux",
+          "year": 2025,
+          "why": "their most-streamed track, the closest thing to a single",
+          "yt_audio": "3h09T6Cxn4A",
+          "yt_video": null
+        },
+        {
+          "title": "Mort.Monde",
+          "album": "On.Rouvrira.Les.Yeux",
+          "year": 2025,
+          "why": "the six-minute one reviewers single out for its ethereal drift — the post-metal end of the range",
+          "yt_audio": "QdH2Yo3S2Ow",
+          "yt_video": null
+        },
+        {
+          "title": "En.Nuit",
+          "album": "On.Rouvrira.Les.Yeux",
+          "year": 2025,
+          "why": "barely three minutes, the blackened-hardcore side taken straight",
+          "yt_audio": "AnPK6Yj0jqY",
+          "yt_video": null
+        },
+        {
+          "title": "Exode.Renaître",
+          "album": "On.Rouvrira.Les.Yeux",
+          "year": 2025,
+          "why": "the seven-and-a-half-minute closer, slow and broken but never inert",
+          "yt_audio": "BRvnzgxUtZk",
+          "yt_video": null
+        }
+      ],
+      "order": 22,
+      "day": "sat",
+      "stage": "h03",
+      "time": "16:30"
+    },
+    {
+      "id": "kalmah",
+      "name": "Kalmah",
+      "origin": "Pudasjärvi, Finland",
+      "formed": "1998",
+      "genres": [
+        "melodic death metal",
+        "swamp metal",
+        "power metal"
+      ],
+      "blurb": "Melodic death metal from Pudasjärvi in northern Finland, built on twin-guitar harmonies, keyboard leads and growled vocals. The band calls its own variant \"swamp metal\", after the bogs of its home region.",
+      "detail": "Kalmah grew out of the death metal band Ancestor, which Pekka Kokko co-founded in 1991 and which folded in 1998; Kalmah formed the same year around Pekka and his brother Antti Kokko on lead guitar. The name comes from Karelian and means roughly \"to the grave\". Nine studio albums have appeared since Swamplord in 2000, with the line-up unchanged since keyboardist Veli-Matti Kananen joined in 2012. The self-titled ninth album arrived in May 2023 on Ranka Kustannus after a five-year gap and a move away from Spinefarm, the label that had signed them within a year of forming.",
+      "members": [
+        {
+          "name": "Pekka Kokko",
+          "role": "vocals, rhythm guitar",
+          "since": "1998"
+        },
+        {
+          "name": "Antti Kokko",
+          "role": "lead guitar",
+          "since": "1998"
+        },
+        {
+          "name": "Timo Lehtinen",
+          "role": "bass",
+          "since": "2001"
+        },
+        {
+          "name": "Janne Kusmin",
+          "role": "drums",
+          "since": "2001"
+        },
+        {
+          "name": "Veli-Matti Kananen",
+          "role": "keyboards",
+          "since": "2012"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Swamplord",
+          "year": 2000,
+          "note": "debut, on Spinefarm; still supplies the most-played song in their live history"
+        },
+        {
+          "title": "Swampsong",
+          "year": 2003
+        },
+        {
+          "title": "The Black Waltz",
+          "year": 2006,
+          "note": "their one proper music video, for \"The Groan of Wind\", came off this record"
+        },
+        {
+          "title": "For the Revolution",
+          "year": 2008
+        },
+        {
+          "title": "Seventh Swamphony",
+          "year": 2013
+        },
+        {
+          "title": "Kalmah",
+          "year": 2023,
+          "note": "ninth album and first for Ranka Kustannus, after a five-year gap"
+        }
+      ],
+      "links": {
+        "official": "https://www.kalmah.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Kalmah",
+        "spotify": "https://open.spotify.com/artist/2YPVtFn6SsYNntkmrdDpGF",
+        "bandcamp": "https://kalmah.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "The Groan of Wind",
+          "album": "The Black Waltz",
+          "year": 2006,
+          "why": "the obvious way in: the one they made a video for, and a fixture of the set for twenty years",
+          "yt_audio": "bbrohzzvLeI",
+          "yt_video": null
+        },
+        {
+          "title": "Hades",
+          "album": "Swamplord",
+          "year": 2000,
+          "why": "the most-played song in the band's history, and usually where the set ends",
+          "yt_audio": "wpsu8UO8gKQ",
+          "yt_video": null
+        },
+        {
+          "title": "Heroes to Us",
+          "album": "Swampsong",
+          "year": 2003,
+          "why": "the other perennial, and often the opener",
+          "yt_audio": "Vbj5tL038QA",
+          "yt_video": null
+        },
+        {
+          "title": "For the Revolution",
+          "album": "For the Revolution",
+          "year": 2008,
+          "why": "title track that leans furthest into the power metal half of the sound",
+          "yt_audio": "kUzRpqayoi0",
+          "yt_video": null
+        },
+        {
+          "title": "Haunted by Guilt",
+          "album": "Kalmah",
+          "year": 2023,
+          "why": "lead single off the newest album, for current form",
+          "yt_audio": "1sg8i1tR8gY",
+          "yt_video": null
+        }
+      ],
+      "order": 23,
+      "day": "sat",
+      "stage": "h02",
+      "time": "17:00"
+    },
+    {
+      "id": "paradise-lost",
+      "name": "Paradise Lost",
+      "origin": "Halifax, England",
+      "formed": "1988",
+      "genres": [
+        "gothic metal",
+        "death-doom",
+        "doom metal"
+      ],
+      "blurb": "Gothic metal and death-doom from Halifax, whose 1991 album Gothic effectively named the genre. Seventeen albums in, with a line-up that has barely changed since 1988.",
+      "detail": "Started in 1988 as slow, guttural death-doom, then spent the mid-90s building the template most gothic metal still uses: Draconian Times (1995) is the best-selling record and charted across Europe. From One Second (1997) they walked out of metal entirely, and Host (1999) was programmed drums, synthesizers and a croon compared to Depeche Mode, which split the audience badly. The heaviness came back gradually from Symbol of Life (2002) onward, and by The Plague Within (2015) Nick Holmes was using death growls again — he had by then also taken over as vocalist of Bloodbath, who play the day before this slot. Ascension (Nuclear Blast, September 2025) is the current album and the tour behind it has run through 2026; drummer is the only seat that rotates, and Jeff Singer rejoined in May 2025 after a 17-year absence.",
+      "members": [
+        {
+          "name": "Nick Holmes",
+          "role": "vocals",
+          "since": "1988"
+        },
+        {
+          "name": "Gregor Mackintosh",
+          "role": "lead guitar, keyboards",
+          "since": "1988"
+        },
+        {
+          "name": "Aaron Aedy",
+          "role": "rhythm guitar",
+          "since": "1988"
+        },
+        {
+          "name": "Steve Edmondson",
+          "role": "bass",
+          "since": "1988"
+        },
+        {
+          "name": "Jeff Singer",
+          "role": "drums, replaced Guido Zima Montanarini in May 2025; also played 2004–2008",
+          "since": "2025"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Gothic",
+          "year": 1991,
+          "note": "the album that gave gothic metal its name"
+        },
+        {
+          "title": "Icon",
+          "year": 1993,
+          "note": "the turn from death-doom to a leaner, cleaner-sung metal"
+        },
+        {
+          "title": "Draconian Times",
+          "year": 1995,
+          "note": "best-selling album, UK no. 16"
+        },
+        {
+          "title": "Host",
+          "year": 1999,
+          "note": "no metal guitars at all — synth-pop and electronics; the most divisive record they made"
+        },
+        {
+          "title": "The Plague Within",
+          "year": 2015,
+          "note": "death growls back after two decades"
+        },
+        {
+          "title": "Ascension",
+          "year": 2025,
+          "note": "17th album; longest gap between records in their career"
+        }
+      ],
+      "links": {
+        "official": "https://paradiselost.co.uk",
+        "wikipedia": "https://en.wikipedia.org/wiki/Paradise_Lost_(band)",
+        "spotify": "https://open.spotify.com/artist/0gIo6kGl4KsCeIbqtZVHYp",
+        "bandcamp": "https://paradiselostofficial.bandcamp.com"
+      },
+      "songs": [
+        {
+          "title": "The Last Time",
+          "album": "Draconian Times",
+          "year": 1995,
+          "why": "the single that broke them, and the shortest route into the gothic-metal sound they are copied for",
+          "yt_audio": "n4FZs5RP950",
+          "yt_video": "E319AWgG_GM"
+        },
+        {
+          "title": "Gothic",
+          "album": "Gothic",
+          "year": 1991,
+          "why": "where they started — death-doom with choir and keyboards, and the title a whole genre took",
+          "yt_audio": "TnqXkN1xpO8",
+          "yt_video": null
+        },
+        {
+          "title": "One Second",
+          "album": "One Second",
+          "year": 1997,
+          "why": "the moment the guitars gave way to electronics and a clean voice; still mid-set in 2026",
+          "yt_audio": "pof4UXG732c",
+          "yt_video": "LZ5XWyC5i6A"
+        },
+        {
+          "title": "Nothing Sacred",
+          "album": "Host",
+          "year": 1999,
+          "why": "the synth-pop album at full commitment, and the Host track they still play live",
+          "yt_audio": "WBVGQSsey5Y",
+          "yt_video": "ra1Zp49bTDQ"
+        },
+        {
+          "title": "Silence Like the Grave",
+          "album": "Ascension",
+          "year": 2025,
+          "why": "current single, closes the 2026 shows — where the doom landed after the round trip",
+          "yt_audio": "JSAlEVzLhDc",
+          "yt_video": null
+        }
+      ],
+      "order": 24,
+      "day": "sat",
+      "stage": "h01",
+      "time": "18:00"
+    },
+    {
+      "id": "horna",
+      "name": "Horna",
+      "origin": "Lappeenranta, Finland",
+      "formed": "1994",
+      "genres": [
+        "Black metal"
+      ],
+      "blurb": "Finnish black metal from Lappeenranta, founded by guitarist Shatraug in 1994 and one of the country's most prolific black metal bands, with over fifty releases behind it. Tremolo-driven, mid-to-fast, almost entirely in Finnish.",
+      "detail": "Shatraug started the band as Shadowed in 1993 and renamed it Horna — Finnish for 'abyss' or 'hell' — in 1994; he is the only continuous member and also runs Sargeist. The albums range from the raw four-track debut Kohti yhdeksän nousua (1998) through the long-form Ääniä yössä (2006), whose title track runs 21 minutes, to the double Sanojesi äärelle (2008) and the six-hymn Nyx – Hymnejä yölle (2024). Vocals have changed hands several times — Nazgul (1996–2001), Corvus (2002–2009) — with Spellgoth in the role since 2009, the longest-serving of the three. Shows have been cancelled in several countries (documented cases in 2010 and 2019) over alleged NSBM associations, chiefly via former members' other bands; Shatraug has described Horna as 'nationalist to a certain point' while denying National Socialist involvement.",
+      "members": [
+        {
+          "name": "Shatraug",
+          "role": "guitar, backing vocals",
+          "since": "1994"
+        },
+        {
+          "name": "Spellgoth",
+          "role": "vocals",
+          "since": "2009"
+        },
+        {
+          "name": "Infection",
+          "role": "guitar, backing vocals (bass 2002-2008)",
+          "since": "2008"
+        },
+        {
+          "name": "LRH",
+          "role": "drums",
+          "since": "2016"
+        },
+        {
+          "name": "VnoM",
+          "role": "bass",
+          "since": "2018"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Kohti yhdeksän nousua",
+          "year": 1998,
+          "note": "Debut, Solistitium Records; opener 'Örkkivuorilta' is still a set fixture"
+        },
+        {
+          "title": "Sudentaival",
+          "year": 2001,
+          "note": "Last album with Nazgul on vocals"
+        },
+        {
+          "title": "Ääniä yössä",
+          "year": 2006,
+          "note": "Four tracks, the title piece 21 minutes long"
+        },
+        {
+          "title": "Sanojesi äärelle",
+          "year": 2008,
+          "note": "Double album, the last with Corvus on vocals; their best-reviewed record"
+        },
+        {
+          "title": "Kuoleman kirjo",
+          "year": 2020,
+          "note": "Double album, World Terror Committee"
+        },
+        {
+          "title": "Nyx – Hymnejä yölle",
+          "year": 2024,
+          "note": "Latest album: five long 'Hymni' pieces plus a re-recorded 'Kuoleva lupaus'"
+        }
+      ],
+      "links": {
+        "wikipedia": "https://en.wikipedia.org/wiki/Horna",
+        "spotify": "https://open.spotify.com/artist/69Sr8wyHst8byPxRXENs3D",
+        "bandcamp": "https://horna666.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Kuoleva lupaus",
+          "album": "Envaatnags Eflos Solf Esgantaavne",
+          "year": 2005,
+          "why": "their most-played live song, and the one they thought worth re-recording to close Nyx in 2024",
+          "yt_audio": "jYM7JV321kc",
+          "yt_video": null
+        },
+        {
+          "title": "Örkkivuorilta",
+          "album": "Kohti yhdeksän nousua",
+          "year": 1998,
+          "why": "the debut's opener and the raw 1990s side, still in nearly every set",
+          "yt_audio": "LulRQN6EPkc",
+          "yt_video": null
+        },
+        {
+          "title": "Noidanloitsu",
+          "album": "Sudentaival",
+          "year": 2001,
+          "why": "the short, hooky one from the Nazgul era",
+          "yt_audio": "6kP1QXOaTVQ",
+          "yt_video": null
+        },
+        {
+          "title": "Muinaisten alttarilta",
+          "album": "Sanojesi äärelle",
+          "year": 2008,
+          "why": "opens the double album most listeners rate their strongest",
+          "yt_audio": "twzzJTPw-mc",
+          "yt_video": null
+        },
+        {
+          "title": "Hymni V",
+          "album": "Nyx – Hymnejä yölle",
+          "year": 2024,
+          "why": "the shortest way into the current long-form material, and in the 2025-26 sets",
+          "yt_audio": "7x80H4vC9KI",
+          "yt_video": null
+        }
+      ],
+      "order": 25,
+      "day": "sat",
+      "stage": "h03",
+      "time": "18:00"
+    },
+    {
+      "id": "cyan-kicks",
+      "name": "Cyan Kicks",
+      "origin": "Helsinki, Finland",
+      "formed": "2016",
+      "genres": [
+        "alternative rock",
+        "electronic rock",
+        "pop rock"
+      ],
+      "blurb": "Alternative rock from Helsinki built on pop choruses, programmed synths and distorted guitars, fronted by Susanna Alexandra. Closer to modern radio rock than to metal, and the lightest act on this bill.",
+      "detail": "Formed in Helsinki in 2016 and signed to Ranka Kustannus in June 2017, Cyan Kicks pair clean, hook-first vocal melodies with electronic production and heavy guitars. The debut album I Don't Love You (2019) was nominated for an Emma for rock album of the year. They are best known in Finland for two runs at Uuden Musiikin Kilpailu, the Eurovision selection: second place in 2022 with \"Hurricane\" — written in a single working day with Amaranthe's Elize Ryd, about a week after she guested at one of their shows — and a return in 2024 with the heavier \"Dancing With Demons\", which reached #14 on the Finnish singles chart. Third album Come Hell, Come High Water followed in October 2025.",
+      "members": [
+        {
+          "name": "Susanna Alexandra",
+          "role": "vocals",
+          "since": "2016"
+        },
+        {
+          "name": "Niila Perkkiö",
+          "role": "guitar",
+          "since": "2016"
+        },
+        {
+          "name": "Leevi Erkkilä",
+          "role": "bass, backing vocals",
+          "since": "2016"
+        },
+        {
+          "name": "Pietari Reijonen",
+          "role": "drums",
+          "since": "2016"
+        }
+      ],
+      "albums": [
+        {
+          "title": "I Don't Love You",
+          "year": 2019,
+          "note": "debut album; Emma nomination for rock album of the year"
+        },
+        {
+          "title": "Not Your Kind",
+          "year": 2021,
+          "note": "seven-track EP"
+        },
+        {
+          "title": "I Never Said 4ever",
+          "year": 2023,
+          "note": "peaked at #19 in Finland; collects \"Hurricane\", \"Invincible\" and \"See the Light\""
+        },
+        {
+          "title": "Come Hell, Come High Water",
+          "year": 2025,
+          "note": "current album; ends with \"Dancing With Demons\""
+        }
+      ],
+      "links": {
+        "official": "https://cyankicks.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Cyan_Kicks",
+        "spotify": "https://open.spotify.com/artist/6nA097TpH4DgdzRYFXAXry",
+        "bandcamp": "https://cyankicks.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "Hurricane",
+          "album": "I Never Said 4ever",
+          "year": 2023,
+          "why": "the UMK 2022 runner-up and the song almost everyone arrives by",
+          "yt_audio": "sT6WODCMRic",
+          "yt_video": null
+        },
+        {
+          "title": "Dancing With Demons",
+          "album": "Come Hell, Come High Water",
+          "year": 2025,
+          "why": "their second UMK entry and the heaviest single they have released — the nearest they get to the rest of this bill",
+          "yt_audio": "IZvrPrxeBPw",
+          "yt_video": "ryA9uuCt53E"
+        },
+        {
+          "title": "Gasoline",
+          "album": "I Don't Love You",
+          "year": 2019,
+          "why": "early guitar-forward single from the debut, before the electronics moved to the front",
+          "yt_audio": "KYkqRZkXnCQ",
+          "yt_video": null
+        },
+        {
+          "title": "Not Your Kind",
+          "album": "Not Your Kind",
+          "year": 2021,
+          "why": "title track of the EP, and the clearest sample of the in-between years",
+          "yt_audio": "SdDHrNc2n-I",
+          "yt_video": null
+        },
+        {
+          "title": "Echo",
+          "album": "Come Hell, Come High Water",
+          "year": 2025,
+          "why": "a 2025 single from the current record, which is what the live set is built around now",
+          "yt_audio": "sswqEZxdwH4",
+          "yt_video": "ns26a4NsDxY"
+        }
+      ],
+      "order": 26,
+      "day": "sat",
+      "stage": "h02",
+      "time": "19:00"
+    },
+    {
+      "id": "tungsten",
+      "name": "Tungsten",
+      "origin": "Sweden",
+      "formed": "2016",
+      "genres": [
+        "power metal",
+        "heavy metal",
+        "folk metal"
+      ],
+      "blurb": "Swedish power/heavy metal with Nordic folk melodies and big clean choruses, built around ex-HammerFall and Yngwie Malmsteen drummer Anders Johansson and his two sons.",
+      "detail": "Anders Johansson started the band in 2016 after hearing songs his sons Nick and Karl had written; the trio operated as Strokkur in 2017-2018 before signing to Arising Empire and renaming to Tungsten for the 2019 debut We Will Rise. Cloudscape singer Mike Andersson fronts it. The sound moves between straight power metal, heavier riff-driven material and arrangements of Swedish folk melodies, with keyboards and harsh vocals both handled by Karl. Four albums followed in five years, up to The Grand Inferno (2024); a fifth, Ashes, is announced for 4 September 2026 on Reigning Phoenix Music, so this slot falls a month before it lands. Recent live history includes a Manowar support at Cirkus in Stockholm and the Battle of Metal tour with All for Metal and Grailknights in October 2025.",
+      "members": [
+        {
+          "name": "Mike Andersson",
+          "role": "lead vocals"
+        },
+        {
+          "name": "Niklas \"Nick\" Johansson",
+          "role": "guitar, backing vocals",
+          "since": "2016"
+        },
+        {
+          "name": "Karl \"Kalle\" Johansson",
+          "role": "bass, keyboards, harsh vocals",
+          "since": "2016"
+        },
+        {
+          "name": "Anders Johansson",
+          "role": "drums",
+          "since": "2016"
+        }
+      ],
+      "albums": [
+        {
+          "title": "We Will Rise",
+          "year": 2019,
+          "note": "debut, on Arising Empire; the folk-inflected template for everything since"
+        },
+        {
+          "title": "Tundra",
+          "year": 2020
+        },
+        {
+          "title": "Bliss",
+          "year": 2022
+        },
+        {
+          "title": "The Grand Inferno",
+          "year": 2024,
+          "note": "the current live set draws mostly from here"
+        },
+        {
+          "title": "Ashes",
+          "year": 2026,
+          "note": "fifth album, announced for 4 September 2026 on Reigning Phoenix Music - after this festival date"
+        }
+      ],
+      "links": {
+        "official": "https://tungstenofficial.net/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Tungsten_(band)",
+        "spotify": "https://open.spotify.com/artist/529eA6ZaD8bWorDonM2wnm"
+      },
+      "songs": [
+        {
+          "title": "We Will Rise",
+          "album": "We Will Rise",
+          "year": 2019,
+          "why": "the first single and title track - the obvious entry point",
+          "yt_audio": "hxvXu6X2pZc",
+          "yt_video": null
+        },
+        {
+          "title": "The Fairies Dance",
+          "album": "We Will Rise",
+          "year": 2019,
+          "why": "the Swedish-folk side of the band, and the one that got them noticed outside power metal",
+          "yt_audio": "DomSYBg_b48",
+          "yt_video": "haS4Kvsx6rQ"
+        },
+        {
+          "title": "King of Shadows",
+          "album": "Tundra",
+          "year": 2020,
+          "why": "lead single from the second album, the straightest power metal they do",
+          "yt_audio": "SeeLnAabZYU",
+          "yt_video": "IUb9BA9cdoo"
+        },
+        {
+          "title": "Come This Way",
+          "album": "Bliss",
+          "year": 2022,
+          "why": "opened the Bliss campaign; shows the poppier, hook-first end",
+          "yt_audio": "ansVQSybdAs",
+          "yt_video": "j99DncpPFfY"
+        },
+        {
+          "title": "Walborg",
+          "album": "The Grand Inferno",
+          "year": 2024,
+          "why": "lead single off the newest album, folk melody over the heaviest production yet",
+          "yt_audio": "sw9da9gIAAQ",
+          "yt_video": null
+        }
+      ],
+      "order": 27,
+      "day": "sat",
+      "stage": "h03",
+      "time": "19:30"
+    },
+    {
+      "id": "triptykon-celtic-frost",
+      "name": "Triptykon performs Celtic Frost",
+      "origin": "Zürich, Switzerland",
+      "formed": "2008",
+      "genres": [
+        "extreme metal",
+        "doom metal",
+        "avant-garde metal"
+      ],
+      "blurb": "A set of nothing but Celtic Frost material — the Swiss band that laid the groundwork for death, black and gothic metal in the mid-1980s — played by Triptykon, the current band of Celtic Frost founder Tom Gabriel Fischer.",
+      "detail": "Tom Gabriel Fischer (Tom G. Warrior) founded Celtic Frost in Zürich in 1984 out of the ashes of Hellhammer, and its first three records — Morbid Tales, To Mega Therion and Into the Pandemonium — are routinely cited as founding documents of extreme metal. Celtic Frost ended for good in 2008 when Fischer left, and he formed Triptykon the same year as its continuation; the name marks it as his third band after Hellhammer and Celtic Frost. Triptykon has always carried Celtic Frost songs in its own sets, and after the death of bassist Martin Eric Ain in 2017 Fischer has been explicit that he plays them because he wrote them: 'these songs are my life.' Full Celtic Frost sets like this one happen at festival request rather than at his initiative. Note on the links below: 'official' is Triptykon's own site, while the Wikipedia article is Celtic Frost's, since that is the band whose songs are being played — Triptykon has a separate article at en.wikipedia.org/wiki/Triptykon.",
+      "members": [
+        {
+          "name": "Thomas Gabriel Fischer (Tom G. Warrior)",
+          "role": "vocals, rhythm guitar",
+          "since": "2008"
+        },
+        {
+          "name": "V. Santura (Victor Bullok)",
+          "role": "lead guitar, vocals",
+          "since": "2008"
+        },
+        {
+          "name": "Vanja Slajh",
+          "role": "bass, backing vocals",
+          "since": "2008"
+        },
+        {
+          "name": "Hannes Grossmann",
+          "role": "drums, percussion",
+          "since": "2018"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Morbid Tales (Celtic Frost)",
+          "year": 1984,
+          "note": "Debut — a six-track mini-LP in Europe, expanded to a full LP in the US; the band now treats the LP as its first album"
+        },
+        {
+          "title": "To Mega Therion (Celtic Frost)",
+          "year": 1985,
+          "note": "H.R. Giger's 'Satan I' on the cover; the record most often named as a direct influence on the emerging death and black metal genres"
+        },
+        {
+          "title": "Into the Pandemonium (Celtic Frost)",
+          "year": 1987,
+          "note": "The experimental turn — goth rock, industrial texture, orchestration and operatic vocals alongside the metal"
+        },
+        {
+          "title": "Monotheist (Celtic Frost)",
+          "year": 2006,
+          "note": "The reunion album and Celtic Frost's last, arriving 16 years after the previous one; Fischer and Ain called it the darkest thing they made"
+        }
+      ],
+      "links": {
+        "official": "https://www.triptykon.net/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Celtic_Frost"
+      },
+      "songs": [
+        {
+          "title": "Circle of the Tyrants",
+          "album": "To Mega Therion",
+          "year": 1985,
+          "why": "the obvious entry point — the single most-played song of Fischer's live career, and the one riff the whole genre borrowed",
+          "yt_audio": "HDSGaG5k6VI",
+          "yt_video": null
+        },
+        {
+          "title": "Procreation (of the Wicked)",
+          "album": "Morbid Tales",
+          "year": 1984,
+          "why": "the 1984 track death metal was effectively built on; a permanent fixture of the set",
+          "yt_audio": "hjuVI6xkNAI",
+          "yt_video": null
+        },
+        {
+          "title": "Into the Crypts of Rays",
+          "album": "Morbid Tales",
+          "year": 1984,
+          "why": "opens the debut and shows the rawest, earliest version of the band, one step from Hellhammer",
+          "yt_audio": "DsKPsybTs7E",
+          "yt_video": null
+        },
+        {
+          "title": "Babylon Fell",
+          "album": "Into the Pandemonium",
+          "year": 1987,
+          "why": "the other side of the band — the 1987 record where they walked out of thrash into goth and orchestration",
+          "yt_audio": "8lVlccLxLHo",
+          "yt_video": null
+        },
+        {
+          "title": "A Dying God Coming into Human Flesh",
+          "album": "Monotheist",
+          "year": 2006,
+          "why": "the late-period doom, and the song Fischer plays as a tribute to Martin Eric Ain",
+          "yt_audio": "dW6RXTjm4iA",
+          "yt_video": null
+        }
+      ],
+      "songs_by": "Celtic Frost",
+      "order": 28,
+      "day": "sat",
+      "stage": "h01",
+      "time": "20:00"
+    },
+    {
+      "id": "eluveitie",
+      "name": "Eluveitie",
+      "origin": "Winterthur, Switzerland",
+      "formed": "2002",
+      "genres": [
+        "folk metal",
+        "melodic death metal",
+        "Celtic metal"
+      ],
+      "blurb": "Swiss folk metal: Gothenburg-style melodic death metal welded to Celtic folk instrumentation — hurdy-gurdy, fiddle, bagpipes, whistles, mandola, bodhran — with a good deal of the lyrics in the extinct Gaulish language.",
+      "detail": "Chrigel Glanzmann started Eluveitie in the winter of 2002 as a studio project with rotating musicians, then turned it into a ten-piece band; the name comes from an Etruscan-letter inscription found at Mantua, read as \"eluveitie\" and interpreted as \"the Helvetian\". The formula has been constant since: harsh vocals and twin guitars carrying folk melodies played on real traditional instruments rather than keyboards, with clean vocals and whole songs in reconstructed Gaulish. Membership has not been constant — the rhythm section, both guitarists and the entire folk section have all turned over at least once, most drastically in 2016 when Anna Murphy, Merlin Sutter and Ivo Henzi left together, and again in 2024–25 with violinist Nicole Ansperger's disputed departure and the exit of piper Matteo Sisti after eleven years. The ninth album, Ànv, arrived on 25 April 2025 through Nuclear Blast, produced by Jens Bogren.",
+      "members": [
+        {
+          "name": "Chrigel Glanzmann",
+          "role": "unclean vocals, whistles, uilleann pipes, mandola, bodhran, gaita, acoustic guitar, harp",
+          "since": "2002"
+        },
+        {
+          "name": "Kay Brem",
+          "role": "bass",
+          "since": "2008"
+        },
+        {
+          "name": "Rafael Salzmann",
+          "role": "lead guitar",
+          "since": "2012"
+        },
+        {
+          "name": "Jonas Wolf",
+          "role": "rhythm guitar",
+          "since": "2016"
+        },
+        {
+          "name": "Alain Ackermann",
+          "role": "drums",
+          "since": "2016"
+        },
+        {
+          "name": "Fabienne Erni",
+          "role": "clean vocals, Celtic harp, mandola",
+          "since": "2017"
+        },
+        {
+          "name": "Lea-Sophie Fischer",
+          "role": "violin, hurdy-gurdy; replaced Nicole Ansperger in 2024 after touring with the band in 2023",
+          "since": "2024"
+        },
+        {
+          "name": "Nils Fischer",
+          "role": "bagpipes, whistles (live musician, covering since Matteo Sisti left in 2025)",
+          "since": "2025"
+        },
+        {
+          "name": "Yannick Urbanczik",
+          "role": "bass (live musician, also stood in during 2023)",
+          "since": "2025"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Slania",
+          "year": 2008,
+          "note": "the breakthrough, and the album \"Inis Mona\" comes from"
+        },
+        {
+          "title": "Evocation I: The Arcane Dominion",
+          "year": 2009,
+          "note": "entirely acoustic, and entirely in Gaulish bar the opening track"
+        },
+        {
+          "title": "Helvetios",
+          "year": 2012,
+          "note": "first concept album, on the Gallic Wars from the Helvetii's side"
+        },
+        {
+          "title": "Origins",
+          "year": 2014,
+          "note": "carried \"The Call of the Mountains\", also cut in French, Italian and Romansh"
+        },
+        {
+          "title": "Ategnatos",
+          "year": 2019,
+          "note": "first full-length by the post-2016 line-up; Randy Blythe guests on \"Worship\""
+        },
+        {
+          "title": "Ànv",
+          "year": 2025,
+          "note": "ninth album, produced by Jens Bogren; folds in the 2022 standalone singles \"Aidus\" and \"Exile of the Gods\" as bonus tracks"
+        }
+      ],
+      "links": {
+        "official": "https://eluveitie.ch/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Eluveitie",
+        "spotify": "https://open.spotify.com/artist/5X0N2k3qMnI8kSrGJT3kfT"
+      },
+      "songs": [
+        {
+          "title": "Inis Mona",
+          "album": "Slania",
+          "year": 2008,
+          "why": "the obvious way in — the hurdy-gurdy hook everyone knows them for",
+          "yt_audio": "iijKLHCQw5o",
+          "yt_video": null
+        },
+        {
+          "title": "Omnos",
+          "album": "Evocation I: The Arcane Dominion",
+          "year": 2009,
+          "why": "no metal at all: an acoustic Gaulish-language duet, for the other half of the band",
+          "yt_audio": "msRy4vcSX4k",
+          "yt_video": null
+        },
+        {
+          "title": "The Call of the Mountains",
+          "album": "Origins",
+          "year": 2014,
+          "why": "the big melodic single, released in four languages",
+          "yt_audio": "-w2m-TeLi6I",
+          "yt_video": null
+        },
+        {
+          "title": "Ategnatos",
+          "album": "Ategnatos",
+          "year": 2019,
+          "why": "title track and the heaviest they get, if the folk side is not the appeal",
+          "yt_audio": "3mwOYP7mEzc",
+          "yt_video": "BG6en2WyAsw"
+        },
+        {
+          "title": "The Prodigal Ones",
+          "album": "Ànv",
+          "year": 2025,
+          "why": "current record, Fabienne Erni out front — what the 2026 set is drawing on",
+          "yt_audio": "D-_l0wSuPqQ",
+          "yt_video": null
+        }
+      ],
+      "order": 29,
+      "day": "sat",
+      "stage": "h02",
+      "time": "21:15"
+    },
+    {
+      "id": "misthyrming-nergal-behemoth",
+      "name": "Misþyrming & Nergal perform Behemoth's Sventevith",
+      "origin": "Reykjavík, Iceland / Gdańsk, Poland",
+      "formed": "2025",
+      "genres": [
+        "black metal",
+        "full-album set"
+      ],
+      "blurb": "A one-off collaboration: Iceland's Misþyrming backing Behemoth founder Nergal through Behemoth's 1995 debut Sventevith (Storming Near the Baltic), performed in full for the record's 30th anniversary.",
+      "detail": "This is not either band's own set. Adam \"Nergal\" Darski wrote and largely played Sventevith himself in December 1994 — guitars, bass and vocals, with only drummer Baal and two guest keyboardists beside him — and Behemoth have never performed the album as a whole since Pagan Records issued it in April 1995. For the 30th anniversary the four-piece Misþyrming, the most prominent band of the Icelandic black metal wave and a decade into its own catalogue, becomes the live vehicle for it, on a short run of European festivals announced in November 2025 that also includes Beyond the Gates, Brutal Assault, Prophecy Fest and Sátan. Sventevith matters because it is the point where Behemoth were still a raw, pagan-themed, keyboard-shaded black metal band rather than the orchestral blackened death metal act they became four albums later — nothing on it sounds like the group that plays arenas now. One caveat on sourcing: Hellsinki's own page for the slot promises \"Behemothin ikonisia kappaleita\" and a tribute to three decades of the band without naming the album, while the tour announcement and every other festival on the run specify Sventevith in full.",
+      "members": [
+        {
+          "name": "Nergal (Adam Darski)",
+          "role": "vocals, guitar — Behemoth founder and frontman; wrote and recorded Sventevith in 1994",
+          "since": "2025"
+        },
+        {
+          "name": "D.G. (Dagur Gíslason) — Misþyrming",
+          "role": "guitar, vocals, keyboards; founded Misþyrming as a solo project",
+          "since": "2013"
+        },
+        {
+          "name": "T.Í. (Tómas Ísdal) — Misþyrming",
+          "role": "guitar, backing vocals; co-runs the Vánagandr label with D.G.",
+          "since": "2014"
+        },
+        {
+          "name": "G.E. (Gústaf Evensen) — Misþyrming",
+          "role": "bass, backing vocals",
+          "since": "2014"
+        },
+        {
+          "name": "M.S. (Magnús Skúlason) — Misþyrming",
+          "role": "drums, replaced founding drummer H.R.H. in 2022",
+          "since": "2022"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Sventevith (Storming Near the Baltic)",
+          "year": 1995,
+          "note": "Behemoth's debut, and the album this set performs in full — recorded December 1994 at Eight Studio, released by Pagan Records in April 1995"
+        },
+        {
+          "title": "Söngvar elds og óreiðu",
+          "year": 2015,
+          "note": "Misþyrming's debut, the record that put the Icelandic scene on wider notice"
+        },
+        {
+          "title": "Algleymi",
+          "year": 2019,
+          "note": "Misþyrming's second album"
+        },
+        {
+          "title": "Með hamri",
+          "year": 2022,
+          "note": "Misþyrming's most recent studio album"
+        }
+      ],
+      "links": {
+        "official": "https://hellsinkimetalfestival.fi/en/artist-info/misthyrming-nergal-perform-behemoth-en/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Sventevith_(Storming_Near_the_Baltic)",
+        "bandcamp": "https://misthyrming.bandcamp.com/"
+      },
+      "songs": [
+        {
+          "title": "From the Pagan Vastlands",
+          "album": "Sventevith (Storming Near the Baltic)",
+          "year": 1995,
+          "why": "the way in — it shares its name with the 1994 demo that got Behemoth noticed",
+          "yt_audio": "os0FdVk461U",
+          "yt_video": null
+        },
+        {
+          "title": "Chant of the Eastern Lands",
+          "album": "Sventevith (Storming Near the Baltic)",
+          "year": 1995,
+          "why": "opens the album, and the album is played in sequence, so it opens the set",
+          "yt_audio": "p1kh9Wdb7Rg",
+          "yt_video": null
+        },
+        {
+          "title": "Hidden in a Fog",
+          "album": "Sventevith (Storming Near the Baltic)",
+          "year": 1995,
+          "why": "the longest track at nearly seven minutes, and the slow atmospheric end of the record",
+          "yt_audio": "9-L7KlxLhk8",
+          "yt_video": null
+        },
+        {
+          "title": "Wolves Guard My Coffin",
+          "album": "Sventevith (Storming Near the Baltic)",
+          "year": 1995,
+          "why": "the compact fast one — tells you quickly whether the raw 1995 production works for you",
+          "yt_audio": "e2QtYk-4EdU",
+          "yt_video": null
+        },
+        {
+          "title": "Transylvanian Forest",
+          "album": "Sventevith (Storming Near the Baltic)",
+          "year": 1995,
+          "why": "closes the original ten-track album, so it closes the hour",
+          "yt_audio": "EwMYtanyN90",
+          "yt_video": null
+        }
+      ],
+      "songs_by": "Behemoth",
+      "order": 30,
+      "day": "sat",
+      "stage": "h03",
+      "time": "22:00"
+    },
+    {
+      "id": "opeth",
+      "name": "Opeth",
+      "origin": "Stockholm, Sweden",
+      "formed": "1990",
+      "genres": [
+        "progressive death metal",
+        "progressive rock"
+      ],
+      "blurb": "Progressive death metal turned 1970s progressive rock, from Stockholm — long, quiet-to-crushing songs built on acoustic guitars, jazz chords and Mikael Åkerfeldt's two voices, a clean baritone and a death growl.",
+      "detail": "Opeth run in two distinct modes. From Orchid (1995) through Watershed (2008) they were a death metal band with folk and prog inside it, peaking commercially with Blackwater Park (2001) and Ghost Reveries (2005); the acoustic, growl-free Damnation (2003) was the early warning. From Heritage (2011) onward Åkerfeldt dropped the growl entirely and wrote 70s prog rock instead, which split the audience for a decade. The Last Will and Testament (2024), a post-WWI concept album about the reading of a will, with Ian Anderson of Jethro Tull on flute and spoken word, brought the growls back for the first time in sixteen years. The 2026 touring set reflects that: new material alongside Demon of the Fall, Godhead's Lament, The Drapery Falls, Deliverance and The Grand Conjuration, with only The Devil's Orchard representing the clean-sung decade — so this is closer to the death metal Opeth than any tour since 2008. Two Bloodbath ties on this bill: Åkerfeldt was Bloodbath's original vocalist until he left in 2012, and drummer Waltteri Väyrynen, the Finn in the line-up, also drums for them.",
+      "members": [
+        {
+          "name": "Mikael Åkerfeldt",
+          "role": "vocals, guitar",
+          "since": "1990"
+        },
+        {
+          "name": "Martín Méndez",
+          "role": "bass",
+          "since": "1997"
+        },
+        {
+          "name": "Fredrik Åkesson",
+          "role": "guitar, backing vocals",
+          "since": "2007"
+        },
+        {
+          "name": "Joakim Svalberg",
+          "role": "keyboards, backing vocals",
+          "since": "2011"
+        },
+        {
+          "name": "Waltteri Väyrynen",
+          "role": "drums, replaced Martin Axenrot in 2022",
+          "since": "2022"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Blackwater Park",
+          "year": 2001,
+          "note": "the Steven Wilson-produced breakthrough; still the usual entry point"
+        },
+        {
+          "title": "Damnation",
+          "year": 2003,
+          "note": "all clean vocals, no distortion — the prog turn eight years early"
+        },
+        {
+          "title": "Ghost Reveries",
+          "year": 2005,
+          "note": "major-label debut and their commercial peak"
+        },
+        {
+          "title": "Watershed",
+          "year": 2008,
+          "note": "the last album with death growls before the sixteen-year gap"
+        },
+        {
+          "title": "Heritage",
+          "year": 2011,
+          "note": "growls abandoned outright for 1970s progressive rock"
+        },
+        {
+          "title": "The Last Will and Testament",
+          "year": 2024,
+          "note": "concept album; growls return, with Ian Anderson guesting on flute"
+        }
+      ],
+      "links": {
+        "official": "https://www.opeth.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Opeth",
+        "spotify": "https://open.spotify.com/artist/0ybFZ2Ab08V8hueghSXm6E"
+      },
+      "songs": [
+        {
+          "title": "The Drapery Falls",
+          "album": "Blackwater Park",
+          "year": 2001,
+          "why": "the obvious way in — clean verses into growls and back, from the album everyone starts with, and still in the 2026 set",
+          "yt_audio": "YeTNkPXRrVY",
+          "yt_video": null
+        },
+        {
+          "title": "Demon of the Fall",
+          "album": "My Arms, Your Hearse",
+          "year": 1998,
+          "why": "the early death metal era at its bluntest; the oldest song they still play, and the one the crowd growls back",
+          "yt_audio": "nMcouHmoApU",
+          "yt_video": null
+        },
+        {
+          "title": "The Grand Conjuration",
+          "album": "Ghost Reveries",
+          "year": 2005,
+          "why": "the single from their biggest album, and the mid-set anchor on this tour",
+          "yt_audio": "2kKNT3PdDkE",
+          "yt_video": "AY5LRReFYus"
+        },
+        {
+          "title": "The Devil's Orchard",
+          "album": "Heritage",
+          "year": 2011,
+          "why": "no growl anywhere — the song that announced the prog rock decade, and the only track from it in the current set",
+          "yt_audio": "G1pi7Dn87mY",
+          "yt_video": "FxvN_GxgpF8"
+        },
+        {
+          "title": "§1",
+          "album": "The Last Will and Testament",
+          "year": 2024,
+          "why": "opens the 2026 set and is the sound of the growls coming back after sixteen years",
+          "yt_audio": "nZmFQE3TlPA",
+          "yt_video": null
+        }
+      ],
+      "order": 31,
+      "day": "sat",
+      "stage": "h01",
+      "time": "22:30"
+    },
+    {
+      "id": "the-kovenant",
+      "name": "The Kovenant",
+      "origin": "Hamar, Norway",
+      "formed": "1993",
+      "genres": [
+        "industrial metal",
+        "cyber metal",
+        "symphonic black metal (early)"
+      ],
+      "blurb": "Norwegian industrial and cyber metal, grown out of the symphonic black metal band Covenant. No album since SETI in 2003 and disbanded in 2011; they reformed in 2024 to play Nexus Polaris in full, so this is a reunion set.",
+      "detail": "Founded in Hamar in 1993 as Covenant by Lex Icon (Stian Hinderson, then known as Nagash, also behind Troll) and Psy Coma (Amund Svensson), the band made two symphonic black metal albums, In Times Before the Light (1997) and Nexus Polaris (1998), before a Swedish band of the same name sued over it; a Dutch group already used The Covenant, so they settled on The Kovenant with a K. Animatronic (1999) was the first record under the new name and traded the symphonic black metal for industrial and EBM-influenced cyber metal, and SETI (2003) pushed further in that direction; the two Covenant albums were reissued under the new name, with the debut rebuilt in 2002 as an industrial version substantially different from the 1997 original. They won Spellemannprisen, the Norwegian Grammy, in the hard rock category in both 1998 and 1999. Nothing followed SETI, the band folded in 2011, and the return was announced in early 2024 with Mayhem's Hellhammer back on drums, Sarah Jezebel Deva on vocals and Arcturus keyboardist Sverd added, performing Nexus Polaris in full from December 2024 onward. English Wikipedia dates the formation to 1993 in Hamar; Wikidata and the Norwegian article say 1992 (and Oslo).",
+      "members": [
+        {
+          "name": "Stian Hinderson (\"Lex Icon\", earlier \"Nagash\")",
+          "role": "vocals, bass, keyboards",
+          "since": "1993"
+        },
+        {
+          "name": "Amund Svensson (\"Psy Coma\", later \"Blackheart\" / \"Pzy-Clone\")",
+          "role": "guitar, keyboards, programming",
+          "since": "1993"
+        },
+        {
+          "name": "Jan Axel Blomberg (\"Hellhammer\" / \"von Blomberg\")",
+          "role": "drums; also played 1998-2003, and drums in Mayhem",
+          "since": "2024"
+        },
+        {
+          "name": "Charles Hedger (\"Ghul\")",
+          "role": "guitar, replaced Astennu (Jamie Stinson) in 2025",
+          "since": "2025"
+        },
+        {
+          "name": "Sarah Jezebel Deva",
+          "role": "vocals; guested on Nexus Polaris in 1998",
+          "since": "2024"
+        },
+        {
+          "name": "Steinar Sverd Johnsen (\"Sverd\")",
+          "role": "keyboards",
+          "since": "2024"
+        },
+        {
+          "name": "Knut Magne Valle",
+          "role": "guitar (live/session)",
+          "since": "2024"
+        }
+      ],
+      "albums": [
+        {
+          "title": "In Times Before the Light",
+          "year": 1997,
+          "note": "debut, released as Covenant on Mordgrimm though recorded in 1995; re-released 2002 in a rebuilt industrial version the band preferred"
+        },
+        {
+          "title": "Nexus Polaris",
+          "year": 1998,
+          "note": "second album, still as Covenant; Nuclear Blast, with Hellhammer on drums and Sarah Jezebel Deva on vocals - the record the reunion shows play in full"
+        },
+        {
+          "title": "Animatronic",
+          "year": 1999,
+          "note": "first album as The Kovenant and the industrial turn; includes a cover of Babylon Zoo's \"Spaceman\""
+        },
+        {
+          "title": "SETI",
+          "year": 2003,
+          "note": "last album to date, full cyber metal; closes with a cover of Metallica's \"The Memory Remains\""
+        }
+      ],
+      "links": {
+        "wikipedia": "https://en.wikipedia.org/wiki/The_Kovenant",
+        "spotify": "https://open.spotify.com/artist/31VNYr7yK0xBD6MfIaucLJ"
+      },
+      "songs": [
+        {
+          "title": "Mirror's Paradise",
+          "album": "Animatronic",
+          "year": 1999,
+          "why": "the obvious entry point and by a wide margin their most-streamed track",
+          "yt_audio": "5-9J6CphizY",
+          "yt_video": null
+        },
+        {
+          "title": "The Sulphur Feast",
+          "album": "Nexus Polaris",
+          "year": 1998,
+          "why": "opens the symphonic black metal album, released as Covenant, that the reunion set performs in full",
+          "yt_audio": "xI20ku-29zs",
+          "yt_video": null
+        },
+        {
+          "title": "Bizarre Cosmic Industries",
+          "album": "Nexus Polaris",
+          "year": 1998,
+          "why": "the 1998 line-up at full stretch, and where the later cyber metal direction is already audible",
+          "yt_audio": "4G2DrkEOE38",
+          "yt_video": null
+        },
+        {
+          "title": "New World Order",
+          "album": "Animatronic",
+          "year": 1999,
+          "why": "the EBM-leaning single of the rename, first issued as club and metal mixes on the Nexus Polaris reissue",
+          "yt_audio": "-N4BF5sIg6A",
+          "yt_video": null
+        },
+        {
+          "title": "Cybertrash",
+          "album": "SETI",
+          "year": 2003,
+          "why": "opener of the final album, for where they had ended up by 2003",
+          "yt_audio": "bDMjKURsV0I",
+          "yt_video": null
+        }
+      ],
+      "order": 32,
+      "day": "sat",
+      "stage": "h03",
+      "time": "00:00"
+    }
+  ],
+  "playlists": [
+    {
+      "platform": "YouTube",
+      "n": 1,
+      "of": 4,
+      "count": 49,
+      "url": "https://www.youtube.com/watch_videos?video_ids=MhO1mlkjwQg,Ob_URzALjUg,o9yxDzo7o7g,Fpr3mij8e8s,Kmmjfki4JwU,EFP6BOE5odA,R3UHfA5dCAw,zcLpBzbvwWQ,uVI0ajtgg8Y,WchonypTXP8,ubmuUiozKyo,hi8k78f8OvQ,H_wwnGrRraU,gowDWEr5SDY,Uj1-_ZpDug4,d80HOdRS00c,xaXadOBWqkk,ciDZw2_JXrg,qR_rOUwaOyc,ZpbpOgUybBM,F5nGo7yUtlE,DGDTwit60xo,d3fRKGD2GW0,hdcfhccjk78,3XEF1DmxEjA,tyhOFQWfOyE,r8BURTBL49A,MW4hbVwrxz8,BbQJHRzEBhw,xy6vbjUvVyQ,AggbcyFahQ4,7KmbQJM1FyI,yEak3EAYVms,BGa6UvZbIZM,AIeVnN9cFmw,trRLdA2mbqI,1nMy3uspyQI,rdaXEhCJuuw,W7Pi_T_DtlU,EpuiETqsEzs,VWMG9-8De38,qEClBK460L4,JydaB8G2bbk,91cyd3LDo1Y,6_trwgiplz8,je7Su03SyL4,2oh73TkfAjY,ZrVgiqoGr_g,2OVkcez6ozo"
+    },
+    {
+      "platform": "YouTube",
+      "n": 2,
+      "of": 4,
+      "count": 50,
+      "url": "https://www.youtube.com/watch_videos?video_ids=QYFcdFHuk8c,AjTa3tmsHNQ,M-5u0FiCW28,V3kfMnzyb_w,7_03HaBcJsE,O5Oo3InIlfw,0zExXVK3ISI,qz88qOS1Rwg,VVjBdobpl3c,KLbfqyi_-90,dbkT4WoGalk,H-ZRotpj9Yw,Ly4OpyV-0r0,tKkrKGoYAEw,pa60caEMWpU,xmGW3emx36Y,4YKRpCSpH5k,Lpyl1He4K6A,GtSUjknFAzI,gHMHrbsLTU4,-PXddU0T4d8,R0YOm5-iaO4,YkVGDywoGrc,y65U8omaAq4,req-oDf2ZRc,er416Ad3R1g,qFfybn_W8Ak,QZUxLq7I-lU,6_t_ZXavIOo,EabS2RdjZ3E,eEsXA_GETp8,1b26bNUzF7A,vFoC7Nlf9b8,J1Vcv8U3qaI,rwhVCQszaNM,s0hXvdYhfPQ,Fw7-kJtDGEg,OAWNl1NQ7DM,jJRcD5-Y68c,myRxoO6wTXU,yVTDjdHuivg,UHKBbiQ_4Ts,EoAfM9BTkU0,eYNGhLmqnzg,ULYaUz6O-WU,3fGDGa_XrLc,gazKY0NPIsc,PQK50m8HGPQ,NQq2y0j_1nQ,HP3DXpw-ahk"
+    },
+    {
+      "platform": "YouTube",
+      "n": 3,
+      "of": 4,
+      "count": 50,
+      "url": "https://www.youtube.com/watch_videos?video_ids=4Gx3DhDrRxc,UIoDxdP7bUk,x-5YO-o15yk,nIVJ8tmAzCo,bukkcXYUIm4,UPlizQ3BIKo,3h09T6Cxn4A,QdH2Yo3S2Ow,AnPK6Yj0jqY,BRvnzgxUtZk,bbrohzzvLeI,wpsu8UO8gKQ,Vbj5tL038QA,kUzRpqayoi0,1sg8i1tR8gY,n4FZs5RP950,TnqXkN1xpO8,pof4UXG732c,WBVGQSsey5Y,JSAlEVzLhDc,jYM7JV321kc,LulRQN6EPkc,6kP1QXOaTVQ,twzzJTPw-mc,7x80H4vC9KI,sT6WODCMRic,IZvrPrxeBPw,KYkqRZkXnCQ,SdDHrNc2n-I,sswqEZxdwH4,hxvXu6X2pZc,DomSYBg_b48,SeeLnAabZYU,ansVQSybdAs,sw9da9gIAAQ,HDSGaG5k6VI,hjuVI6xkNAI,DsKPsybTs7E,8lVlccLxLHo,dW6RXTjm4iA,iijKLHCQw5o,msRy4vcSX4k,-w2m-TeLi6I,3mwOYP7mEzc,D-_l0wSuPqQ,os0FdVk461U,p1kh9Wdb7Rg,9-L7KlxLhk8,e2QtYk-4EdU,EwMYtanyN90"
+    },
+    {
+      "platform": "YouTube",
+      "n": 4,
+      "of": 4,
+      "count": 10,
+      "url": "https://www.youtube.com/watch_videos?video_ids=YeTNkPXRrVY,nMcouHmoApU,2kKNT3PdDkE,G1pi7Dn87mY,nZmFQE3TlPA,5-9J6CphizY,xI20ku-29zs,4G2DrkEOE38,-N4BF5sIg6A,bDMjKURsV0I"
+    }
+  ]
+};
+/* @al-festival:data:end */
+
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* Every string on this page comes from web research, so all of it goes through
+     esc() before it touches innerHTML. There is no field here that is allowed to
+     carry markup -- an act called "Sunn O)))" or a song with an ampersand must
+     render as itself and nothing else. */
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function attr(s) { return esc(s); }
+
+  var acts = (DATA.acts || []).slice().sort(function (a, b) {
+    return (a.order || 0) - (b.order || 0);
+  });
+  var byId = {};
+  acts.forEach(function (a) { byId[a.id] = a; });
+
+  var dayLabel = {}, stageLabel = {};
+  (DATA.days || []).forEach(function (d) { dayLabel[d.id] = d.label; });
+  (DATA.stages || []).forEach(function (s) { stageLabel[s.id] = s.label; });
+
+  /* ---- masthead ------------------------------------------------------- */
+  var eb = [];
+  if (CONFIG.dates) { eb.push(CONFIG.dates); }
+  if (CONFIG.venue) { eb.push(CONFIG.venue); }
+  $("eyebrow").textContent = eb.join(" · ");
+  $("title").textContent = CONFIG.event || "Lineup";
+  document.title = (CONFIG.event || "Lineup") + " — lineup";
+
+  var nSongs = 0;
+  acts.forEach(function (a) { nSongs += (a.songs || []).length; });
+  $("sub").textContent = acts.length + " acts · " + nSongs + " songs"
+    + ((DATA.days || []).length > 1 ? " · " + DATA.days.length + " days" : "");
+
+  if (CONFIG.source) {
+    /* Show the host rather than the whole URL -- a full schedule URL wraps over
+       three lines on a phone and buries the heading. */
+    var host = String(CONFIG.source).replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+    $("src").innerHTML = "<a href=\"" + attr(CONFIG.source) + "\" target=\"_blank\" "
+      + "rel=\"noopener\">Official schedule at " + esc(host) + "</a>";
+  }
+
+  if (CONFIG.note) {
+    var n = document.createElement("p");
+    n.className = "note";
+    n.textContent = CONFIG.note;
+    $("noteslot").appendChild(n);
+  }
+  if (CONFIG.hero === "gradient") { $("mast").classList.add("grad"); }
+  if (CONFIG.hero === "bars") { $("mast").classList.add("bars"); }
+
+  var prov = [];
+  if (CONFIG.generated) { prov.push("Generated " + CONFIG.generated); }
+  $("prov").innerHTML = prov.join(" · ")
+    + (CONFIG.source ? (prov.length ? " · " : "") + "Lineup source: <a href=\""
+        + attr(CONFIG.source) + "\" target=\"_blank\" rel=\"noopener\">"
+        + esc(CONFIG.source) + "</a>" : "");
+
+  /* ---- playlists ------------------------------------------------------ */
+  var pls = DATA.playlists || [];
+  if (pls.length) {
+    $("plsec").hidden = false;
+
+    /* Say how many songs each act contributes, but derive it -- an act with a thin
+       catalogue gets fewer than five, and a heading that claims otherwise is wrong
+       on exactly the acts a reader is least sure about. */
+    var counts = acts.map(function (a) { return (a.songs || []).length; });
+    var hi = Math.max.apply(null, counts.concat([0]));
+    var uniform = counts.length && counts.every(function (n) { return n === hi; });
+    $("plhead").textContent = "YouTube playlists — " + (uniform ? "" : "up to ") + hi
+      + " songs per act, in performance order";
+
+    $("plrow").innerHTML = pls.map(function (p) {
+      return "<a class=\"plbtn\" href=\"" + attr(p.url) + "\" target=\"_blank\" rel=\"noopener\">"
+        + esc(p.platform) + (p.of > 1 ? " <span class=\"n\">" + p.n + "/" + p.of + "</span>" : "")
+        + "</a>";
+    }).join("");
+
+    var chunked = pls.some(function (p) { return p.of > 1; });
+    $("plhint").textContent =
+      (chunked ? "Split into parts because one playlist link holds 50 videos; no act is split "
+               + "across parts. " : "")
+      + "Every song also has its own YouTube Music link below.";
+  }
+
+  /* ---- filters -------------------------------------------------------- */
+  var KEY = "alfest:" + (CONFIG.slug || "x") + ":filters";
+  var state = { day: "all", stage: "all", q: "" };
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved) {
+      if (saved.day) { state.day = saved.day; }
+      if (saved.stage) { state.stage = saved.stage; }
+    }
+  } catch (e) { /* file:// with storage disabled; defaults are fine */ }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify({ day: state.day, stage: state.stage })); }
+    catch (e) { /* not worth telling the reader about */ }
+  }
+
+  var groups = [];
+  if ((DATA.days || []).length > 1) {
+    groups.push({ kind: "day", items: DATA.days });
+  }
+  if ((DATA.stages || []).length > 1) {
+    groups.push({ kind: "stage", items: DATA.stages });
+  }
+
+  function renderChips() {
+    var html = "";
+    groups.forEach(function (g) {
+      html += "<button class=\"chip\" type=\"button\" data-kind=\"" + g.kind
+        + "\" data-v=\"all\" aria-pressed=\"" + (state[g.kind] === "all") + "\">"
+        + (g.kind === "day" ? "All days" : "All stages") + "</button>";
+      g.items.forEach(function (it) {
+        html += "<button class=\"chip\" type=\"button\" data-kind=\"" + g.kind
+          + "\" data-v=\"" + attr(it.id) + "\" aria-pressed=\"" + (state[g.kind] === it.id)
+          + "\">" + esc(it.label) + "</button>";
+      });
+    });
+    $("chips").innerHTML = html;
+  }
+
+  $("chips").addEventListener("click", function (e) {
+    var b = e.target.closest("button.chip");
+    if (!b) { return; }
+    state[b.getAttribute("data-kind")] = b.getAttribute("data-v");
+    save();
+    renderChips();
+    render();
+  });
+
+  $("srch").addEventListener("input", function (e) {
+    state.q = e.target.value.trim().toLowerCase();
+    render();
+  });
+
+  function matches(a) {
+    if (state.day !== "all" && a.day !== state.day) { return false; }
+    if (state.stage !== "all" && a.stage !== state.stage) { return false; }
+    if (state.q) {
+      var hay = (a.name + " " + (a.genres || []).join(" ") + " " + (a.origin || "")).toLowerCase();
+      if (hay.indexOf(state.q) === -1) { return false; }
+    }
+    return true;
+  }
+
+  /* ---- act cards ------------------------------------------------------ */
+  function songHtml(s, i) {
+    /* Album, year and the reason share one muted line -- three stacked paragraphs
+       per song is what made a 32-act page unscrollable. */
+    var meta = [];
+    if (s.album) { meta.push(s.album); }
+    if (s.year) { meta.push(s.year); }
+    var line = meta.join(" · ");
+    if (s.why) { line = line ? line + " — " + s.why : s.why; }
+
+    var links = [];
+    if (s.yt_audio) {
+      links.push("<a class=\"lnk\" target=\"_blank\" rel=\"noopener\" href=\"https://music.youtube.com/watch?v="
+        + attr(s.yt_audio) + "\">YT Music</a>");
+      links.push("<a class=\"lnk\" target=\"_blank\" rel=\"noopener\" href=\"https://www.youtube.com/watch?v="
+        + attr(s.yt_audio) + "\">YouTube</a>");
+    }
+    if (s.yt_video) {
+      links.push("<a class=\"lnk\" target=\"_blank\" rel=\"noopener\" href=\"https://www.youtube.com/watch?v="
+        + attr(s.yt_video) + "\">Video</a>");
+    }
+
+    return "<li class=\"song\">"
+      + "<div class=\"stitle\"><span class=\"shead\"><span class=\"snum\">" + (i + 1)
+      + "</span><span class=\"sname\">" + esc(s.title) + "</span></span>"
+      + (links.length ? "<span class=\"links\">" + links.join("") + "</span>" : "")
+      + "</div>"
+      + (line ? "<p class=\"smeta\">" + esc(line) + "</p>" : "")
+      + "</li>";
+  }
+
+  function cardHtml(a) {
+    var slot = [];
+    if (a.time) { slot.push(a.time); }
+    if (dayLabel[a.day] && (DATA.days || []).length > 1) { slot.push(dayLabel[a.day]); }
+    if (stageLabel[a.stage]) { slot.push(stageLabel[a.stage]); }
+
+    /* Spotify, then Wikipedia, then the official site: listen, read, then the
+       band's own page. Wikipedia is on the card and not only in the dialog
+       because it is the link most often actually wanted -- someone scanning a
+       lineup wants one tap to "who are these people", without opening a popup
+       first. Both places carry it; neither is a substitute for the other. */
+    var ext = [], ls0 = a.links || {};
+    if (ls0.spotify) {
+      ext.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
+        + attr(ls0.spotify) + "\">Spotify</a>");
+    }
+    if (ls0.wikipedia) {
+      ext.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
+        + attr(ls0.wikipedia) + "\">Wikipedia</a>");
+    }
+    if (ls0.official) {
+      ext.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
+        + attr(ls0.official) + "\">Site</a>");
+    }
+
+    var hasDetail = a.detail || (a.members || []).length || (a.albums || []).length;
+
+    return "<article class=\"card\" id=\"act-" + attr(a.id) + "\">"
+      + "<div class=\"chead\"><span class=\"ord\">" + esc(a.order) + "</span>"
+      + "<h3 class=\"aname\">" + esc(a.name) + "</h3>"
+      + (slot.length ? "<span class=\"slot\">" + esc(slot.join(" · ")) + "</span>" : "")
+      + "</div>"
+      + ((a.genres || []).length
+          ? "<div class=\"gen\">" + a.genres.map(function (g) {
+              return "<span class=\"tag\">" + esc(g) + "</span>"; }).join("") + "</div>"
+          : "")
+      + (a.blurb ? "<p class=\"blurb\">" + esc(a.blurb) + "</p>" : "")
+      + "<div class=\"arow\">"
+      + (hasDetail ? "<button class=\"detbtn\" type=\"button\" data-act=\"" + attr(a.id)
+          + "\">Members &amp; releases</button>" : "")
+      + ext.join("")
+      + "</div>"
+      + ((a.songs || []).length
+          ? "<ul class=\"songs\">" + a.songs.map(songHtml).join("") + "</ul>" : "")
+      + "</article>";
+  }
+
+  function render() {
+    var vis = acts.filter(matches);
+    $("acts").innerHTML = vis.length
+      ? vis.map(cardHtml).join("")
+      : "<p class=\"empty\">No acts match that filter.</p>";
+    var n = 0;
+    vis.forEach(function (a) { n += (a.songs || []).length; });
+    $("count").textContent = vis.length === acts.length
+      ? acts.length + " acts"
+      : "showing " + vis.length + " of " + acts.length + " acts · " + n + " songs";
+  }
+
+  /* ---- dialog --------------------------------------------------------- */
+  var dlg = $("dlg"), scrollY = 0;
+
+  function lockScroll() {
+    /* Compensate for the scrollbar the lock removes, or the page shifts sideways
+       under the backdrop on desktop. */
+    var pad = window.innerWidth - document.documentElement.clientWidth;
+    scrollY = window.scrollY;
+    document.body.style.overflow = "hidden";
+    if (pad > 0) { document.body.style.paddingRight = pad + "px"; }
+  }
+  function unlockScroll() {
+    document.body.style.overflow = "";
+    document.body.style.paddingRight = "";
+  }
+
+  function listHtml(items, fmt) {
+    return "<ul class=\"dl\">" + items.map(fmt).join("") + "</ul>";
+  }
+
+  function openAct(id) {
+    var a = byId[id];
+    if (!a) { return; }
+    $("dlgtitle").textContent = a.name;
+
+    var meta = [];
+    if (a.origin) { meta.push(a.origin); }
+    if (a.formed) { meta.push("formed " + a.formed); }
+    if ((a.genres || []).length) { meta.push(a.genres.join(", ")); }
+
+    var html = "";
+    if (meta.length) { html += "<p class=\"dmeta\">" + esc(meta.join(" · ")) + "</p>"; }
+    if (a.detail) { html += "<p>" + esc(a.detail) + "</p>"; }
+
+    if ((a.members || []).length) {
+      html += "<h4>Line-up</h4>" + listHtml(a.members, function (m) {
+        return "<li>" + esc(m.name)
+          + (m.role ? " <span class=\"r\">" + esc(m.role)
+              + (m.since ? ", since " + esc(m.since) : "") + "</span>" : "")
+          + "</li>";
+      });
+    }
+    if ((a.albums || []).length) {
+      html += "<h4>Key releases</h4>" + listHtml(a.albums, function (r) {
+        return "<li>" + esc(r.title)
+          + (r.year ? " <span class=\"yr\">" + esc(r.year) + "</span>" : "")
+          + (r.note ? "<br><span class=\"r\">" + esc(r.note) + "</span>" : "")
+          + "</li>";
+      });
+    }
+
+    var ls = a.links || {}, ln = [];
+    [["official", "Official site"], ["wikipedia", "Wikipedia"],
+     ["spotify", "Spotify"], ["bandcamp", "Bandcamp"]].forEach(function (p) {
+      if (ls[p[0]]) {
+        ln.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
+          + attr(ls[p[0]]) + "\">" + p[1] + "</a>");
+      }
+    });
+    if (ln.length) { html += "<h4>Links</h4><div class=\"arow\">" + ln.join("") + "</div>"; }
+
+    $("dlgbody").innerHTML = html;
+    lockScroll();
+    dlg.showModal();
+    $("dlgbody").scrollTop = 0;
+  }
+
+  $("acts").addEventListener("click", function (e) {
+    var b = e.target.closest("button.detbtn");
+    if (b) { openAct(b.getAttribute("data-act")); }
+  });
+  $("dlgx").addEventListener("click", function () { dlg.close(); });
+  dlg.addEventListener("click", function (e) {
+    /* The backdrop is the dialog element itself; a click on a child bubbles here
+       with a different target. */
+    if (e.target === dlg) { dlg.close(); }
+  });
+  dlg.addEventListener("close", function () {
+    unlockScroll();
+    window.scrollTo(0, scrollY);
+  });
+
+  /* ---- theme ---------------------------------------------------------- */
+  var btn = $("themebtn");
+  btn.addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    var next = cur === "dark" ? "light" : cur === "light" ? "" : "dark";
+    if (next) { document.documentElement.setAttribute("data-theme", next); }
+    else { document.documentElement.removeAttribute("data-theme"); }
+    btn.textContent = next ? "Theme: " + next : "Theme";
+  });
+
+  renderChips();
+  render();
+})();
+</script>
+</body>
+</html>
