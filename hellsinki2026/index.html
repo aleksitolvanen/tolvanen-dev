@@ -129,24 +129,39 @@ h2 {
 /* ---- controls ---------------------------------------------------------- */
 .controls {
   position: sticky; top: 0; z-index: 20;
-  margin: 22px 0 4px; padding: 10px 0 9px;
+  margin: 16px 0 2px; padding: 8px 0 6px;
   background: linear-gradient(var(--bg) 82%, transparent);
 }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+/* Compact on purpose. At 44 px in a wrapping row these seven chips occupied 288 px
+   of a 360 px-wide screen -- most of a phone viewport spent on filters before a
+   single act was visible. They are a secondary control on a page whose point is
+   the list, so they trade tap size for the space. */
 .chip {
-  min-height: var(--tap); padding: 5px 14px;
+  min-height: 30px; padding: 3px 10px;
   background: var(--surface); border: 1px solid var(--line-2);
-  border-radius: 999px; font-size: 13px; cursor: pointer; white-space: nowrap;
+  border-radius: 999px; font-size: 12.5px; line-height: 1.35;
+  cursor: pointer; white-space: nowrap;
 }
 .chip[aria-pressed="true"] {
   background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 600;
 }
+.srchwrap { position: relative; margin-top: 6px; }
 .srch {
-  width: 100%; margin-top: 8px; min-height: var(--tap); padding: 9px 12px;
+  width: 100%; min-height: 36px; padding: 7px 38px 7px 11px;
   background: var(--surface); color: var(--ink);
-  border: 1px solid var(--line-2); border-radius: var(--radius); font-size: 15px;
+  border: 1px solid var(--line-2); border-radius: var(--radius); font-size: 16px;
 }
-.count { margin: 6px 0 0; font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+/* 16px, not 14: iOS Safari zooms the whole page when a focused input's text is
+   under 16px, and the zoom does not come back on blur. */
+.srch::-webkit-search-cancel-button { display: none; }
+.srchx {
+  position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 34px; padding: 0; cursor: pointer;
+  background: none; border: 0; color: var(--ink-2); font-size: 20px; line-height: 1;
+}
+.srchx:hover { color: var(--ink); }
+.count { margin: 4px 0 0; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
          letter-spacing: .06em; text-transform: uppercase; }
 
 /* ---- act cards --------------------------------------------------------- */
@@ -285,7 +300,15 @@ footer p { margin: 0 0 6px; }
   <h2>Lineup</h2>
   <div class="controls">
     <div class="chips" id="chips"></div>
-    <input class="srch" id="srch" type="search" placeholder="Filter by name or genre" aria-label="Filter by name or genre">
+    <!-- A real <form> is what makes the mobile keyboard's Enter/Go key dismissable:
+         with a bare input there is nothing to submit, so the key does nothing and
+         the keyboard will not go away. -->
+    <form class="srchwrap" id="srchform" role="search" action="#" onsubmit="return false">
+      <input class="srch" id="srch" type="search" enterkeyhint="done"
+             autocapitalize="none" autocorrect="off" spellcheck="false"
+             placeholder="Filter by name or genre" aria-label="Filter by name or genre">
+      <button class="srchx" id="srchx" type="button" aria-label="Clear filter" hidden>&times;</button>
+    </form>
     <p class="count" id="count"></p>
   </div>
 
@@ -4263,9 +4286,31 @@ var DATA = {
     render();
   });
 
-  $("srch").addEventListener("input", function (e) {
-    state.q = e.target.value.trim().toLowerCase();
+  var srch = $("srch"), srchx = $("srchx");
+
+  function applyQuery() {
+    state.q = srch.value.trim().toLowerCase();
+    srchx.hidden = !srch.value;
     render();
+  }
+
+  srch.addEventListener("input", applyQuery);
+
+  /* Three separate ways to put the keyboard away, because on a phone a filter you
+     cannot dismiss is worse than no filter: the form's Enter/Go key, the clear
+     button, and Escape. */
+  $("srchform").addEventListener("submit", function (e) {
+    e.preventDefault();
+    srch.blur();
+  });
+  srch.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); srch.blur(); }
+    if (e.key === "Escape") { srch.value = ""; applyQuery(); srch.blur(); }
+  });
+  srchx.addEventListener("click", function () {
+    srch.value = "";
+    applyQuery();
+    srch.blur();
   });
 
   function matches(a) {
