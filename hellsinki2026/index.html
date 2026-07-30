@@ -4097,6 +4097,18 @@ var DATA = {
   }
   function attr(s) { return esc(s); }
 
+  /* Wikipedia articles live on per-language subdomains and plenty of acts have no
+     English article at all -- four on the first bill this page was built for. So
+     the link keeps whatever language actually has the article, and says which one
+     when it is not English, rather than sending the reader to a dead en. URL or
+     surprising them with Finnish. */
+  function wikiLabel(url) {
+    var m = /^https?:\/\/([a-z-]+)\.(m\.)?wikipedia\.org\//i.exec(String(url || ""));
+    var lang = m ? m[1].toLowerCase() : "";
+    return (!lang || lang === "en" || lang === "www")
+      ? "Wikipedia" : "Wikipedia (" + esc(lang) + ")";
+  }
+
   var acts = (DATA.acts || []).slice().sort(function (a, b) {
     return (a.order || 0) - (b.order || 0);
   });
@@ -4283,7 +4295,7 @@ var DATA = {
     }
     if (ls0.wikipedia) {
       ext.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
-        + attr(ls0.wikipedia) + "\">Wikipedia</a>");
+        + attr(ls0.wikipedia) + "\">" + wikiLabel(ls0.wikipedia) + "</a>");
     }
     if (ls0.official) {
       ext.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
@@ -4376,11 +4388,11 @@ var DATA = {
     }
 
     var ls = a.links || {}, ln = [];
-    [["official", "Official site"], ["wikipedia", "Wikipedia"],
+    [["official", "Official site"], ["wikipedia", null],
      ["spotify", "Spotify"], ["bandcamp", "Bandcamp"]].forEach(function (p) {
       if (ls[p[0]]) {
         ln.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
-          + attr(ls[p[0]]) + "\">" + p[1] + "</a>");
+          + attr(ls[p[0]]) + "\">" + (p[1] || wikiLabel(ls[p[0]])) + "</a>");
       }
     });
     if (ln.length) { html += "<h4>Links</h4><div class=\"arow\">" + ln.join("") + "</div>"; }
