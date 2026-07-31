@@ -1,0 +1,4449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lineup</title>
+<style>
+/* ---------------------------------------------------------------------------
+   THEME. build-festival.py replaces the region between the sentinels with the
+   tokens it derived from spec.theme, for light and dark.
+
+   Keep the sentinel comments EXACTLY as they are or --rebuild cannot find them.
+   Do not restyle a single event by editing anything below the theme region: the
+   mobile and contrast guarantees live in this file and every future page
+   inherits them.
+   --------------------------------------------------------------------------- */
+/* @al-festival:theme:begin */
+:root, :root[data-theme="light"] {
+  --bg: #edeef1; --surface: #fbfbfc; --surface-2: #e3e6ea; --surface-3: #d6dae0;
+  --ink: #14181f; --ink-2: #4b535d; --ink-3: #6e7781;
+  --line: #d2d7dd; --line-2: #b6bec7;
+  --accent: #e6007e; --accent-soft: #ecd1e3; --accent-ink: #ffffff; --accent-text: #d10073;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+  --bg: #0e1116; --surface: #161a20; --surface-2: #1d222a; --surface-3: #262d36;
+  --ink: #e6eaef; --ink-2: #a3adb8; --ink-3: #79838e;
+  --line: #232a33; --line-2: #333c47;
+  --accent: #ff5cb8; --accent-soft: #351d30; --accent-ink: #111111; --accent-text: #ff5cb8;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --surface: #161a20; --surface-2: #1d222a; --surface-3: #262d36;
+  --ink: #e6eaef; --ink-2: #a3adb8; --ink-3: #79838e;
+  --line: #232a33; --line-2: #333c47;
+  --accent: #ff5cb8; --accent-soft: #351d30; --accent-ink: #111111; --accent-text: #ff5cb8;
+}
+:root {
+  --display: "Archivo Narrow", "Roboto Condensed", "Liberation Sans Narrow", "Arial Narrow", Impact, system-ui, sans-serif;
+}
+/* @al-festival:theme:end */
+
+:root {
+  --radius: 3px;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --tap: 44px;
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: light dark; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-size: 15px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;
+}
+.wrap {
+  max-width: 1080px; margin: 0 auto;
+  padding: 0 max(14px, env(safe-area-inset-left)) 80px max(14px, env(safe-area-inset-right));
+}
+a { color: var(--accent-text); }
+button { font: inherit; color: inherit; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .card, .chip, .plbtn, .lnk, .detbtn { transition: border-color .12s ease, background .12s ease; }
+}
+:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+
+/* ---- masthead ---------------------------------------------------------- */
+.mast { padding: 26px 0 16px; border-bottom: 2px solid var(--ink); }
+.mast.grad {
+  margin: 0 calc(-1 * max(14px, env(safe-area-inset-left))) 0 calc(-1 * max(14px, env(safe-area-inset-right)));
+  padding: 26px max(14px, env(safe-area-inset-left)) 16px;
+  background: linear-gradient(160deg, var(--accent-soft), transparent 70%);
+}
+.mast.bars { position: relative; }
+.mast.bars::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0 22px, transparent 22px 34px);
+}
+.mast.bars { padding-top: 32px; }
+.eyebrow {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--accent-text); margin: 0 0 8px;
+}
+h1 {
+  font-family: var(--display);
+  font-size: clamp(27px, 8vw, 44px); line-height: 1.08; margin: 0 0 8px;
+  letter-spacing: -.02em; text-wrap: balance;
+}
+.sub { margin: 0; color: var(--ink-2); font-size: 14px; }
+/* The official schedule belongs at the top, not only in the footer: this page is a
+   copy of a lineup that can change, and the reader should be one tap from the
+   source without scrolling past 32 acts to find it. */
+.src { margin: 4px 0 0; font-size: 13.5px; }
+.src a { text-decoration: underline; text-underline-offset: 3px; }
+.note {
+  margin: 12px 0 0; padding: 9px 12px; font-size: 13.5px; color: var(--ink-2);
+  background: var(--accent-soft); border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+.themebtn {
+  margin-top: 14px; min-height: var(--tap); padding: 6px 14px;
+  background: var(--surface); border: 1px solid var(--line-2);
+  border-radius: var(--radius); font-family: var(--mono); font-size: 11px;
+  letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+}
+
+/* ---- playlists --------------------------------------------------------- */
+.pl { margin: 20px 0 0; }
+h2 {
+  font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-2);
+  margin: 26px 0 10px; padding-bottom: 7px; border-bottom: 1px solid var(--line);
+}
+/* Plain text links, not buttons. They still need to be comfortably tappable, so
+   they carry vertical padding rather than a box: the hit area is ~34px without
+   any of them looking like a control. */
+.plrow { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: baseline; }
+.plbtn {
+  display: inline-block; padding: 8px 0;
+  color: var(--accent-text); font-weight: 600; font-size: 15px;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.plbtn .n { font-family: var(--mono); font-size: 11.5px; opacity: .75; margin-left: 3px; }
+.plhint { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-3); }
+
+/* ---- controls ---------------------------------------------------------- */
+.controls {
+  position: sticky; top: 0; z-index: 20;
+  margin: 16px 0 2px; padding: 8px 0 6px;
+  background: linear-gradient(var(--bg) 82%, transparent);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+/* Compact on purpose. At 44 px in a wrapping row these seven chips occupied 288 px
+   of a 360 px-wide screen -- most of a phone viewport spent on filters before a
+   single act was visible. They are a secondary control on a page whose point is
+   the list, so they trade tap size for the space. */
+.chip {
+  min-height: 30px; padding: 3px 10px;
+  background: var(--surface); border: 1px solid var(--line-2);
+  border-radius: 999px; font-size: 12.5px; line-height: 1.35;
+  cursor: pointer; white-space: nowrap;
+}
+.chip[aria-pressed="true"] {
+  background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 600;
+}
+.srchwrap { position: relative; margin-top: 6px; }
+.srch {
+  width: 100%; min-height: 36px; padding: 7px 38px 7px 11px;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-2); border-radius: var(--radius); font-size: 16px;
+}
+/* 16px, not 14: iOS Safari zooms the whole page when a focused input's text is
+   under 16px, and the zoom does not come back on blur. */
+.srch::-webkit-search-cancel-button { display: none; }
+.srchx {
+  position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 34px; padding: 0; cursor: pointer;
+  background: none; border: 0; color: var(--ink-2); font-size: 20px; line-height: 1;
+}
+.srchx:hover { color: var(--ink); }
+.count { margin: 4px 0 0; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
+         letter-spacing: .06em; text-transform: uppercase; }
+
+/* ---- act cards --------------------------------------------------------- */
+.acts { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-left: 3px solid var(--accent); border-radius: var(--radius);
+  padding: 13px 14px;
+}
+.chead { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; min-width: 0; }
+.ord {
+  font-family: var(--mono); font-size: 11px; color: var(--accent-ink);
+  background: var(--accent); border-radius: var(--radius);
+  padding: 2px 6px; flex: none;
+}
+/* min-width:0 plus break-anywhere on every flex child that holds researched text.
+   A flex item will not shrink below the width of its content, so one long
+   unbreakable string -- a song title with no spaces, a band name written as one
+   word -- pushes the whole page into horizontal scroll at 360px. The default
+   overflow-wrap on body does not reach inside a flex item without this. */
+.aname {
+  font-family: var(--display); font-size: 21px; line-height: 1.15; margin: 0;
+  letter-spacing: -.01em; min-width: 0; overflow-wrap: anywhere;
+}
+.slot { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); letter-spacing: .04em; }
+.gen { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0 0; }
+.tag {
+  font-size: 11.5px; padding: 2px 8px; color: var(--ink-2);
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px;
+}
+.blurb { margin: 7px 0 0; color: var(--ink-2); font-size: 14.5px; }
+.arow { display: flex; flex-wrap: wrap; gap: 2px 16px; align-items: baseline; margin: 6px 0 0; }
+.detbtn, .ext {
+  display: inline-block; padding: 7px 0; background: none; border: 0;
+  font-size: 13.5px; cursor: pointer; color: var(--accent-text);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.detbtn:hover, .ext:hover { color: var(--ink); }
+
+/* ---- songs ------------------------------------------------------------- */
+/* Two lines per song instead of five: title and its links on one row, then album,
+   year and the reason on a single muted line under it. On a 32-act bill that is
+   the difference between a page you can scan and one you scroll past. */
+.songs { list-style: none; margin: 9px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.song { padding: 7px 0 8px; border-bottom: 1px solid var(--line); }
+.song:last-child { border-bottom: 0; padding-bottom: 1px; }
+/* space-between rather than margin-left:auto on .links: with one item per line
+   after a wrap, auto-margin would shove the links to the right edge of their own
+   line, which reads as a stray fragment. space-between leaves them left-aligned
+   when wrapped and still pushes them right when they fit. */
+.stitle {
+  display: flex; gap: 2px 12px; align-items: baseline; flex-wrap: wrap;
+  justify-content: space-between; min-width: 0;
+}
+/* The number and the title are one unit -- letting them break apart orphans a
+   bare "5" on its own line above a long song title. */
+.shead { display: flex; gap: 8px; align-items: baseline; min-width: 0; flex: 1 1 auto; }
+.snum { font-family: var(--mono); font-size: 11px; color: var(--ink-3); flex: none; }
+.sname { font-weight: 600; font-size: 14.5px; min-width: 0; overflow-wrap: anywhere; }
+.links { display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; flex: 0 0 auto; }
+.lnk {
+  display: inline-block; padding: 8px 0; font-size: 12.5px;
+  color: var(--accent-text); text-decoration: underline; text-underline-offset: 3px;
+}
+.lnk:hover { color: var(--ink); }
+.smeta { margin: 1px 0 0 20px; font-size: 12.5px; color: var(--ink-3); }
+
+/* ---- dialog ------------------------------------------------------------ */
+dialog {
+  width: min(660px, 100vw); max-width: 100vw; max-height: 100dvh;
+  margin: auto; padding: 0; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line-2); border-radius: var(--radius);
+}
+dialog::backdrop { background: rgba(0,0,0,.6); }
+.dhead {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 14px max(14px, env(safe-area-inset-right)) 12px 14px;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.dhead h3 {
+  font-family: var(--display); font-size: 22px; line-height: 1.15; margin: 0;
+  flex: 1; min-width: 0; overflow-wrap: anywhere;
+}
+.dx {
+  flex: none; width: var(--tap); height: var(--tap); cursor: pointer;
+  font-size: 22px; line-height: 1; background: var(--surface-2);
+  border: 1px solid var(--line-2); border-radius: var(--radius);
+}
+.dbody { padding: 14px; padding-bottom: max(18px, env(safe-area-inset-bottom)); }
+.dmeta { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); margin: 0 0 10px; }
+.dbody h4 {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-3); margin: 18px 0 7px; padding-bottom: 5px; border-bottom: 1px solid var(--line);
+}
+.dbody p { margin: 0 0 10px; color: var(--ink-2); }
+.dl { list-style: none; margin: 0; padding: 0; }
+.dl li { padding: 5px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.dl li:last-child { border-bottom: 0; }
+.dl .r { color: var(--ink-3); font-size: 12.5px; }
+.yr { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+
+@media (max-width: 560px) {
+  dialog { width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
+}
+@media (min-width: 620px) {
+  .wrap { padding-left: 20px; padding-right: 20px; }
+  .smeta, .swhy, .links { margin-left: 24px; }
+}
+
+footer {
+  margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--line);
+  color: var(--ink-3); font-size: 13px;
+}
+footer p { margin: 0 0 6px; }
+.empty { padding: 30px 0; color: var(--ink-3); text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast" id="mast">
+    <p class="eyebrow" id="eyebrow"></p>
+    <h1 id="title"></h1>
+    <p class="sub" id="sub"></p>
+    <p class="src" id="src"></p>
+    <div id="noteslot"></div>
+    <button class="themebtn" id="themebtn" type="button">Theme</button>
+  </header>
+
+  <section class="pl" id="plsec" hidden>
+    <h2 id="plhead">Playlists</h2>
+    <div class="plrow" id="plrow"></div>
+    <p class="plhint" id="plhint"></p>
+  </section>
+
+  <h2>Lineup</h2>
+  <div class="controls">
+    <div class="chips" id="chips"></div>
+    <!-- A real <form> is what makes the mobile keyboard's Enter/Go key dismissable:
+         with a bare input there is nothing to submit, so the key does nothing and
+         the keyboard will not go away. -->
+    <form class="srchwrap" id="srchform" role="search" action="#" onsubmit="return false">
+      <input class="srch" id="srch" type="search" enterkeyhint="done"
+             autocapitalize="none" autocorrect="off" spellcheck="false"
+             placeholder="Filter by name or genre" aria-label="Filter by name or genre">
+      <button class="srchx" id="srchx" type="button" aria-label="Clear filter" hidden>&times;</button>
+    </form>
+    <p class="count" id="count"></p>
+  </div>
+
+  <div class="acts" id="acts"></div>
+
+  <footer>
+    <p id="prov"></p>
+    <p>Act descriptions, line-ups and discographies come from web research and may contain errors.
+       Song picks are an introduction to each act, not a ranking.</p>
+  </footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgtitle">
+  <div class="dhead">
+    <h3 id="dlgtitle"></h3>
+    <button class="dx" id="dlgx" type="button" aria-label="Close">&times;</button>
+  </div>
+  <div class="dbody" id="dlgbody"></div>
+</dialog>
+
+<script>
+/* @al-festival:config:begin */
+var CONFIG = {
+  "slug": "flow2026",
+  "event": "Flow Festival 2026 — Sunday",
+  "dates": "Sunday 16 August 2026",
+  "venue": "Suvilahti, Helsinki",
+  "source": "https://www.flowfestival.com/en/program/music/",
+  "generated": "2026-07-31",
+  "note": "The Sunday of the three-day festival, in set-time order. Korgy and 1Black Prince have no time because neither plays a set — Korgy curates the Front Yard day, 1Black Prince hosts X Garden on the mic.",
+  "hero": "gradient"
+};
+/* @al-festival:config:end */
+/* @al-festival:data:begin */
+var DATA = {
+  "days": [
+    {
+      "id": "sun",
+      "label": "Sunday 16 August"
+    }
+  ],
+  "stages": [
+    {
+      "id": "main",
+      "label": "Main Stage"
+    },
+    {
+      "id": "silver",
+      "label": "Silver Arena"
+    },
+    {
+      "id": "black-tent",
+      "label": "Black Tent"
+    },
+    {
+      "id": "balloon",
+      "label": "Balloon 360°"
+    },
+    {
+      "id": "other-sound",
+      "label": "The Other Sound"
+    },
+    {
+      "id": "front-yard",
+      "label": "Front Yard"
+    },
+    {
+      "id": "backyard",
+      "label": "Heineken Backyard"
+    },
+    {
+      "id": "x-garden",
+      "label": "X Garden"
+    },
+    {
+      "id": "champagne",
+      "label": "Champagne Bar & Lounge"
+    }
+  ],
+  "acts": [
+    {
+      "id": "elixiiri",
+      "name": "eliXiiri",
+      "order": 1,
+      "day": "sun",
+      "stage": "champagne",
+      "time": "13:00",
+      "origin": "Helsinki, Finland",
+      "formed": "2023",
+      "genres": [
+        "electro",
+        "tech house",
+        "breakbeat"
+      ],
+      "blurb": "Helsinki DJ playing genre-fluid club sets that run from electro and tech house into breakbeat and percussive modern club tracks. A selector rather than a producer — there are no releases under the name.",
+      "detail": "eliXiiri is the DJ alias of Siiri Hytönen, who started out in 2023 through the Helsinki collective PTNKY and has since played Ääniwalli, Siltanen and Post Bar. She co-hosts the Roundabout nights at Kaiku alongside Monokromatiko and Spilius, and has turned up in Kaiku's second room through 2026 on bills with Moritz von Oswald, Sterac and ketia. Her own framing of the sets leans on 2000s electro and a playful, seductive club aesthetic. No records have been released under the name, so there is nothing to link — this is a DJ set, and a daytime one, opening the Champagne Bar & Lounge on the Sunday.",
+      "members": [
+        {
+          "name": "Siiri Hytönen",
+          "role": "DJ"
+        }
+      ],
+      "links": {
+        "official": "https://soundcloud.com/siiri-hytoenen"
+      }
+    },
+    {
+      "id": "fadda-francis",
+      "name": "Fadda Francis",
+      "order": 2,
+      "day": "sun",
+      "stage": "x-garden",
+      "time": "13:00",
+      "origin": "Helsinki, Finland (b. Nigeria)",
+      "genres": [
+        "reggae",
+        "dancehall",
+        "sound system"
+      ],
+      "blurb": "Reggae and dancehall selector, and the promoter who built most of the Finnish reggae calendar. Nigerian-born, Helsinki-based, head of the Lion Head Sound system.",
+      "detail": "Francis Erharuyi moved from Nigeria to Finland at the end of the 1970s and has worked the Helsinki reggae circuit for more than four decades, as a DJ and as the person who books it. He is the promoter behind Helsinki Reggae Festival — first held in 1992 and Finland's longest-running reggae event — as well as Reggae Snowsplash and Tampere Reggae Festival, and he has run the club nights One Love, Reggae United and Shocking Vybz. His own sound system, Lion Head Sound, also plays outside Finland; the sound's own profile dates his start as a selector to Nigeria in 1976. He is a selector rather than a recording artist: there is no discography under the name, so a set is records and Lion Head dubplates rather than his own material. Flow bills him as one of the driving forces behind urban music culture in Finland.",
+      "members": [
+        {
+          "name": "Francis Erharuyi",
+          "role": "DJ and selector; head of Lion Head Sound"
+        }
+      ],
+      "links": {
+        "official": "https://soundcloud.com/lionheadsound"
+      }
+    },
+    {
+      "id": "fibi",
+      "name": "fibi",
+      "order": 3,
+      "day": "sun",
+      "stage": "black-tent",
+      "time": "13:30",
+      "origin": "Helsinki, Finland",
+      "formed": "2024",
+      "genres": [
+        "indie pop",
+        "bedroom pop"
+      ],
+      "blurb": "Delicate Finnish indie pop: soft, organic arrangements shaded with electronics, built around first-person lyrics in Finnish about love, heartbreak and growing up. One EP and a run of singles since a 2024 debut.",
+      "detail": "fibi is Fiona, originally from Espoo and now based in Helsinki, who began writing on songwriting courses in upper secondary school and released her first music as the double single onnellinen & heinakuu in August 2024. The five-track debut EP samalla kun nukut followed in May 2025, with singles pysyvaa, tasapainoo / 1000 versioo and toukokuu since. She names Clairo as the biggest influence on her writing and a background in classical violin as the other, and describes the result herself as 'herkkaa bedroom poppia' - delicate bedroom pop whose lyrics circle love in its various forms, heartbreak, friendship and growing up. She has opened for emma & matilda and Vesta, sold out a headline show at Semifinal in spring 2026, and guested on tracks by Pesso ('kun pihalla kukkii') and Pykari ('5 kertaa').",
+      "members": [
+        {
+          "name": "Fiona",
+          "role": "vocals, songwriting",
+          "since": "2024"
+        }
+      ],
+      "albums": [
+        {
+          "title": "onnellinen & heinäkuu",
+          "year": 2024,
+          "note": "debut double single, August 2024"
+        },
+        {
+          "title": "siniset silmät",
+          "year": 2025,
+          "note": "single that led the EP"
+        },
+        {
+          "title": "samalla kun nukut",
+          "year": 2025,
+          "note": "debut EP, five tracks, May 2025"
+        },
+        {
+          "title": "pysyvää",
+          "year": 2025
+        },
+        {
+          "title": "tasapainoo / 1000 versioo",
+          "year": 2026,
+          "note": "double single"
+        },
+        {
+          "title": "toukokuu",
+          "year": 2026,
+          "note": "latest single, May 2026"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/oonfibi/",
+        "spotify": "https://open.spotify.com/artist/3ZzkX4rxGFuxbIaavXhWoo",
+        "yt_music": "https://music.youtube.com/channel/UCLqk2RHmPn6PuteLLZi3_ng"
+      },
+      "songs": [
+        {
+          "title": "tiiän miten tää loppuu",
+          "album": "samalla kun nukut",
+          "year": 2025,
+          "why": "her most-streamed track and the EP opener - the obvious way in",
+          "yt_audio": "YlX8X411WrY",
+          "yt_video": null
+        },
+        {
+          "title": "siniset silmät",
+          "album": "samalla kun nukut",
+          "year": 2025,
+          "why": "the single that trailed the EP a month early and got her noticed",
+          "yt_audio": "SZrn4zV_XHQ",
+          "yt_video": null
+        },
+        {
+          "title": "1000 versioo",
+          "album": "tasapainoo / 1000 versioo",
+          "year": 2026,
+          "why": "the 2026 double single, and where the electronic side is furthest forward",
+          "yt_audio": "XEsgUJEN8ts",
+          "yt_video": null
+        },
+        {
+          "title": "onnellinen",
+          "album": "onnellinen & heinäkuu",
+          "year": 2024,
+          "why": "half of the debut double single - the sparse, guitar-first version of her",
+          "yt_audio": "vlse1SqQESE",
+          "yt_video": null
+        },
+        {
+          "title": "toukokuu",
+          "album": "toukokuu",
+          "year": 2026,
+          "why": "newest release, ninety seconds long, closest to what the Flow set will sound like",
+          "yt_audio": "Ar5SPbzP0PU",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "jaakko-kulta",
+      "name": "Jaakko Kulta",
+      "order": 4,
+      "day": "sun",
+      "stage": "silver",
+      "time": "13:30",
+      "origin": "Helsinki, Finland",
+      "formed": "2020",
+      "genres": [
+        "suomirock",
+        "guitar pop",
+        "radio pop"
+      ],
+      "blurb": "Guitar-driven Finnish pop-rock from Helsinki, written by a former rap producer with an obvious debt to classic suomirock. Broke out on TikTok with \"Huone\" in 2023; his 2025 debut Ihminen took the Vuoden rock Emma.",
+      "detail": "Jaakko Ingraeus (b. 2000, Helsinki) started out making beats for rappers and performing in the duo SIDOT before releasing under his own name; the rap background still shows in how the vocal lines sit on the beat, over arrangements that lean on Kaseva, Juice Leskinen and Ismo Alanko rather than on anything current. The December 2023 single \"Huone\" (feat. Ellis) went to no. 3 on Finnish Spotify and became one of the year's biggest domestic TikTok trends; \"Norjalaista puuta\" followed in June 2024 and turned it into commercial-radio ubiquity. The debut album Ihminen (Warner Music Finland, 7 November 2025) was made almost entirely with producer Samuli Sulku and deals with substance use, mental health, exclusion and toxic masculinity alongside the lighter material — it won Vuoden rock at the 2026 Emma gala. He plays with a full band live, though its members are not publicly credited; sets typically open with \"Janne paina kaasua\" and close with \"Norjalaista puuta\", with a Dingo cover in the middle.",
+      "members": [
+        {
+          "name": "Jaakko Ingraeus",
+          "role": "vocals, songwriting",
+          "since": "2020"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Valo",
+          "year": 2022,
+          "note": "debut EP"
+        },
+        {
+          "title": "Jotta muistaisin",
+          "year": 2024,
+          "note": "EP; collects the breakthrough singles \"Huone\" and \"Norjalaista puuta\""
+        },
+        {
+          "title": "Ihminen",
+          "year": 2025,
+          "note": "debut album, 11 tracks, produced with Samuli Sulku; Vuoden rock Emma 2026"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/jaakkokulta/",
+        "wikipedia": "https://fi.wikipedia.org/wiki/Jaakko_Kulta_(artisti)",
+        "spotify": "https://open.spotify.com/artist/3yKaJcys5vfZv2nE2IURyO",
+        "yt_music": "https://music.youtube.com/channel/UCxYaQpSNUdAfJCtXjkJZA7Q"
+      },
+      "songs": [
+        {
+          "title": "Huone",
+          "album": "Jotta muistaisin",
+          "year": 2023,
+          "why": "the breakthrough single (feat. Ellis) that went top-3 on Finnish Spotify — the obvious entry point",
+          "yt_audio": "yFx07lwZdpA",
+          "yt_video": null
+        },
+        {
+          "title": "Norjalaista puuta",
+          "album": "Jotta muistaisin",
+          "year": 2024,
+          "why": "the radio hit that made him mainstream; the singalong he closes with",
+          "yt_audio": "oEO7iW4CTCM",
+          "yt_video": null
+        },
+        {
+          "title": "Tupakkaa ja rakkautta",
+          "album": "Ihminen",
+          "year": 2025,
+          "why": "the album's biggest streamer, near platinum, and the clearest look at the songwriting",
+          "yt_audio": "r7-t2aQIBsU",
+          "yt_video": null
+        },
+        {
+          "title": "Janne paina kaasua (JPK)",
+          "album": "Ihminen",
+          "year": 2025,
+          "why": "opens the live set — the loudest, most straight-ahead suomirock side of him",
+          "yt_audio": "mm42buaXmDo",
+          "yt_video": null
+        },
+        {
+          "title": "Steariini",
+          "album": "Valo",
+          "year": 2022,
+          "why": "from the debut EP, the earliest song still in the set and a quieter counterweight",
+          "yt_audio": "6Lb1OZOTQmM",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "pekko-kappi-khhl",
+      "name": "Pekko Käppi & K:H:H:L",
+      "order": 5,
+      "day": "sun",
+      "stage": "balloon",
+      "time": "14:00",
+      "origin": "Tampere, Finland",
+      "formed": "2013",
+      "genres": [
+        "psychedelic folk rock",
+        "Finnish folk",
+        "blues"
+      ],
+      "blurb": "Psychedelic folk rock built on an amplified, distorted jouhikko — the archaic Finnish-Karelian bowed lyre — with a rock rhythm section behind it. The band name means \"the unbridled bones of dead horses\".",
+      "detail": "Pekko Käppi (b. 1976) is an ethnomusicologist and part-time Sibelius Academy teacher from Tampere who found his sound in 1998 by plugging a jouhikko into a small amplifier while busking and turning it up until it distorted. He had released solo records since the 2001 EP Kalastajia ja kaivostyöläisiä; the band K:H:H:L formed around the 2013 solo album Rammat Jumalat and has put out six albums of its own since 2015, setting spellcraft texts, runo-song metre and blues shapes over mantra-like repetition. Väärä laulu (2019) produced \"Ikoni\", by some distance their most-streamed track and the closest thing Finnish folk rock had to a hit that year. The rhythmic base changed with Mauritian drummer and singer Gilbert Kuppusami, who first appeared on Credo (2023) and plays throughout the 2025 album Oli kerran ryytimaassa…, which the band is touring in 2026.",
+      "members": [
+        {
+          "name": "Pekko Käppi",
+          "role": "jouhikko, vocals",
+          "since": "2013"
+        },
+        {
+          "name": "Tommi Laine",
+          "role": "guitar (often cigar-box), vocals"
+        },
+        {
+          "name": "Nuutti Vapaavuori",
+          "role": "bass, vocals"
+        },
+        {
+          "name": "Gilbert Kuppusami",
+          "role": "drums, percussion, vocals; from Mauritius, guested on Credo (2023) before playing the whole of the 2025 album"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Rammat Jumalat",
+          "year": 2013,
+          "note": "credited to Käppi solo, but the record the band grew out of"
+        },
+        {
+          "title": "Sanguis Meus, Mama!",
+          "year": 2015,
+          "note": "first album as K:H:H:L; the one that carried them beyond folk circles"
+        },
+        {
+          "title": "Matilda",
+          "year": 2017
+        },
+        {
+          "title": "Väärä laulu",
+          "year": 2019,
+          "note": "contains \"Ikoni\", their most-played song"
+        },
+        {
+          "title": "Aamunkoi",
+          "year": 2021,
+          "note": "sixteen tracks, described by Käppi as a gently dystopian collection of short stories"
+        },
+        {
+          "title": "Credo",
+          "year": 2023
+        },
+        {
+          "title": "Oli kerran ryytimaassa…",
+          "year": 2025,
+          "note": "current album, Svart Records, first full-length with Gilbert Kuppusami drumming"
+        }
+      ],
+      "links": {
+        "official": "https://pekkokappi.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Pekko_K%C3%A4ppi",
+        "spotify": "https://open.spotify.com/artist/0UMDxlQeIQO1ObwZ2cHrWd",
+        "bandcamp": "https://pekkokappi.bandcamp.com/",
+        "yt_music": "https://music.youtube.com/search?q=Pekko%20K%C3%A4ppi%20%26%20K%3AH%3AH%3AL"
+      },
+      "songs": [
+        {
+          "title": "Ikoni",
+          "album": "Väärä laulu",
+          "year": 2019,
+          "why": "the obvious entry point — mantra-like, pop-shaped, and far and away their most-streamed track",
+          "yt_audio": "fHbv9ro7Uus",
+          "yt_video": null
+        },
+        {
+          "title": "Mun vereni",
+          "album": "Sanguis Meus, Mama!",
+          "year": 2015,
+          "why": "opens the first band album; the distorted jouhikko riff at its plainest",
+          "yt_audio": "aWUMx79mz_Q",
+          "yt_video": null
+        },
+        {
+          "title": "Supermies",
+          "album": "Matilda",
+          "year": 2017,
+          "why": "the mid-period single, the band at its most straightforwardly song-shaped",
+          "yt_audio": "IqYfGvOJ72E",
+          "yt_video": null
+        },
+        {
+          "title": "Melanz Kiltir",
+          "album": "Credo",
+          "year": 2023,
+          "why": "sung in Mauritian Creole by drummer Gilbert Kuppusami — where the rhythms went after 2023",
+          "yt_audio": "7F2sU3BAAnU",
+          "yt_video": "YuvzShhRINg"
+        },
+        {
+          "title": "Musta ruuna",
+          "album": "Oli kerran ryytimaassa…",
+          "year": 2025,
+          "why": "the heavy one from the current album, a 1786 incantation text in Kalevala metre",
+          "yt_audio": "VoPrMvB6-44",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "bilar-leo-sal",
+      "name": "Bilar & Leo Sal",
+      "order": 6,
+      "day": "sun",
+      "stage": "champagne",
+      "time": "14:00",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "trance",
+        "progressive house",
+        "ambient"
+      ],
+      "blurb": "Back-to-back trance and progressive house from two Helsinki DJs, leaning on early-2000s euphoria, ambient textures and club-ready house. Both co-founded the city’s MCK collective.",
+      "detail": "This is a DJ pairing rather than a band: Bilar is a producer and DJ whose own tracks blend early-2000s trance and progressive house with ambient and modern electronic music, built around big melodies; Leo Sal is a frequent collaborator whose sets swing between ambient, trance and harder house, and who has yet to release anything of his own — Flow's page says a debut project is due later in 2026. Both co-founded MCK (Mäkelänkatu Construction Kru), a Helsinki collective that has run techno, speed-garage and breakbeat club nights at Kulttuuritalo's KULT and at Kaiku since late 2024, and both have played Kaiku, Post Bar and Siltanen. At Flow they appear inside the Guilty Pleasures takeover of the Lanson Champagne Bar & Lounge — the Sunday concept, run by DJ Hotleevibling and long legs, that trades in pop, house and edits — so expect a curated EDM-nostalgia set rather than either DJ's own productions end to end. The songs below are Bilar's own releases; nothing is credited to the duo, and nothing to Leo Sal.",
+      "members": [
+        {
+          "name": "Bilar",
+          "role": "DJ, producer"
+        },
+        {
+          "name": "Leo Sal",
+          "role": "DJ"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Isolation",
+          "year": 2024,
+          "note": "Bilar's first release, a six-track EP"
+        },
+        {
+          "title": "Shine",
+          "year": 2026,
+          "note": "Bilar's debut album, out 27 February 2026; seven tracks, self-released"
+        }
+      ],
+      "links": {
+        "official": "https://soundcloud.com/bilar1",
+        "yt_music": "https://music.youtube.com/search?q=Bilar"
+      },
+      "songs": []
+    },
+    {
+      "id": "noei",
+      "name": "NOEI",
+      "order": 7,
+      "day": "sun",
+      "stage": "front-yard",
+      "time": "14:00",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "eurotrance",
+        "techno",
+        "queer club"
+      ],
+      "blurb": "Technoid eurotrance, played fast, by a Helsinki DJ. NOEI is one of the newest residents of Korgy, the city's queer tekno-trance collective.",
+      "detail": "NOEI has been in the DJ roster at Korgy's Ääniwalli parties for a few years and has played club nights at Post Bar and Kaiku, and was made a Korgy resident recently. In 2025 he travelled with the rest of the collective for sets at Den Anden Side in Copenhagen and the KitKat Club in Berlin, the latter a room he first visited as a customer ten years earlier; Flow's own bio credits that night with shaping what he now goes for behind the decks. This is his second Flow: he debuted in August 2024 on the Korgy-run X Garden stage, and returns for the Korgy-curated Sunday at Front Yard. He has no releases under his own name — the output is the DJ set, not a discography. A 'Noei' with a 2026 album on Spotify is an unrelated namesake."
+    },
+    {
+      "id": "aili-jarvela-vuori",
+      "name": "Aili Järvelä: VUORI",
+      "order": 8,
+      "day": "sun",
+      "stage": "main",
+      "time": "14:30",
+      "origin": "Kaustinen, Finland",
+      "formed": "2019",
+      "genres": [
+        "chamber pop",
+        "singer-songwriter",
+        "Finnish folk"
+      ],
+      "songs_by": "Aili Järvelä",
+      "blurb": "Orchestral chamber pop with Finnish folk roots, from a Kaustinen singer-songwriter, fiddler and arranger. At Flow she performs her Teosto Prize-winning 2025 album VUORI in full with a chamber orchestra.",
+      "detail": "VUORI is not a set name but a record: Järvelä's third solo album, self-released on 19 September 2025, with every note composed, written, arranged and produced by her, the orchestral sessions produced by Pekka Kuusisto. It won the 2026 Teosto Prize (shared with Joel Järventausta), was named Album of the Year at the Indie Awards and was nominated for the Critics' Choice prize at the Emma Gala. At Flow the whole nine-track work is played start to finish by Järvelä, harpist Laura Hynninen, percussionist Sami Koskela, the Ostrobothnian Chamber Orchestra and conductor Kaapo Ijas; on the record the percussion was played by Samuli Kosminen. She comes from the Järvelä musical family of Kaustinen — her father Mauno Järvelä devised the Näppäri teaching method, her siblings Alina and Esko play in Frigg, and she has depped on fiddle in Frigg herself. Her earlier albums sit in quite different rooms: Unituulia (2021) is big-band jazz with the Sointi Jazz Orchestra and Älä pelkää (2023) is a pop-rock record about fear; she also wrote the 2024 musical Katrina for Lilla Teatern.",
+      "members": [
+        {
+          "name": "Aili Järvelä",
+          "role": "vocals; composer, lyricist, arranger and producer of the whole work"
+        },
+        {
+          "name": "Laura Hynninen",
+          "role": "harp"
+        },
+        {
+          "name": "Sami Koskela",
+          "role": "percussion (Samuli Kosminen played percussion on the album)"
+        },
+        {
+          "name": "Ostrobothnian Chamber Orchestra",
+          "role": "orchestra (Keski-Pohjanmaan kamariorkesteri)"
+        },
+        {
+          "name": "Kaapo Ijas",
+          "role": "conductor"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Omaa",
+          "year": 2020,
+          "note": "closing EP of the Lainattua–Sinistä–Omaa trilogy; carries the original 'Roihuvuori'"
+        },
+        {
+          "title": "Unituulia",
+          "year": 2021,
+          "note": "big-band album with the Sointi Jazz Orchestra"
+        },
+        {
+          "title": "Älä pelkää",
+          "year": 2023,
+          "note": "self-released pop-rock album built around fear"
+        },
+        {
+          "title": "VUORI",
+          "year": 2025,
+          "note": "third solo album, with the Ostrobothnian Chamber Orchestra; 2026 Teosto Prize; the work performed in full at Flow"
+        }
+      ],
+      "links": {
+        "official": "https://www.ailijarvela.com",
+        "spotify": "https://open.spotify.com/artist/6r1mVyGnnq60IThQV3Is8j",
+        "bandcamp": "https://ailijarvela.bandcamp.com",
+        "yt_music": "https://music.youtube.com/channel/UCFYyf9362OlrpeEE30AIwqg"
+      },
+      "songs": [
+        {
+          "title": "Roihuvuori",
+          "album": "Omaa",
+          "year": 2020,
+          "why": "the obvious entry point — her most-played song, its lyric voted among the 50 best Finnish lyrics of the millennium, and re-recorded twice since",
+          "yt_audio": "SaFYscig9wc",
+          "yt_video": null
+        },
+        {
+          "title": "Mänty",
+          "album": "VUORI",
+          "year": 2025,
+          "why": "the single and video from the album she plays in full here",
+          "yt_audio": "FYITMsZd9SU",
+          "yt_video": null
+        },
+        {
+          "title": "Apollo",
+          "album": "VUORI",
+          "year": 2025,
+          "why": "the orchestral high point of the record, set up by an excerpt of Eino Leino's poem Hymyilevä Apollo",
+          "yt_audio": "WxEcmBzs08I",
+          "yt_video": null
+        },
+        {
+          "title": "Rakkaus",
+          "album": "Älä pelkää",
+          "year": 2023,
+          "why": "the band-pop side, and her second-most-streamed track",
+          "yt_audio": "X0mhCgN28WE",
+          "yt_video": null
+        },
+        {
+          "title": "Päiväpääsky",
+          "album": "Unituulia",
+          "year": 2021,
+          "why": "the big-band jazz version of her writing, with the Sointi Jazz Orchestra",
+          "yt_audio": "CAs2OXJjFrM",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "laura-lazor",
+      "name": "Laura Lazor",
+      "order": 9,
+      "day": "sun",
+      "stage": "x-garden",
+      "time": "15:00",
+      "origin": "Helsinki, Finland",
+      "formed": "2019",
+      "genres": [
+        "dancehall",
+        "reggae",
+        "DJ set"
+      ],
+      "blurb": "Helsinki dancehall selector who came to DJing from the dancefloor, playing records for dancers rather than for a stage.",
+      "detail": "Laura Lazor has been DJing since 2019, after years of dancing dancehall, and her sets are built around Jamaican rhythms and the dance culture attached to them; she has travelled to Jamaica to deepen her grounding in the music and the community around it. She was one of the people behind the Helsinki dancehall and reggae club Top Rankin Sisters, and is currently a resident DJ at Reggae United Club at Ääniwalli. At Flow she plays the X Garden on Sunday as part of Street Vyybz, the closing-day dancehall and reggae takeover that also brings DJ TEV, Kemarr, VG+, Wekesa, Chargie, Fadda Francis and MC 1Black Prince. This is a selector's set of other artists' records rather than a live show of her own material.",
+      "members": [
+        {
+          "name": "Laura Lazor",
+          "role": "DJ, selector",
+          "since": "2019"
+        }
+      ],
+      "links": {
+        "official": "https://soundcloud.com/laura-lazor-kyt-m-ki"
+      }
+    },
+    {
+      "id": "arppa-8-pack",
+      "name": "Arppa 8-pack",
+      "order": 10,
+      "day": "sun",
+      "stage": "silver",
+      "time": "15:30",
+      "origin": "Kokkola, Finland",
+      "formed": "2018",
+      "genres": [
+        "folk-tinged pop-rock",
+        "indie pop",
+        "jazz"
+      ],
+      "songs_by": "Arppa",
+      "blurb": "Folk-tinged Finnish pop-rock built on Aaro \"Arppa\" Airola's plain-spoken, oddly cinematic songs about ordinary things. For Flow the usual four-piece is doubled to eight with two saxophones, keys and percussion.",
+      "detail": "Arppa is the band around singer-songwriter and actor Aaro Airola (b. 1996), founded in 2018 and named after his own nickname; the songs are all his, in Finnish, and the recordings are released simply as \"Arppa\" rather than under his own name. He grew up in the Ykspihlaja harbour district of Kokkola, in a family of five performing siblings, and the place runs through the records — the title of Kinovalon alla is a retro neon sign that now hangs in his mother's yard cafe there. The band went from a self-released debut in 2020 to a number-one album with Valeria in 2023, and has switched between Johanna Kustannus and Airola's own Arppa Music label since. \"8-pack\" is a one-off expanded line-up for this show: the regular four — Airola, guitarist Ville-Veikko Airaniemi, drummer Okko Saastamoinen and bassist Eero Seppä — plus four guests, saxophonists Adele Sauros and Linda Fredriksson, keyboardist Mikael Myrskog and percussionist Abdissa Assefa, a roster Flow says pushes the songs toward jazz, hip-hop, folk-rock and free improvisation. Recorded versions are the four-piece, so nothing in the discography sounds quite like the eight-piece set.",
+      "members": [
+        {
+          "name": "Aaro \"Arppa\" Airola",
+          "role": "vocals, songwriting",
+          "since": "2018"
+        },
+        {
+          "name": "Ville-Veikko Airaniemi",
+          "role": "guitar; also plays in Mikael Gabriel's band"
+        },
+        {
+          "name": "Okko Saastamoinen",
+          "role": "drums; co-produces the records"
+        },
+        {
+          "name": "Eero Seppä",
+          "role": "bass, replaced Antti Ahoniemi and first appears on the 2024 album"
+        },
+        {
+          "name": "Adele Sauros",
+          "role": "saxophone, guest in the Flow 8-pack line-up only"
+        },
+        {
+          "name": "Linda Fredriksson",
+          "role": "saxophone, guest in the Flow 8-pack line-up only"
+        },
+        {
+          "name": "Mikael Myrskog",
+          "role": "keyboards, guest in the Flow 8-pack line-up only"
+        },
+        {
+          "name": "Abdissa Assefa",
+          "role": "percussion, guest in the Flow 8-pack line-up only"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Laavalamppuja",
+          "year": 2020,
+          "note": "self-released debut that got the critics' attention"
+        },
+        {
+          "title": "Kinovalon alla",
+          "year": 2021,
+          "note": "first for Johanna Kustannus; no. 6 on the Finnish album chart, an ode to Ykspihlaja"
+        },
+        {
+          "title": "Valeria",
+          "year": 2023,
+          "note": "no. 1 on both the album and physical charts; pop, rock and jazz"
+        },
+        {
+          "title": "Muovipussi kummittelee",
+          "year": 2024,
+          "note": "no. 5; first record with Eero Seppä on bass"
+        },
+        {
+          "title": "Peppuni kanssa",
+          "year": 2025,
+          "note": "self-released again, no. 3; cut at Saastamoinen's cabin"
+        },
+        {
+          "title": "Iltamat Pihlajassa",
+          "year": 2026,
+          "note": "side project as Arppa & Jiri-serkku, stories from the Ykspihlaja docks"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/arppamusic/",
+        "wikipedia": "https://fi.wikipedia.org/wiki/Arppa",
+        "spotify": "https://open.spotify.com/artist/7BLe6O1Q3UbUsAUh5x6wuv",
+        "yt_music": "https://music.youtube.com/channel/UCTj-xfgHkaP66zl64OQQXkA"
+      },
+      "songs": [
+        {
+          "title": "Hauki",
+          "album": "Kinovalon alla",
+          "year": 2021,
+          "why": "the most-streamed song in the catalogue and the obvious way in",
+          "yt_audio": "lrKZ-5xLZWI",
+          "yt_video": null
+        },
+        {
+          "title": "Juhani",
+          "album": "Laavalamppuja",
+          "year": 2020,
+          "why": "off the self-released debut, the early one that got them noticed",
+          "yt_audio": "avdM7AUOeHM",
+          "yt_video": null
+        },
+        {
+          "title": "Luulin että",
+          "album": "Valeria",
+          "year": 2023,
+          "why": "the biggest track from the album that went to number one",
+          "yt_audio": "Up9dPYiC8LA",
+          "yt_video": null
+        },
+        {
+          "title": "Kavereita, Hilma",
+          "album": "Muovipussi kummittelee",
+          "year": 2024,
+          "why": "their most-watched video and the slower, more contemplative side",
+          "yt_audio": "3lYdIA7RuEY",
+          "yt_video": null
+        },
+        {
+          "title": "Peppuni kanssa",
+          "album": "Peppuni kanssa",
+          "year": 2025,
+          "why": "title track of the fifth album, the sparsest and newest thing they play",
+          "yt_audio": "5E5GiApx0SI",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "asla-jo",
+      "name": "Asla Jo",
+      "order": 11,
+      "day": "sun",
+      "stage": "black-tent",
+      "time": "15:45",
+      "origin": "Vaasa, Finland",
+      "formed": "2024",
+      "genres": [
+        "indie pop",
+        "kaihopop",
+        "singer-songwriter"
+      ],
+      "blurb": "Finnish-language indie pop — the artist's own word for it is kaihopop, longing-pop — written and sung by Emmi Haapaniemi, who grew up a vicar's daughter in Vaasa. Autofictive songs about queer adolescence, loneliness and letting go.",
+      "detail": "Emmi Haapaniemi (b. 1999) signed to Kaiku Recordings in May 2024 and released the debut EP Kaikki alko siitä mihin me loputtiin that autumn — six songs walking through the stages of a breakup, from denial (Dementia) to acceptance (Aika parantaa). The May 2025 single Pussailen tyttöjen kaa, written out of homophobic Facebook comment sections, the Lutheran church's same-sex marriage argument and her own fear of coming out to her parents, became by some distance her most-streamed track. The debut album Papin tytär followed on 20 February 2026: faith, gender, family and small-city belonging, with guests including Hassan Maikal, Kah Pao, Poikailona, Cecil Opia and Kuopus. She cites Adrienne Lenker and Sufjan Stevens, and says she writes songs as little films that fit into three minutes. A second album is already in progress.",
+      "members": [
+        {
+          "name": "Emmi Haapaniemi",
+          "role": "vocals, songwriting",
+          "since": "2024"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Kaikki alko siitä mihin me loputtiin",
+          "year": 2024,
+          "note": "debut EP; each of its six tracks is a stage of grief after a breakup"
+        },
+        {
+          "title": "Pussailen tyttöjen kaa",
+          "year": 2025,
+          "note": "standalone single, her breakthrough and still her most-streamed song"
+        },
+        {
+          "title": "Papin tytär",
+          "year": 2026,
+          "note": "debut album, 20 February 2026 — the vicar's-daughter record, and the reason she is on this bill"
+        }
+      ],
+      "links": {
+        "official": "https://kaikuentertainment.fi/artists/asla-jo/",
+        "wikipedia": "https://fi.wikipedia.org/wiki/Asla_Jo",
+        "spotify": "https://open.spotify.com/artist/5z6VH7BWb3QDIAhdMILyG4",
+        "yt_music": "https://music.youtube.com/channel/UC6eL6mGfavALRPtI2hjjp2w"
+      },
+      "songs": [
+        {
+          "title": "Pussailen tyttöjen kaa",
+          "album": "Papin tytär",
+          "year": 2025,
+          "why": "the obvious entry point — the May 2025 single, far ahead of everything else she has released",
+          "yt_audio": "Dl5ufq4xMmI",
+          "yt_video": null
+        },
+        {
+          "title": "Poltan mun kotikaupungin",
+          "album": "Kaikki alko siitä mihin me loputtiin",
+          "year": 2024,
+          "why": "the EP track that got her noticed, and its angriest three minutes",
+          "yt_audio": "XUtVC496AyQ",
+          "yt_video": null
+        },
+        {
+          "title": "Aika parantaa",
+          "album": "Kaikki alko siitä mihin me loputtiin",
+          "year": 2024,
+          "why": "the sparse end of the range — the EP's acceptance song",
+          "yt_audio": "p95eMQ7WbwM",
+          "yt_video": null
+        },
+        {
+          "title": "Terveisii kotii",
+          "album": "Papin tytär",
+          "year": 2026,
+          "why": "her first entry into the Finnish top 50",
+          "yt_audio": "bb4RyFjUqwY",
+          "yt_video": null
+        },
+        {
+          "title": "Viistoista",
+          "album": "Papin tytär",
+          "year": 2026,
+          "why": "the January 2026 single that led the debut album in",
+          "yt_audio": "haM2reDRq5c",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "eskola-makynen-with-the-guards-brass-collective-drumnbrass",
+      "name": "Eskola & Mäkynen with The Guards Brass Collective: Drum’n’Brass",
+      "order": 12,
+      "day": "sun",
+      "stage": "balloon",
+      "time": "16:00",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "jazz",
+        "brass band",
+        "second line funk"
+      ],
+      "songs_by": "Jukka Eskola Soul Trio",
+      "blurb": "A one-off large-ensemble jazz set: trumpeter Jukka Eskola and drummer Teppo Mäkynen play their Drum’n’Brass music with a nine-piece brass group from the Finnish Guards Band, pulling second line and brass band tradition through hip-hop.",
+      "detail": "This is a project, not a band. Eskola (trumpet, flugelhorn) and Mäkynen (drums) have played together since the early-2000s Helsinki nu-jazz scene — the Five Corners Quintet, Teddy Rok Seven, and since 2017 the Jukka Eskola Soul Trio — and they compose and arrange the Drum’n’Brass music themselves. The suite was already touring in summer 2024 as \"Drum’n’Brass Suite\" with Kaartin Rytmikone, an eight-piece from the Guards Band, on the Finnish Defence Forces' MILjazz tour (Tampere, Helsinki, Lahti) and at Hamina Tattoo; at Flow the horn section is billed as the nine-piece Guards Brass Collective. Nothing under the Drum’n’Brass name has been released on record, so the songs below are by the Jukka Eskola Soul Trio — Eskola and Mäkynen with organist Mikko Helevä — which is the closest thing on record to what the two of them do together.",
+      "members": [
+        {
+          "name": "Jukka Eskola",
+          "role": "trumpet, flugelhorn; co-composer and arranger"
+        },
+        {
+          "name": "Teppo Mäkynen",
+          "role": "drums; co-composer and arranger"
+        },
+        {
+          "name": "The Guards Brass Collective",
+          "role": "nine-piece brass ensemble assembled from the Finnish Guards Band (Kaartin soittokunta)"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Chasin' the Jazz Gone By",
+          "year": 2005,
+          "note": "The Five Corners Quintet — the Helsinki nu-jazz record both men played on, Eskola on trumpet and Mäkynen on drums"
+        },
+        {
+          "title": "Jukka Eskola",
+          "year": 2005,
+          "note": "Eskola's solo debut"
+        },
+        {
+          "title": "Introducing The Soul Trio",
+          "year": 2017,
+          "note": "Timmion 7\" that launched the Eskola/Mäkynen soul-jazz trio"
+        },
+        {
+          "title": "Jukka Eskola Soul Trio",
+          "year": 2017,
+          "note": "The trio's album: Eskola, Mäkynen and organist Mikko Helevä, with Timo Lassy and Magnus Lindgren guesting"
+        },
+        {
+          "title": "Steamy!",
+          "year": 2019,
+          "note": "Second Soul Trio album, stripped back to trumpet, Hammond and drums"
+        }
+      ],
+      "links": {
+        "official": "https://jukkaeskola.com/",
+        "wikipedia": "https://fi.wikipedia.org/wiki/Jukka_Eskola",
+        "spotify": "https://open.spotify.com/artist/1kuzJdBsQbShpXntTagPm4",
+        "bandcamp": "https://jukkaeskolasoultrio.bandcamp.com/",
+        "yt_music": "https://music.youtube.com/search?q=Jukka%20Eskola%20Soul%20Trio"
+      },
+      "songs": [
+        {
+          "title": "Introducing The Soul Trio",
+          "album": "Introducing The Soul Trio",
+          "year": 2017,
+          "why": "the 7\" that announced the pair's trio — two and a half minutes of what Eskola's horn over Mäkynen's drums sounds like",
+          "yt_audio": "KP0w_5BSRkk",
+          "yt_video": null
+        },
+        {
+          "title": "Martha's New Moment",
+          "album": "Jukka Eskola Soul Trio",
+          "year": 2017,
+          "why": "the obvious entry point: the tune that opens the album and shares the debut single",
+          "yt_audio": "IzoVuU5m2P8",
+          "yt_video": null
+        },
+        {
+          "title": "Sweet Honey Bee",
+          "album": "Jukka Eskola Soul Trio",
+          "year": 2017,
+          "why": "the Duke Pearson standard, showing where the horn writing comes from",
+          "yt_audio": "NyK5lcwsjHs",
+          "yt_video": null
+        },
+        {
+          "title": "Tiny B",
+          "album": "Steamy!",
+          "year": 2019,
+          "why": "the single off the second album and the hardest-hitting drum feature",
+          "yt_audio": "-1NqRay5WGk",
+          "yt_video": null
+        },
+        {
+          "title": "Smash",
+          "album": "Steamy!",
+          "year": 2019,
+          "why": "the seven-minute one, where the groove is allowed to stretch out",
+          "yt_audio": "z2PQJlMMg0o",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "marju",
+      "name": "Marju",
+      "order": 13,
+      "day": "sun",
+      "stage": "champagne",
+      "time": "16:00",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "house",
+        "techno",
+        "genre-bending DJ set"
+      ],
+      "blurb": "Genre-bending Helsinki DJ and Club Kaiku resident whose sets chase euphoria rather than any one style. At Flow she plays a Guilty Pleasures set: pop, rap and disco served without apology.",
+      "detail": "Marja-Leena \"Marju\" Rotinen has been a fixture of Helsinki's club scene since at least 2017, where her own gig log begins, playing Kaiku, Siltanen, Kuudes Linja and Post Bar alongside a long run of one-off underground parties — the \"decade of DIY parties\" Flow's billing refers to. Away from the decks she handles Kaiku's bookings and promotion together with Lil' Tony, and she still plays the club regularly, including its Chaos In The CBD and The Lady Machine nights in 2026. This is not her first Flow: she also played the festival in 2018, 2019 and 2024. Her 2026 slot is framed as a Guilty Pleasures set, the pop-, rap- and disco-leaning concept started in 2024 by Hotleevibling & Long Legs, who follow her on the same stage at 17:00. She has no records of her own — no label, no releases, and her SoundCloud carries a list of gigs rather than tracks.",
+      "members": [
+        {
+          "name": "Marja-Leena \"Marju\" Rotinen",
+          "role": "DJ; also books and promotes Club Kaiku with Lil' Tony"
+        }
+      ],
+      "links": {
+        "official": "https://soundcloud.com/djmarju",
+        "soundcloud": "https://soundcloud.com/djmarju",
+        "instagram": "https://www.instagram.com/mvrju/",
+        "facebook": "https://www.facebook.com/djmarju",
+        "ra": "https://ra.co/dj/marju"
+      }
+    },
+    {
+      "id": "sallidoing",
+      "name": "Sallidoing",
+      "order": 14,
+      "day": "sun",
+      "stage": "front-yard",
+      "time": "16:00",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "tech house",
+        "house"
+      ],
+      "blurb": "Tech house and house DJ from Helsinki, resident with the queer party collective Korgy. A club selector rather than a producer: her sets run from minimal house to loud, playful peak-time, which is how Flow bills her.",
+      "detail": "Sallidoing is a DJ, not a recording artist, and has no released productions of her own — her SoundCloud carries three phone-recorded snippets of past gigs and mixtapes, described in her own profile text as exactly that. She is a resident of Korgy, the Helsinki queer party collective, and plays its nights and other club nights at Ääniwalli, Kaiku and Post Bar; Korgy has run parties with Berlin's Pornceptual and Gegen and Hamburg's Kinky Sundays, and Flow says she made her international debut alongside the other Korgy DJs at Berlin's KitKat Club and in Copenhagen. Her Resident Advisor biography describes over a decade in Helsinki and Berlin nightlife, and puts it as a dentist by day, deck mechanic by night. Her own words for what she plays are house and tech house, with the occasional guilty pleasure. This is her fourth Flow in a row — she played the X Garden on the Sunday of 2023 and returned in 2024 and 2025 — and in 2026 Korgy curates the whole Sunday on the Front Yard, alongside Noei and Lara Silva.",
+      "members": [
+        {
+          "name": "Salli",
+          "role": "DJ"
+        }
+      ],
+      "links": {
+        "official": "https://soundcloud.com/sallidoing"
+      }
+    },
+    {
+      "id": "galactic-mace",
+      "name": "Galactic Mace",
+      "order": 15,
+      "day": "sun",
+      "stage": "backyard",
+      "time": "16:00",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "disco edits",
+        "global club",
+        "experimental electronic"
+      ],
+      "blurb": "Tropical floor-fillers, classic disco, soul and experimental electronic music from a solo Helsinki DJ with over twenty years in the city's club booths. The recorded output is edits and dubs of rare records rather than original productions.",
+      "detail": "Galactic Mace is one selector, not a duo or a collective, and the person behind the alias is not named publicly. Resident Advisor dates the project to \"the turn of the Millennium\" and Flow's own text to more than twenty years of Helsinki club work, lately at Tanner, Siltanen, Kaiku and Ääniwalli. Alongside the DJ sets there are self-run club nights built around global rhythm music — Zesty and Zoukous, the latter at Tanner with invited guests such as Cami Layé Okún and Edna Martinez. Everything released so far is an edit, dub or rework of somebody else's record: South African disco and Shangaan, Bay Area hyphy, Finnish eurodance, Latin freestyle, all self-issued on Bandcamp, with unreleased edits and productions kept for the sets.",
+      "members": [
+        {
+          "name": "Galactic Mace",
+          "role": "DJ, edits and productions"
+        }
+      ],
+      "albums": [
+        {
+          "title": "South Africa edits",
+          "year": 2024,
+          "note": "three-track EP of South African disco and Shangaan edits, the closest thing to a flagship release"
+        },
+        {
+          "title": "Hyphy flips",
+          "year": 2024,
+          "note": "two Bay Area hyphy rap tracks flipped for a disco floor"
+        },
+        {
+          "title": "Sollmath Kids – Chedza (Galactic Mace edit)",
+          "year": 2024,
+          "note": "an Alec Khaoli production extended as a DJ tool; proceeds donated to the Palestine Children's Relief Fund"
+        },
+        {
+          "title": "Big Bad Girls – Kolme Villikissaa (Galactic Mace sliced cheeze Dancemix)",
+          "year": 2024,
+          "note": "Finnish eurodance rework, built on Jussi Halme's music"
+        },
+        {
+          "title": "Lisa M – Ingrato (Galactic Mace dub)",
+          "year": 2025,
+          "note": "most recent release"
+        }
+      ],
+      "links": {
+        "official": "https://soundcloud.com/galacticmace",
+        "bandcamp": "https://galacticmace.bandcamp.com/",
+        "yt_music": "https://music.youtube.com/channel/UCWQLEGLpDCW7hnXTkGAw0qQ"
+      },
+      "songs": [
+        {
+          "title": "Stevo – Marawedi (Galactic Mace edit)",
+          "album": "South Africa edits",
+          "year": 2024,
+          "why": "the way in: 1991 Shangaan disco barely touched, and the track that opens the best-known release",
+          "yt_audio": "gfXj08w6LBs",
+          "yt_video": null
+        },
+        {
+          "title": "Keak Da Sneak – Town Shit (Galactic Mace flip)",
+          "album": "Hyphy flips",
+          "year": 2024,
+          "why": "the other extreme of the range, Bay Area rap flipped onto a disco floor",
+          "yt_audio": "iKp0fYtlRV4",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "niillas-holmberg-pauli-lyytinen-naarattu-laulu",
+      "name": "Niillas Holmberg & Pauli Lyytinen: Naarattu laulu",
+      "order": 16,
+      "day": "sun",
+      "stage": "other-sound",
+      "time": "16:00",
+      "origin": "Utsjoki / Kuopio, Finland",
+      "formed": "2021",
+      "genres": [
+        "joik",
+        "spoken word",
+        "electroacoustic jazz"
+      ],
+      "songs_by": "Niillas Holmberg & Pauli Lyytinen",
+      "blurb": "Joik and spoken-word Sámi poetry against saxophone, percussion and live electronics, improvised rather than arranged. A duo since 2021; Naarattu laulu is their 2025 debut album and the work this set is billed under.",
+      "detail": "Niillas Holmberg is a Sámi poet, musician and screenwriter from Utsjoki; Pauli Lyytinen is a saxophonist and composer known from Elifantree, Magnetia Orkesteri and a solo career. They began working together in 2021 and toured the material in Finland, Germany, Italy and Norway before recording it. Naarattu laulu came out on 24 October 2025 on Eclipse Music, taking its title and much of its imagery from Holmberg's poetry collection Naarattu, published by Gummerus weeks earlier; the vinyl carries a 12-page booklet of his poems with photographs by Lada Suomenrinne. Both describe the method as channelling, improvisation and close mutual listening rather than a fixed arrangement, so the live set is not a note-for-note reading of the record. The album was one of seven nominees for the 2026 Teosto Prize, which went to Aili Järvelä and Joel Järventausta in April 2026.",
+      "members": [
+        {
+          "name": "Niillas Holmberg",
+          "role": "voice, joik, spoken word",
+          "since": "2021"
+        },
+        {
+          "name": "Pauli Lyytinen",
+          "role": "saxophone, live electronics, percussion",
+          "since": "2021"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Naarattu laulu",
+          "year": 2025,
+          "note": "the duo's debut album (Eclipse Music); nominated for the 2026 Teosto Prize"
+        },
+        {
+          "title": "Lehto / Korpi",
+          "year": 2024,
+          "note": "Lyytinen solo, We Jazz Records; won the Jazz Emma at the March 2025 gala"
+        },
+        {
+          "title": "Luođik",
+          "year": 2024,
+          "note": "Holmberg's joik-soundscape album on DAT"
+        },
+        {
+          "title": "Guorga",
+          "year": 2021,
+          "note": "Holmberg with drummer Jakop Janssønn (DAT)"
+        },
+        {
+          "title": "Assimilašuvdna blues",
+          "year": 2014,
+          "note": "Holmberg with Roope Mäenpää; his best-known earlier record"
+        }
+      ],
+      "links": {
+        "official": "https://www.vapaataanet.fi/niillas-holmberg-pauli-lyytinen-naarattu-laulu/",
+        "wikipedia": "https://fi.wikipedia.org/wiki/Niillas_Holmberg",
+        "spotify": "https://open.spotify.com/artist/1NWzRTetaiM6b6cHSpdl7Z",
+        "bandcamp": "https://paulilyytinen.bandcamp.com/album/naarattu-laulu",
+        "yt_music": "https://music.youtube.com/search?q=Niillas%20Holmberg%20%26%20Pauli%20Lyytinen"
+      },
+      "songs": [
+        {
+          "title": "Taskunsakääntäjä",
+          "album": "Naarattu laulu",
+          "year": 2025,
+          "why": "the nine-minute opener and the obvious way in: recitation and joik over saxophone and slow electronics",
+          "yt_audio": "TXjDLhxwZ7Y",
+          "yt_video": null
+        },
+        {
+          "title": "Hormi",
+          "album": "Naarattu laulu",
+          "year": 2025,
+          "why": "three minutes of murmured joik and finger piano, the stripped-back end of the record",
+          "yt_audio": "QU3JmMU_Z7Y",
+          "yt_video": null
+        },
+        {
+          "title": "Majava",
+          "album": "Naarattu laulu",
+          "year": 2025,
+          "why": "the shortest joik piece, closest to unaccompanied Sámi tradition",
+          "yt_audio": "NRUJH_whU4E",
+          "yt_video": null
+        },
+        {
+          "title": "Kaksikokkaisia veneitä",
+          "album": "Naarattu laulu",
+          "year": 2025,
+          "why": "the rhythmic one, electronic percussion under a saxophone that keeps breaking loose",
+          "yt_audio": "gdyDfH7bATs",
+          "yt_video": null
+        },
+        {
+          "title": "Májjá",
+          "album": "Naarattu laulu",
+          "year": 2025,
+          "why": "the closer: solo joik that builds into the album's biggest, loudest passage",
+          "yt_audio": "uAMn1XjVZOk",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "j-karjalainen",
+      "name": "J. Karjalainen",
+      "order": 17,
+      "day": "sun",
+      "stage": "main",
+      "time": "16:30",
+      "origin": "Helsinki, Finland",
+      "formed": "1981",
+      "genres": [
+        "suomirock",
+        "blues rock",
+        "singer-songwriter"
+      ],
+      "blurb": "Finnish blues-, folk- and country-rooted rock, sung in Finnish and almost entirely self-written. Jukka Tapio Karjalainen has been recording since 1981 and is one of the songwriters who defined suomirock.",
+      "detail": "Karjalainen debuted in 1981 with the horn-driven J. Karjalainen ja Mustat Lasit, whose Doris (1985), Varaani (1986) and Lumipallo (1988) turned him into a household name; he has written the words and music to nearly everything he has recorded. He has released under four billings that all funnel back to him: Mustat Lasit through 1989, J. Karjalainen yhtyeineen (1991-1994), J. Karjalainen Electric Sauna (1996-2002) and his own name, which also covers the Lännen-Jukka / Paratiisin pojat / Polkabilly Rebels trilogy of Finnish-American folk songs (2006-2010). Et ole yksin (2013) was a double-platinum return that took Emma awards for album, rock album and song of the year, and the same four-piece band has backed him on record ever since. His latest album Suomalaista muotoiluu, produced by his son Väinö Karjalainen, came out in March 2025 and reached number two. He holds the Pro Finlandia medal (2013) and the Juha Vainio lyricist award (2001).",
+      "members": [
+        {
+          "name": "J. Karjalainen",
+          "role": "vocals, guitar, harmonica, banjo, mandolin, fiddle",
+          "since": "1981"
+        },
+        {
+          "name": "Mikko Lankinen",
+          "role": "guitar",
+          "since": "2013"
+        },
+        {
+          "name": "Tom Nyman",
+          "role": "bass",
+          "since": "2013"
+        },
+        {
+          "name": "Pekka Gröhn",
+          "role": "keyboards",
+          "since": "2013"
+        },
+        {
+          "name": "Janne Haavisto",
+          "role": "drums; also drummed in Mustat Lasit in the 1980s and has produced most of the recent albums",
+          "since": "2013"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Doris",
+          "year": 1985,
+          "note": "as J. Karjalainen ja Mustat Lasit; the title track broke him nationally"
+        },
+        {
+          "title": "Lumipallo",
+          "year": 1988,
+          "note": "last Mustat Lasit studio album; contains \"Hän\""
+        },
+        {
+          "title": "Villejä lupiineja",
+          "year": 1994,
+          "note": "as J. Karjalainen yhtyeineen; platinum and Emma album of the year"
+        },
+        {
+          "title": "J. Karjalainen Electric Sauna",
+          "year": 1996,
+          "note": "nine weeks at number one; Emma album of the year"
+        },
+        {
+          "title": "Et ole yksin",
+          "year": 2013,
+          "note": "double platinum; Emma album, rock album and song of the year"
+        },
+        {
+          "title": "Suomalaista muotoiluu",
+          "year": 2025,
+          "note": "latest album, produced by his son Väinö Karjalainen"
+        }
+      ],
+      "links": {
+        "official": "https://warnermusiclive.fi/artistit/j-karjalainen",
+        "wikipedia": "https://en.wikipedia.org/wiki/J._Karjalainen",
+        "spotify": "https://open.spotify.com/artist/03WFRA66hsZpJ5rqylE0vQ",
+        "yt_music": "https://music.youtube.com/channel/UC1st7mh7ChyMdNtlerMMQYQ"
+      },
+      "songs": [
+        {
+          "title": "Hän",
+          "album": "Lumipallo",
+          "year": 1988,
+          "why": "the obvious way in: the single most-played song on Finnish commercial radio between 1985 and 2020",
+          "yt_audio": "W4jPEBQV8zw",
+          "yt_video": null
+        },
+        {
+          "title": "Sekaisin",
+          "album": "Varaani",
+          "year": 1986,
+          "why": "the loud, horn-driven Mustat Lasit band the ballads hide",
+          "yt_audio": "P4adkQatx4Y",
+          "yt_video": null
+        },
+        {
+          "title": "Villejä lupiineja",
+          "album": "Villejä lupiineja",
+          "year": 1994,
+          "why": "the mid-90s peak, and the song that carried an Emma album of the year",
+          "yt_audio": "nSN4aPvwin0",
+          "yt_video": null
+        },
+        {
+          "title": "Missä se Väinö on?",
+          "album": "J. Karjalainen Electric Sauna",
+          "year": 1996,
+          "why": "the odd one out, with a Mandinka verse sung by kora player Malang Cissokho; Emma song of the year 1996",
+          "yt_audio": "uYVLjbfyY9M",
+          "yt_video": null
+        },
+        {
+          "title": "Mennyt mies",
+          "album": "Et ole yksin",
+          "year": 2013,
+          "why": "the late-career return and the one a younger crowd knows; Emma song of the year 2014",
+          "yt_audio": "oAXvYdtBYyY",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "hotleevibling-long-legs",
+      "name": "Hotleevibling & Long Legs",
+      "order": 18,
+      "day": "sun",
+      "stage": "champagne",
+      "time": "17:00",
+      "origin": "Helsinki, Finland",
+      "formed": "2024",
+      "genres": [
+        "club DJ set",
+        "pop edits",
+        "house"
+      ],
+      "blurb": "A two-DJ club set rather than a band: pop hits, house anthems and club classics reworked for the floor. The pair founded and host Guilty Pleasures, one of the most in-demand club nights in Finland.",
+      "detail": "Not a recording act but a DJ pairing. Guilty Pleasures, the concept they front, launched in March 2024 and has since filled Tanner, Siltanen, Kaiku and Ääniwalli in Helsinki and travelled to Provinssi, Ö Festejä and Ruisrock; Flow's own 2024 page framed it as a deliberate swerve away from the pair's earlier g-tech and hard-groove sets toward lighter pop and house. Hotleevibling is Leevi Tuukkanen, a Helsinki DJ and club promoter also billed as DJ HLB; long legs goes by Patrik, also plays as Spin Doctor, and comes out of the MCK (Mäkelänkatu Construction Kru) crew of techno, speed garage and breakbeats. This is their third Flow in a row at the champagne bar, after the Lanson Champagne Bar in 2024 and the Champagne Bar & Lounge in 2025. Neither has released original music under either name — their SoundCloud pages hold recorded club sets only — so there is no discography and no songs to list here.",
+      "members": [
+        {
+          "name": "Hotleevibling",
+          "role": "DJ — Leevi Tuukkanen, also billed DJ HLB",
+          "since": "2024"
+        },
+        {
+          "name": "long legs",
+          "role": "DJ — goes by Patrik, also plays as Spin Doctor; part of the MCK / Mäkelänkatu Construction Kru crew",
+          "since": "2024"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/guiltypleasureshki/"
+      }
+    },
+    {
+      "id": "chargie",
+      "name": "Chargie",
+      "order": 19,
+      "day": "sun",
+      "stage": "x-garden",
+      "time": "17:00",
+      "origin": "Helsinki, Finland",
+      "formed": "2011",
+      "genres": [
+        "dancehall",
+        "reggae",
+        "tropical party"
+      ],
+      "blurb": "Helsinki DJ and selector playing tropical party music, weighted towards dancehall and reggae, with African sounds, reggaeton, R&B and rap alongside the Jamaican material.",
+      "detail": "Chargie has been DJing since 2011 and works clubs and festivals across Finland. He currently holds two Helsinki residencies: the Bashment Yard club night at Kuudes Linja and the Reggae United night at Ääniwalli. In 2025 he joined Lion Head Sound alongside Fadda Francis and Rumpunch; the sound system dates from 1990, is billed as Finland's longest-running active one, and carries an unusually deep stock of custom dubplates. He is a selector rather than a recording artist, so the X Garden set is a record set rather than a live show of his own material.",
+      "members": [
+        {
+          "name": "Chargie",
+          "role": "DJ, selector",
+          "since": "2011"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/djchargie/"
+      }
+    },
+    {
+      "id": "lara-silva",
+      "name": "Lara Silva",
+      "order": 20,
+      "day": "sun",
+      "stage": "front-yard",
+      "time": "17:30",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "techno",
+        "trance"
+      ],
+      "blurb": "Techno DJ from Helsinki and a resident of the queer club collective Korgy. Her sets run from hard, hypnotic techno out into trance.",
+      "detail": "Lara Silva has spent years in the booths of Helsinki's club circuit — Ääniwalli, Kaiku and Post Bar, including the Trance Bar nights at the latter — and is a resident of Korgy, the queer collective that programmes club nights at Ääniwalli; in 2025 she played abroad with the rest of the collective at Den Anden Side in Copenhagen and KitKat Club in Berlin. She is a DJ rather than a producer: there is no discography, and her only published recordings are three hour-long mixes on SoundCloud, the earliest from 2019. She has played Flow several times before, including the Korgy takeover of X Garden on the Sunday of Flow 2024 and a back-to-back set with CEB in 2025. This Front Yard slot is part of a Sunday curated by Korgy, alongside 2THEMAX b2b KEMIK b2b CEB, Noei and Sallidoing.",
+      "members": [
+        {
+          "name": "Lara Silva",
+          "role": "DJ"
+        }
+      ],
+      "albums": [
+        {
+          "title": "esoteric mix 032019",
+          "year": 2019,
+          "note": "hour-long DJ mix, her earliest on SoundCloud; \"a hazy journey from way back\""
+        },
+        {
+          "title": "sleep in a park trip [POST BAR X IDA]",
+          "year": 2020,
+          "note": "DJ mix recorded for a Post Bar x IDA session"
+        },
+        {
+          "title": "Home Alone Mix Vol. 01",
+          "year": 2025,
+          "note": "her most recent mix, tagged techno"
+        }
+      ],
+      "links": {
+        "official": "https://soundcloud.com/l4r4silv4"
+      }
+    },
+    {
+      "id": "geese",
+      "name": "Geese",
+      "order": 21,
+      "day": "sun",
+      "stage": "silver",
+      "time": "17:45",
+      "origin": "Brooklyn, New York, USA",
+      "formed": "2016",
+      "genres": [
+        "art rock",
+        "indie rock",
+        "post-punk"
+      ],
+      "blurb": "Art-rock from Brooklyn built around Cameron Winter’s cracked baritone, moving from basement post-punk to cosmic country to the jam-derived grooves of 2025’s Getting Killed. Won International Group at the 2026 BRITs.",
+      "detail": "Geese formed in 2016 while the members were still at school in Brooklyn, recording in drummer Max Bassin's basement studio; they were signed by Partisan in 2020 and made their label debut with the self-produced Projector (2021). 3D Country (2023), produced by James Ford, swapped the angular post-punk for alternative country, blues rock and gospel choirs, and Getting Killed (2025) — cut in ten days in Los Angeles with Kenny Beats, out of extended jam sessions built on repetitive grooves — drew a Metacritic 89 and topped the 2025 albums lists at both Stereogum and The New Yorker. Cameron Winter's solo record Heavy Metal (2024) widened the band's audience considerably in the run-up. Guitarist Foster Hudson, in the band from 2019, left in 2023, leaving the original four-piece; Sam Revaz has played keyboards and keytar with them on the road since 2022.",
+      "members": [
+        {
+          "name": "Cameron Winter",
+          "role": "lead vocals, keyboards, guitar",
+          "since": "2016"
+        },
+        {
+          "name": "Emily Green",
+          "role": "guitar",
+          "since": "2016"
+        },
+        {
+          "name": "Dominic DiGesu",
+          "role": "bass",
+          "since": "2016"
+        },
+        {
+          "name": "Max Bassin",
+          "role": "drums",
+          "since": "2016"
+        },
+        {
+          "name": "Sam Revaz",
+          "role": "keyboards, keytar (touring musician)",
+          "since": "2022"
+        }
+      ],
+      "albums": [
+        {
+          "title": "A Beautiful Memory",
+          "year": 2018,
+          "note": "self-released at 15-16; the band later pulled it from streaming"
+        },
+        {
+          "title": "Projector",
+          "year": 2021,
+          "note": "label debut, self-produced in the drummer's basement"
+        },
+        {
+          "title": "3D Country",
+          "year": 2023,
+          "note": "produced by James Ford; the turn to country, blues and gospel"
+        },
+        {
+          "title": "Getting Killed",
+          "year": 2025,
+          "note": "produced by Kenny Beats; Metacritic 89, No. 1 on Stereogum's and The New Yorker's 2025 lists"
+        }
+      ],
+      "links": {
+        "official": "https://geeseband.com",
+        "wikipedia": "https://en.wikipedia.org/wiki/Geese_(band)",
+        "spotify": "https://open.spotify.com/artist/0WCo84qtCKfbyIf1lqQWB4",
+        "bandcamp": "https://geesebandnyc.bandcamp.com",
+        "yt_music": "https://music.youtube.com/channel/UCY1iN9fT5gG7sG3oAAkkQtQ"
+      },
+      "songs": [
+        {
+          "title": "Taxes",
+          "album": "Getting Killed",
+          "year": 2025,
+          "why": "the lead single that took them from cult concern to arena bills; the main set's climax",
+          "yt_audio": "Phh3oVCtzBg",
+          "yt_video": null
+        },
+        {
+          "title": "Au Pays du Cocaine",
+          "album": "Getting Killed",
+          "year": 2025,
+          "why": "their most-streamed track, and the clearest example of the loose Kenny Beats groove side",
+          "yt_audio": "kjxsaFB5svA",
+          "yt_video": "RGE-JRsJ2uo"
+        },
+        {
+          "title": "Mysterious Love",
+          "album": "3D Country",
+          "year": 2023,
+          "why": "the 3D Country single that carried them furthest beyond the rock press",
+          "yt_audio": "IeM0YJZGMsM",
+          "yt_video": null
+        },
+        {
+          "title": "3D Country",
+          "album": "3D Country",
+          "year": 2023,
+          "why": "the five-minute title track with the gospel choir, for the other side of the band",
+          "yt_audio": "KgTXwMrj5Po",
+          "yt_video": null
+        },
+        {
+          "title": "Disco",
+          "album": "Projector",
+          "year": 2021,
+          "why": "where they started: the angular post-punk single cut in a Brooklyn basement as teenagers",
+          "yt_audio": "BvAlWXmy1iA",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "hannah-cohen",
+      "name": "Hannah Cohen",
+      "order": 22,
+      "day": "sun",
+      "stage": "balloon",
+      "time": "18:00",
+      "origin": "San Francisco, California, USA",
+      "formed": "2012",
+      "genres": [
+        "singer-songwriter",
+        "indie folk",
+        "soft rock"
+      ],
+      "blurb": "American singer-songwriter working in a soft-focus 1970s idiom — folk, soul and soft rock with a hazy psychedelic edge, built on unhurried grooves and a low, close-miked voice.",
+      "detail": "Cohen was born in San Francisco to a jazz-drummer father, moved to New York as a teenager and modelled before releasing her debut Child Bride on Bella Union in 2012, produced by Thomas Bartlett. Pleasure Boy (2015) and Welcome Home (2019) followed, the latter the first made with Sam Owens — Sam Evian — who is both her producer and her partner. The two now live in the Catskills, where they converted a barn into Flying Cloud Recordings; her fourth album Earthstar Mountain was assembled there between 2020 and 2024 out of sessions with the musicians constantly passing through, among them Sufjan Stevens, Clairo, Liam Kazar and Oliver Hill. Released in March 2025 after a six-year gap, it is the loosest and funkiest record she has made, and the current live set draws mostly on it and on Welcome Home.",
+      "members": [
+        {
+          "name": "Hannah Cohen",
+          "role": "vocals, guitar, songwriting"
+        },
+        {
+          "name": "Halsey Phillip Harkins",
+          "role": "keyboards, drum machine, backing vocals (touring band, 2026)"
+        },
+        {
+          "name": "Sam Evian (Sam Owens)",
+          "role": "producer and studio collaborator since 2019, not a live member"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Child Bride",
+          "year": 2012,
+          "note": "debut on Bella Union, produced by Thomas Bartlett (Doveman)"
+        },
+        {
+          "title": "Pleasure Boy",
+          "year": 2015
+        },
+        {
+          "title": "Welcome Home",
+          "year": 2019,
+          "note": "first album produced by Sam Evian"
+        },
+        {
+          "title": "Earthstar Mountain",
+          "year": 2025,
+          "note": "current album; guests include Sufjan Stevens and Clairo"
+        }
+      ],
+      "links": {
+        "official": "https://www.thehannahcohen.com",
+        "wikipedia": "https://en.wikipedia.org/wiki/Hannah_Cohen_(singer)",
+        "spotify": "https://open.spotify.com/artist/7ovXNdlB2DNSC16TbKgros",
+        "bandcamp": "https://hannahcohen.bandcamp.com",
+        "yt_music": "https://music.youtube.com/channel/UCTUh7jGhV3D9fZbje_8UY5w"
+      },
+      "songs": [
+        {
+          "title": "This Is Your Life",
+          "album": "Welcome Home",
+          "year": 2019,
+          "why": "the obvious entry point — lead track and single from the album that got her noticed",
+          "yt_audio": "zbvS61vBlis",
+          "yt_video": null
+        },
+        {
+          "title": "Dusty",
+          "album": "Earthstar Mountain",
+          "year": 2025,
+          "why": "opens the current record and the current set; the shimmering pop-rock end of her range",
+          "yt_audio": "kofsXEiGAmg",
+          "yt_video": null
+        },
+        {
+          "title": "Earthstar",
+          "album": "Earthstar Mountain",
+          "year": 2025,
+          "why": "title track and lead single, the one with the official video",
+          "yt_audio": "anwbu8QCXcc",
+          "yt_video": null
+        },
+        {
+          "title": "Keepsake",
+          "album": "Pleasure Boy",
+          "year": 2015,
+          "why": "the torchier mid-period side, before the grooves arrived",
+          "yt_audio": "v_U6WsrwGe0",
+          "yt_video": null
+        },
+        {
+          "title": "The Crying Game",
+          "album": "Child Bride",
+          "year": 2012,
+          "why": "hushed chamber-folk from the debut, to hear how far the sound has moved",
+          "yt_audio": "N5XCYjXC_iM",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "awesome-tapes-from-africa",
+      "name": "Awesome Tapes from Africa",
+      "order": 23,
+      "day": "sun",
+      "stage": "backyard",
+      "time": "18:00",
+      "origin": "Brooklyn, USA",
+      "formed": "2006",
+      "genres": [
+        "African cassette DJ set",
+        "highlife",
+        "Ethio-jazz"
+      ],
+      "songs_by": "Hailu Mergia",
+      "blurb": "A cassette-only DJ set rather than a band: Brian Shimkovitz plays African tapes — highlife, Ethio-jazz, Shangaan disco, Somali funk — off the cassettes themselves. Named for the blog he started in 2006.",
+      "detail": "Awesome Tapes From Africa is Brian Shimkovitz, an ethnomusicologist who began posting cassettes he had bought in Ghanaian markets on a Fulbright, first as a blog from Brooklyn in 2006, then from 2011 as a reissue label — over fifty releases since, licensed from the artists and split with them 50/50. He DJs under the same name, playing only cassettes and only African music; the label's roster is effectively the set list. The reissues that made the name are Nâ Hawa Doumbia's 1982 Malian cassette (the label's first release), Ata Kak's 1994 Ghanaian rap-highlife tape Obaa Sima, Penny Penny's Shangaan disco, Dur-Dur Band's Mogadishu funk and, above all, the Ethiopian keyboardist and accordionist Hailu Mergia, whose career the label restarted in 2013 and who has recorded new albums for it since. He now runs the label from Berlin (Wikipedia still gives Los Angeles) and hosts a show on the LA station dublab. Since Shimkovitz records nothing of his own, the five songs below are all Hailu Mergia's — one label artist a single search can actually find, rather than a mixed list that would resolve to nothing.",
+      "members": [
+        {
+          "name": "Brian Shimkovitz",
+          "role": "DJ (cassettes), blog and label founder",
+          "since": "2006"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Nâ Hawa Doumbia – La Grande Cantatrice Malienne Vol 3",
+          "year": 2011,
+          "note": "the label's first release; a 1982 Malian cassette recorded in Abidjan"
+        },
+        {
+          "title": "Dur-Dur Band – Volume 5",
+          "year": 2013,
+          "note": "1989 Mogadishu funk and disco"
+        },
+        {
+          "title": "Penny Penny – Shaka Bundu",
+          "year": 2013,
+          "note": "1994 South African Shangaan disco, licensed from the artist"
+        },
+        {
+          "title": "Hailu Mergia & His Classical Instrument: Shemonmuanaye",
+          "year": 2013,
+          "note": "1985 accordion-and-synth cassette; the reissue that restarted Mergia's career"
+        },
+        {
+          "title": "Ata Kak – Obaa Sima",
+          "year": 2015,
+          "note": "1994 Ghanaian rap-highlife tape that took years to trace back to its maker"
+        },
+        {
+          "title": "Hailu Mergia – Lala Belu",
+          "year": 2018,
+          "note": "not a reissue: Mergia's first new album in roughly fifteen years"
+        }
+      ],
+      "links": {
+        "official": "https://www.awesometapes.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Awesome_Tapes_From_Africa",
+        "bandcamp": "https://awesometapesfromafrica.bandcamp.com/",
+        "yt_music": "https://music.youtube.com/channel/UCRROZl3O1JCkECgvSdBfWvQ"
+      },
+      "songs": [
+        {
+          "title": "Shemonmuanaye",
+          "album": "Hailu Mergia & His Classical Instrument: Shemonmuanaye",
+          "year": 1985,
+          "why": "the entry point — title track of the 1985 solo cassette whose 2013 reissue made both Mergia's second career and the label's reputation",
+          "yt_audio": "L8rqxr59HKo",
+          "yt_video": null
+        },
+        {
+          "title": "Wede Harer Guzo",
+          "album": "Wede Harer Guzo",
+          "year": 1978,
+          "why": "Hailu Mergia & Dahlak Band, organ-led and full-band; the label's best-selling release, reissued 2016",
+          "yt_audio": "wU_gcM7lmD8",
+          "yt_video": null
+        },
+        {
+          "title": "Tezeta",
+          "album": "Tezeta",
+          "year": 1975,
+          "why": "the earlier Walias Band era, reissued 2021 — the Ethio-jazz side rather than the solo keyboard side",
+          "yt_audio": "rfojy3Xm9aI",
+          "yt_video": null
+        },
+        {
+          "title": "Lala Belu",
+          "album": "Lala Belu",
+          "year": 2018,
+          "why": "title track of the comeback album, recorded new with Tony Buck and Mike Majkowski",
+          "yt_audio": "LQRHL3btDIQ",
+          "yt_video": null
+        },
+        {
+          "title": "Semen Ena Debub",
+          "album": "Yene Mircha",
+          "year": 2020,
+          "why": "opens the 2020 album with the trio expanded by masenqo, sax and voice",
+          "yt_audio": "ZAQ6rjz-XaU",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "akkajee-feat-oma-ensemble",
+      "name": "Akkajee feat. Oma Ensemble",
+      "order": 24,
+      "day": "sun",
+      "stage": "other-sound",
+      "time": "18:00",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "avant-folk",
+        "experimental Finnish folk",
+        "chamber folk"
+      ],
+      "songs_by": "Akkajee",
+      "blurb": "Avant-folk duo Meriheini Luoto and Iida Savolainen, working nyckelharpa, viola, voice, junk-metal sound objects and live electronics. Here joined by the choir Oma Ensemble for the full staging of their 2026 album Pölynkerääjä.",
+      "detail": "Akkajee is a duo: Meriheini Luoto (nyckelharpa, kantele, voice) and Iida Savolainen (viola, pump organ, voice), both Sibelius Academy folk-music graduates, playing together for over a decade — the debut album Akkajee was recorded in Veteli in 2012-2013. They were named Vuoden kansanmusiikkitekijä (Folk Music Creator of the Year) by Suomen Musiikintekijät in 2022. The Flow set is not the duo's standard show: it is Pölynkerääjä, the third album (All That Plazz, 20 February 2026), performed with Oma Ensemble, a Helsinki mixed choir of 19-30-year-olds founded in spring 2025 and conducted by Maija Laurinsilta. The choir already sings on the album's track \"Ajastaika\", and the full live version premiered at Kallio Church in Helsinki on 24 February 2026. The piece circles time — its passing, relativity and cycles — narrated from outside a single human viewpoint: church bells, decomposition, fungal networks, an abandoned house.",
+      "members": [
+        {
+          "name": "Meriheini Luoto",
+          "role": "nyckelharpa, vocals, kantele, piano, sound objects, live electronics"
+        },
+        {
+          "name": "Iida Savolainen",
+          "role": "viola, vocals, pump organ, recorders, sound objects, live electronics"
+        },
+        {
+          "name": "Oma Ensemble",
+          "role": "choir, guest for this set — Helsinki mixed choir founded spring 2025"
+        },
+        {
+          "name": "Maija Laurinsilta",
+          "role": "conductor of Oma Ensemble, guest for this set"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Akkajee",
+          "year": 2013,
+          "note": "debut; violin, viola and two voices, recorded in Veteli"
+        },
+        {
+          "title": "Hys hys hymylään",
+          "year": 2021,
+          "note": "single from Lastenkerääjä"
+        },
+        {
+          "title": "Lastenkerääjä",
+          "year": 2021,
+          "note": "second album, built around the mind of a child; the record that got them attention outside Finland"
+        },
+        {
+          "title": "Pölynkerääjä",
+          "year": 2026,
+          "note": "third album, on All That Plazz; Oma Ensemble sings on \"Ajastaika\" and this is the work performed at Flow"
+        }
+      ],
+      "links": {
+        "official": "https://www.akkajee.com/",
+        "spotify": "https://open.spotify.com/artist/7D53ldh3d7IFcwLYqUb36S",
+        "bandcamp": "https://akkajee.bandcamp.com/",
+        "yt_music": "https://music.youtube.com/channel/UC60TCgVhtOmV59NBcuiCqzA"
+      },
+      "songs": [
+        {
+          "title": "Lastenkerääjä",
+          "album": "Lastenkerääjä",
+          "year": 2021,
+          "why": "the candle-lit title track the duo themselves use as the way in",
+          "yt_audio": "tFR3xtwA2iU",
+          "yt_video": null
+        },
+        {
+          "title": "Hys hys hymylään",
+          "album": "Lastenkerääjä",
+          "year": 2021,
+          "why": "the single, and the shortest route to what two strings and two voices sound like",
+          "yt_audio": "Q7x_6hBdZh8",
+          "yt_video": null
+        },
+        {
+          "title": "Kuolleita kutsun",
+          "album": "Pölynkerääjä",
+          "year": 2026,
+          "why": "opens the new album and sets its darker, electronics-heavy register",
+          "yt_audio": "A6NcAnylzdY",
+          "yt_video": null
+        },
+        {
+          "title": "Kello lyö",
+          "album": "Pölynkerääjä",
+          "year": 2026,
+          "why": "the seven-minute one, church bells as narrator — the centre of the Flow piece",
+          "yt_audio": "Cxh8wDg6nFM",
+          "yt_video": null
+        },
+        {
+          "title": "Ajastaika",
+          "album": "Pölynkerääjä",
+          "year": 2026,
+          "why": "the recorded track that already features Oma Ensemble under Maija Laurinsilta, i.e. the reason for this billing",
+          "yt_audio": "pIrQf7Bpb9U",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "james-k",
+      "name": "james K",
+      "order": 25,
+      "day": "sun",
+      "stage": "black-tent",
+      "time": "18:30",
+      "origin": "New York, USA",
+      "formed": "2013",
+      "genres": [
+        "ambient pop",
+        "trip hop",
+        "shoegaze"
+      ],
+      "blurb": "Ambient pop and trip hop from New York: Jamie Krasner sings in a murmur over shoegaze guitar, found sound and club-derived production. Three albums so far, most recently Friend (2025) on AD 93.",
+      "detail": "Krasner trained on violin as a child and studied as a visual artist at Rhode Island School of Design before adopting the james K name and moving to Berlin, where she lived from 2013 to 2017 and picked up the club-music side of her production. Her records run from the lo-fi cassette pop of PET (2016) through the ambient, long-form Random Girl (2022) on Anthony Naples' Incienso to Friend (2025) on AD 93, which pulls in shoegaze and drum & bass. She has recorded with Yves Tumor, Drew McDowall, Stefan Maier, Ben Bondy and Priori, runs the She Rocks! imprint and hosts the NTS show Trip Lick. The 2024 single \"Blinkmoth (July Mix)\" was Resident Advisor's second-best track of that year.",
+      "members": [
+        {
+          "name": "Jamie Krasner",
+          "role": "vocals, production, guitar",
+          "since": "2013"
+        }
+      ],
+      "albums": [
+        {
+          "title": "PET",
+          "year": 2016,
+          "note": "debut album; the cassette edition came out in collaboration with the 1080p tape label"
+        },
+        {
+          "title": "036",
+          "year": 2021,
+          "note": "EP on AD 93; opens with \"Open\" featuring Yves Tumor"
+        },
+        {
+          "title": "Random Girl",
+          "year": 2022,
+          "note": "second album, on Incienso; the ambient, long-form end of her work, with Drew McDowall and Stefan Maier"
+        },
+        {
+          "title": "Blinkmoth (July Mix)",
+          "year": 2024,
+          "note": "12\" single on AD 93; Resident Advisor's number two track of 2024"
+        },
+        {
+          "title": "Friend",
+          "year": 2025,
+          "note": "third album, AD 93; trip hop, shoegaze and drum & bass, with Priori, Ben Bondy and Special Guest DJ"
+        }
+      ],
+      "links": {
+        "spotify": "https://open.spotify.com/artist/25BObiRSDCMwVrBGIVaLIf",
+        "bandcamp": "https://jameskmusic.bandcamp.com",
+        "yt_music": "https://music.youtube.com/channel/UC-bDD1hmQJ_Us4ELbo0g5vg"
+      },
+      "songs": [
+        {
+          "title": "Ultra Facial!",
+          "album": "036",
+          "year": 2021,
+          "why": "her most-played track by a wide margin, and the quickest way in",
+          "yt_audio": "CyttVbKOl7w",
+          "yt_video": null
+        },
+        {
+          "title": "Blinkmoth (July Mix)",
+          "album": "Friend",
+          "year": 2025,
+          "why": "the 2024 single that Resident Advisor ranked second best track of the year",
+          "yt_audio": "Ji5by6AYNNA",
+          "yt_video": null
+        },
+        {
+          "title": "Hypersoft Lovejinx Junkdream",
+          "album": "Friend",
+          "year": 2025,
+          "why": "the fast one, where the drum & bass side takes over",
+          "yt_audio": "P5hNMWh4--Q",
+          "yt_video": null
+        },
+        {
+          "title": "Life Of A Fly",
+          "album": "Random Girl",
+          "year": 2022,
+          "why": "the most-heard piece from the ambient second album",
+          "yt_audio": "f_mymTYUKHo",
+          "yt_video": null
+        },
+        {
+          "title": "Sokit to me Baby",
+          "album": "PET",
+          "year": 2016,
+          "why": "the lo-fi 2016 debut, before the club production arrived",
+          "yt_audio": "582VYbFkGvo",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "dj-aleksi-dj-handshaking",
+      "name": "DJ Aleksi & DJ Handshaking",
+      "order": 26,
+      "day": "sun",
+      "stage": "champagne",
+      "time": "18:30",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "house",
+        "club",
+        "techno"
+      ],
+      "songs_by": "Handshaking",
+      "blurb": "House, club and techno played back-to-back by two Helsinki DJs from the OO Recordings circle — Kaiku resident DJ Aleksi and Fedja Kamari, who records as Handshaking.",
+      "detail": "A pairing rather than a band: two Helsinki selectors who co-run the OO Recordings orbit and have shared decks and the label's 'O to O' show on Noods Radio since at least 2020. DJ Aleksi is a Kaiku resident and Post Bar and Siltanen regular with over a decade behind him, co-founder of OO Recordings and the Danny Wu Sound Community, with radio shows on NOODS and IDA Helsinki and club dates from Berlin's Sisyphos to Amsterdam; Flow describes his sets as 'deep yet physical', while his own bio runs from bouncy house through trance, breaks and percussive workouts. Handshaking is Fedja Kamari, born 1994 in Kuopio, who first surfaced as producer and singer in the Töölö grime duo Töölön Ketterä and has since released two solo albums on PME Records — the countryside-house concept record Garden Clogs (2021) and the darker, club-functional There was a chance (2023). Kamari also works as an audio journalist for Uusi Juttu. The Flow booking is a DJ set, not a Handshaking live show, so the songs below are his records rather than the set's contents; DJ Aleksi has no releases of his own, only mixes.",
+      "members": [
+        {
+          "name": "DJ Aleksi",
+          "role": "DJ; Kaiku resident, co-founder of OO Recordings and Danny Wu Sound Community"
+        },
+        {
+          "name": "Handshaking (Fedja Kamari)",
+          "role": "DJ and producer; records solo as Handshaking, formerly Töölön Ketterä"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Garden Clogs",
+          "year": 2021,
+          "note": "Handshaking's debut on PME Records; a cosmic-house concept album about a Finnish rural upbringing, its 200-copy vinyl run sold out at once"
+        },
+        {
+          "title": "There was a chance",
+          "year": 2023,
+          "note": "second Handshaking album, darker and more club-functional, with mantra-like lyrics about bills, lonely lunches and unreturned calls"
+        }
+      ],
+      "links": {
+        "wikipedia": "https://fi.wikipedia.org/wiki/Fedja_Kamari",
+        "spotify": "https://open.spotify.com/artist/3TfafQpydszqcuvtb6isYQ",
+        "bandcamp": "https://handshaking.bandcamp.com",
+        "yt_music": "https://music.youtube.com/channel/UCPFk4ZfY0XDenqDqZ21j6zw"
+      },
+      "songs": [
+        {
+          "title": "Distant Grounds",
+          "album": "Garden Clogs",
+          "year": 2021,
+          "why": "the closer, and the track lifted out to Beatport and a video — the one that travelled furthest",
+          "yt_audio": "ioc8FeM3G3E",
+          "yt_video": null
+        },
+        {
+          "title": "Go Ahead",
+          "album": "Garden Clogs",
+          "year": 2021,
+          "why": "the opener, cut down to a radio edit; the bubbliest way in",
+          "yt_audio": "d2OgHMZFIYg",
+          "yt_video": null
+        },
+        {
+          "title": "Näin kai taas lankesin",
+          "album": "Garden Clogs",
+          "year": 2021,
+          "why": "the Finnish-language one, where his own singing and the countryside-house conceit are plainest",
+          "yt_audio": "UMRcMjiQKUY",
+          "yt_video": null
+        },
+        {
+          "title": "In your eyes",
+          "album": "There was a chance",
+          "year": 2023,
+          "why": "the second album at its most straightforwardly dancefloor",
+          "yt_audio": "pXh9EteLREA",
+          "yt_video": null
+        },
+        {
+          "title": "Alone in the sushi buffet",
+          "album": "There was a chance",
+          "year": 2023,
+          "why": "mantra over a steady beat, and the title tells you what the darker record is about",
+          "yt_audio": "SwDJRfvuSIc",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "patrick-mason",
+      "name": "Patrick Mason",
+      "order": 27,
+      "day": "sun",
+      "stage": "front-yard",
+      "time": "18:30",
+      "origin": "Berlin, Germany",
+      "genres": [
+        "techno",
+        "house"
+      ],
+      "songs_by": "SRVD",
+      "blurb": "Techno and house DJ from Berlin who sings live over his own sets rather than only mixing. On record he works as half of SRVD with Radio Slave, whose 2018 track \"Elevate\" is the one he is known for.",
+      "detail": "Born in Bavaria to a Bavarian mother and an African-American father and raised in Regensburg, Mason moved to Berlin to study graphic and later fashion design, and started going to Berghain and Panorama Bar around 2016. Matt Edwards (Radio Slave) heard him sing there, pulled him up to improvise vocals over a Panorama Bar set, and the two formed SRVD; the resulting \"Elevate\" became the duo's debut EP on Rekids in 2018, followed by three more Rekids records through 2020. Almost all of his recorded output is SRVD rather than solo — the main exception is the vocal on Héctor Oaks' \"Give Us The Night\" from the 2024 album Fuego Universal. He also works as a designer, including a 2020 redesign of Ray-Ban's State Street frame. Flow's own page bills him as a solo DJ set, and puts his 2023 workload at over 150 sets in 40 countries.",
+      "members": [
+        {
+          "name": "Patrick Mason",
+          "role": "DJ, vocals, production"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Elevate",
+          "year": 2018,
+          "note": "debut EP as SRVD with Radio Slave, on Rekids; the title-track vocal started as an improvisation at Panorama Bar"
+        },
+        {
+          "title": "Raw Files",
+          "year": 2019,
+          "note": "SRVD, Rekids — two long instrumental cuts"
+        },
+        {
+          "title": "Talking 2 B Mad",
+          "year": 2019,
+          "note": "SRVD, on Rekids Special Projects"
+        },
+        {
+          "title": "Black On Black",
+          "year": 2020,
+          "note": "SRVD, Rekids — the last SRVD 12\" to date"
+        },
+        {
+          "title": "Fuego Universal",
+          "year": 2024,
+          "note": "Héctor Oaks album on Kaos; Mason is credited on the track \"Give Us The Night\""
+        }
+      ],
+      "links": {
+        "spotify": "https://open.spotify.com/artist/32H97VEM4nTqJsJgdt3hDg",
+        "yt_music": "https://music.youtube.com/channel/UCJC9J8OkSu01OCqtAxKwI3g"
+      },
+      "songs": [
+        {
+          "title": "Elevate",
+          "album": "Elevate",
+          "year": 2018,
+          "why": "the obvious entry point — his vocal, and by some distance the most-played thing he has recorded",
+          "yt_audio": "mfBvbA5EZU8",
+          "yt_video": null
+        },
+        {
+          "title": "Nasty",
+          "album": "Elevate",
+          "year": 2018,
+          "why": "the EP's other side, harder and built for the floor rather than the hook",
+          "yt_audio": "pGs3p54-2n0",
+          "yt_video": null
+        },
+        {
+          "title": "The Yard Man",
+          "album": "Raw Files",
+          "year": 2019,
+          "why": "seven and a half minutes of stripped instrumental techno, the wordless side of the project",
+          "yt_audio": "-kGu0laQoxw",
+          "yt_video": null
+        },
+        {
+          "title": "Talking 2 B Mad",
+          "album": "Talking 2 B Mad",
+          "year": 2019,
+          "why": "the 45rpm one-off, with the vocal back at the front",
+          "yt_audio": "3NTLjTSkU88",
+          "yt_video": null
+        },
+        {
+          "title": "Black On Black",
+          "album": "Black On Black",
+          "year": 2020,
+          "why": "the most recent SRVD single and the closest to what he plays now",
+          "yt_audio": "wGJDZVcs1MU",
+          "yt_video": "Il_2uE_6PJc"
+        }
+      ]
+    },
+    {
+      "id": "wekesa",
+      "name": "Wekesa",
+      "order": 28,
+      "day": "sun",
+      "stage": "x-garden",
+      "time": "18:30",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "dancehall",
+        "amapiano",
+        "afrobeats"
+      ],
+      "blurb": "Bass-driven dancehall, amapiano and afrobeats laced with hip-hop, R&B, baile and jersey club, from a Helsinki DJ and dancer of almost a decade. A selector, not a producer — there is no discography.",
+      "detail": "Wekesa is Sophia Wekesa, a Helsinki-born dancer, DJ and specialist in culturally sensitive and antiracist youth work, billed as DJ Wekesa when she last played Flow in 2022. Her sets are built around a bass-driven soundscape that runs dancehall, amapiano, afrobeats, hip-hop, R&B, baile, jersey club, edits and remixes together, with the stated aim of physical sets that let a crowd drop the pressure to look cool. She is a regular at Kuudes linja, Ääniwalli, Siltanen and Kaiku, one third of the Mellow Yellow collective alongside Yeboyah and Renaz, and a founder of Club U-Haul, a Kaiku night for Black and brown queer people; safer-space practice runs through all of it, and she sits on the advisory board of Tanssin talo. She has hosted shows on Radio Helsinki and co-hosted the YleX music programme \"Yeboyah, Renaz ja Wekesa\" with Renaz Ebrahimi and Rebekka Yeboah from 2019. No original tracks or mixes are released under the name: MusicBrainz has no artist by it and the SoundCloud account Flow links carries a bio but no uploads, the closest thing to a recording being a b2b set with Joseysradios filmed for Livingroom Session in May 2025 (youtube 5byxxWmoewo).",
+      "members": [
+        {
+          "name": "Sophia Wekesa",
+          "role": "DJ, selector; dancer"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/sophiawekesa/",
+        "wikipedia": "https://fi.wikipedia.org/wiki/Sophia_Wekesa",
+        "soundcloud": "https://soundcloud.com/sophia-wekesa-586774603"
+      }
+    },
+    {
+      "id": "sombr",
+      "name": "sombr",
+      "order": 29,
+      "day": "sun",
+      "stage": "main",
+      "time": "19:00",
+      "origin": "New York City, United States",
+      "formed": "2021",
+      "genres": [
+        "indie rock",
+        "alt-pop",
+        "pop rock"
+      ],
+      "blurb": "Alt-pop and indie rock from the Lower East Side, written, played and largely self-recorded by Shane Boose alone. Two 2025 TikTok breakouts took a bedroom project to the Billboard top ten inside a year.",
+      "detail": "Shane Michael Boose (b. 2005) started posting self-recorded songs while a vocal major at LaGuardia High School, took the name sombr in 2021, and dropped out after his fourth single \"caroline\" went viral in 2022; Warner Records signed him in early 2023 and released the EP In Another Life that September, co-produced by Tony Berg. The debut album I Barely Know Her (August 2025) was written entirely by Boose and produced with Berg; \"back to friends\" peaked at No. 7 on the Billboard Hot 100, spent 52 weeks on the chart and won Best Alternative Video at the 2025 VMAs, and \"undressed\" reached No. 16 and topped the US Hot Rock & Alternative Songs chart. He was nominated for Best New Artist at the 68th Grammy Awards and performed at the ceremony in February 2026. 2026 has so far been standalone singles rather than an album — \"homewrecker\" (February, with Wendy Melvoin of Prince's Revolution on bass), \"potential\" (April) and \"my body isn't ready\" (June) — alongside The Late Nights & Young Romance Tour and the You Are The Reason Tour. He is now based in Los Angeles. All his track titles are stylised in lowercase, and Flow bills him as \"SOMBR\" where he writes it \"sombr\".",
+      "members": [
+        {
+          "name": "Shane Boose",
+          "role": "vocals, guitar, piano, bass, drums; sole songwriter and co-producer",
+          "since": "2021"
+        }
+      ],
+      "albums": [
+        {
+          "title": "In Another Life",
+          "year": 2023,
+          "note": "debut EP, co-produced by Tony Berg"
+        },
+        {
+          "title": "I Barely Know Her",
+          "year": 2025,
+          "note": "debut album; written entirely by Boose, four singles, Metacritic 79"
+        }
+      ],
+      "links": {
+        "official": "https://www.sombrmusic.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Sombr",
+        "spotify": "https://open.spotify.com/artist/4G9NDjRyZFDlJKMRL8hx3S",
+        "yt_music": "https://music.youtube.com/channel/UCXlqFQmZZOb78teSnAqhuwA"
+      },
+      "songs": [
+        {
+          "title": "back to friends",
+          "album": "I Barely Know Her",
+          "year": 2025,
+          "why": "the breakout that reached No. 7 on the Hot 100 and won the alternative-video VMA — the obvious way in",
+          "yt_audio": "fOQ_-gZsnYQ",
+          "yt_video": "c8zq4kAn_O0"
+        },
+        {
+          "title": "undressed",
+          "album": "I Barely Know Her",
+          "year": 2025,
+          "why": "the other 2025 breakout, and the quiet, close-mic'd end of what he does",
+          "yt_audio": "CtRn6eqVnvY",
+          "yt_video": "z0wT6CrEGYg"
+        },
+        {
+          "title": "12 to 12",
+          "album": "I Barely Know Her",
+          "year": 2025,
+          "why": "'80s synth-pop and funk instead of heartbreak balladry, so it shows the other side",
+          "yt_audio": "cZgUiR31m-Y",
+          "yt_video": null
+        },
+        {
+          "title": "homewrecker",
+          "year": 2026,
+          "why": "the first post-album single and his current hit, with Wendy Melvoin on bass",
+          "yt_audio": "mQezde_qeXw",
+          "yt_video": null
+        },
+        {
+          "title": "caroline",
+          "year": 2022,
+          "why": "the bedroom recording that went viral and got him signed at 17",
+          "yt_audio": "aFPPIPV4vlk",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "club-geeli",
+      "name": "Club Geeli",
+      "order": 30,
+      "day": "sun",
+      "stage": "champagne",
+      "time": "19:30",
+      "origin": "Helsinki, Finland",
+      "formed": "2024",
+      "genres": [
+        "DJ collective",
+        "90s/00s dance-pop",
+        "house & trance"
+      ],
+      "blurb": "Helsinki DJ collective and club night trading in 90s and 00s dance music — bubblegum pop remixes, eurodance, house and trance, with current pop dropped in. Resident DJs are DJ Lassi Lassi and the duo CEX.",
+      "detail": "Club Geeli was started in 2024 by friends who originally met on IRC-Galleria, the Finnish social network of the mid-2000s, and the nostalgia is the point rather than a gimmick: the sets are built from 90s and 00s dance hits, pop remixes, house classics and trance, seasoned with present-day pop. The night runs regularly at Kaiku in Suvilahti — both as its own party and as the club's second-room programme alongside bookings like Lil Tony, Kristiina Männikkö & Jori Hulkkonen and ND_Baumecker — and has spread to other Helsinki venues including Bar Loose. Since October 2024 the collective has also hosted a monthly show on IDA Helsinki, past 20 episodes by mid-2026. Flow 2026 is billed as their festival debut; they play as DJs, so there are no releases of their own to preview.",
+      "members": [
+        {
+          "name": "DJ Lassi Lassi",
+          "role": "DJ, resident",
+          "since": "2024"
+        },
+        {
+          "name": "CEX",
+          "role": "DJ duo, residents",
+          "since": "2024"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/club.geeli/"
+      }
+    },
+    {
+      "id": "the-congos",
+      "name": "The Congos",
+      "order": 31,
+      "day": "sun",
+      "stage": "balloon",
+      "time": "20:00",
+      "origin": "Kingston, Jamaica",
+      "formed": "1975",
+      "genres": [
+        "roots reggae",
+        "dub"
+      ],
+      "blurb": "Jamaican roots reggae vocal group, built on Cedric Myton’s falsetto stacked against a tenor and a baritone. Known above all for Heart of the Congos (1977), the Lee \"Scratch\" Perry production.",
+      "detail": "Cedric Myton and Roydel \"Congo Ashanti Roy\" Johnson started as a duo; Lee \"Scratch\" Perry named them, added baritone Watty Burnett and cut Heart of the Congos at his Black Ark studio in 1977 - a record barely distributed at the time and only canonised by Blood & Fire's 1996 reissue. The group broke up, reformed in the 1990s, got the full trio back together for Swinging Bridge (2006) and returned to Perry for Back in the Black Ark; the 2012 FRKWYS collaboration with Sun Araw and M. Geddes Gengras, Icon Give Thank, carried them to an experimental audience. Flow bills the four-man line-up of Myton, Ashanti Roy, Burnett and Kenroy \"Talash\" Ffyffe, but the promotional line about an unchanged 1970s line-up is not accurate - Talash is a later arrival, and Myton, born 1947, missed the group's Oslo World show on 31 October 2025 on health grounds, so the exact quartet on stage is not guaranteed. Sources disagree on the founding year: Wikidata says 1975, while MusicBrainz and the French Wikipedia both date the group to 1977.",
+      "members": [
+        {
+          "name": "Cedric Myton",
+          "role": "falsetto vocals; founder member"
+        },
+        {
+          "name": "Roydel \"Congo Ashanti Roy\" Johnson",
+          "role": "tenor vocals; founder member"
+        },
+        {
+          "name": "Watty Burnett",
+          "role": "baritone vocals; added by Lee \"Scratch\" Perry for the Heart of the Congos sessions"
+        },
+        {
+          "name": "Kenroy \"Talash\" Ffyffe",
+          "role": "vocals; the most recent addition, not part of the 1970s line-up"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Heart of the Congos",
+          "year": 1977,
+          "note": "produced by Lee \"Scratch\" Perry at the Black Ark; pressed in a few hundred copies and only widely heard after the 1996 Blood & Fire reissue"
+        },
+        {
+          "title": "Congo Ashanti",
+          "year": 1979,
+          "note": "first album after leaving Perry, cut for CBS"
+        },
+        {
+          "title": "Image of Africa",
+          "year": 1979
+        },
+        {
+          "title": "Swinging Bridge",
+          "year": 2006,
+          "note": "the reunion that put Myton, Ashanti Roy and Burnett back on the same record"
+        },
+        {
+          "title": "Back in the Black Ark",
+          "year": 2009,
+          "note": "recorded with Lee Perry again, three decades on; MusicBrainz dates the UK pressing to March 2010"
+        },
+        {
+          "title": "Morning Star",
+          "year": 2018
+        }
+      ],
+      "links": {
+        "wikipedia": "https://en.wikipedia.org/wiki/The_Congos",
+        "spotify": "https://open.spotify.com/artist/0nGxKkhmIzyu6bvuXrko1e",
+        "yt_music": "https://music.youtube.com/channel/UC4M7wP9CM9y2pBMD9MRONKw"
+      },
+      "songs": [
+        {
+          "title": "Fisherman",
+          "album": "Heart of the Congos",
+          "year": 1977,
+          "why": "the entry point - the falsetto lead the whole reputation rests on",
+          "yt_audio": "mFTxmDy74LI",
+          "yt_video": null
+        },
+        {
+          "title": "Congoman",
+          "album": "Heart of the Congos",
+          "year": 1977,
+          "why": "the chant that gave them their name, and the deepest end of the Black Ark mix",
+          "yt_audio": "TkmDH-uw8fs",
+          "yt_video": null
+        },
+        {
+          "title": "Youth Man",
+          "album": "Congo Ashanti",
+          "year": 1979,
+          "why": "the first album away from Perry, and still turning up in the 2025 sets",
+          "yt_audio": "7y2kFH1Mh1k",
+          "yt_video": null
+        },
+        {
+          "title": "Ten Million Chariots",
+          "album": "Swinging Bridge",
+          "year": 2006,
+          "why": "the reunion-era song their own touring bio leads with",
+          "yt_audio": "XnLvEhtPihQ",
+          "yt_video": null
+        },
+        {
+          "title": "Garden of Life",
+          "album": "Back in the Black Ark",
+          "year": 2009,
+          "why": "what the harmonies sound like back in front of Lee Perry thirty years later",
+          "yt_audio": "K-0_pBy14jo",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "anetha",
+      "name": "Anetha",
+      "order": 32,
+      "day": "sun",
+      "stage": "front-yard",
+      "time": "20:00",
+      "origin": "Paris, France",
+      "formed": "2013",
+      "genres": [
+        "techno",
+        "trance",
+        "acid"
+      ],
+      "blurb": "French techno DJ and producer whose sets and records run bouncy acid basslines and hard kicks into open, melancholic trance melodies. Founder of the Mama Told Ya label and, since 2024, of a debut album, Mothearth.",
+      "detail": "Born in Bordeaux in 1989 and based in Paris, Anetha was introduced to techno by her Kraftwerk-fan father and has been mixing since she was 16; she trained as an architect rather than as a musician. She turned professional in 2013 during a spell in London and became a resident of the Paris Blocaus parties, playing Concrete and Rex Club before Berghain, Bassiani and De School. Her 2017 track Acid Train put her on Mixmag's list of the twenty best techno tracks of the decade, and a 2018 Boiler Room set in Amsterdam widened the audience further. In 2019 she launched her own label Mama Told Ya and the associated Mama Loves Ya collective, which pushes ecological transition in club culture; the 2024 album Mothearth built on the same themes of ecology and femininity. Her most recent single, Voicetrack Generation, appeared on Mama Told Ya in May 2026.",
+      "members": [
+        {
+          "name": "Anetha",
+          "role": "DJ, production",
+          "since": "2013"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Ophiuchus EP",
+          "year": 2015,
+          "note": "debut EP, on Work Them Records"
+        },
+        {
+          "title": "Leftover Love",
+          "year": 2016,
+          "note": "Blocaus Series"
+        },
+        {
+          "title": "Bionic Romance",
+          "year": 2018,
+          "note": "Blocaus Series"
+        },
+        {
+          "title": "Don't Rush to Grow Up",
+          "year": 2019,
+          "note": "MTY001, the first release on her own Mama Told Ya, shared with ABSL and Sugar"
+        },
+        {
+          "title": "Mothearth",
+          "year": 2024,
+          "note": "debut album, on Mama Told Ya"
+        }
+      ],
+      "links": {
+        "wikipedia": "https://en.wikipedia.org/wiki/Anetha",
+        "spotify": "https://open.spotify.com/artist/7sJ3ngSMvvXGdVLnODPqXa",
+        "bandcamp": "https://anetha.bandcamp.com/",
+        "yt_music": "https://music.youtube.com/channel/UC6jpAPpzMEBhXHgr5EMA3qg"
+      },
+      "songs": [
+        {
+          "title": "Acid Train",
+          "album": "Phasing Faces Vol. 1",
+          "year": 2017,
+          "why": "the breakout, and the one Mixmag put in its twenty best techno tracks of the decade",
+          "yt_audio": "uXpGP-UP3rc",
+          "yt_video": null
+        },
+        {
+          "title": "Free Britney",
+          "album": "Élément I - L'Eau Repousse Les Feux Agressifs",
+          "year": 2021,
+          "why": "her most-played track, and where the trance side takes over from the acid",
+          "yt_audio": "II6tDIpKoqs",
+          "yt_video": null
+        },
+        {
+          "title": "Sorry For Being So Sexy",
+          "album": "Mothearth",
+          "year": 2024,
+          "why": "the single that led the debut album and the one DJs picked up",
+          "yt_audio": "DQbXw0IIRHc",
+          "yt_video": null
+        },
+        {
+          "title": "Let me d&be",
+          "album": "Let me d&be",
+          "year": 2024,
+          "why": "the drum-and-bass detour that shows she is not only a four-to-the-floor producer",
+          "yt_audio": "hGIm7R-sGj4",
+          "yt_video": null
+        },
+        {
+          "title": "Drive with a Dead Girl",
+          "album": "Ophiuchus EP",
+          "year": 2015,
+          "why": "the early, stripped hypnotic techno she started from",
+          "yt_audio": "o_uNhzMfucA",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "lykke-li",
+      "name": "Lykke Li",
+      "order": 33,
+      "day": "sun",
+      "stage": "silver",
+      "time": "20:00",
+      "origin": "Ystad, Sweden",
+      "formed": "2007",
+      "genres": [
+        "indie pop",
+        "art pop",
+        "electropop"
+      ],
+      "blurb": "Swedish indie pop with the reverb left up and the heartbreak left in — cavernous drums, a thin close-miked voice, and hooks that go down easier than the lyrics. Best known for \"I Follow Rivers\".",
+      "detail": "Li broke out of Stockholm in 2008 with Youth Novels, produced end to end by Björn Yttling of Peter Bjorn and John, and has changed shape on every record since: the big-drum Wounded Rhymes (2011), the stark breakup album I Never Learn (2014), and the contemporary-pop turn of So Sad So Sexy (2018). Eyeye (2022) went the other way entirely — recorded in her Los Angeles bedroom with vocals cut on a $70 handheld drum mic, mixed to tape, and released alongside looping 16mm visuals. Her sixth album, The Afterparty, came out on 8 May 2026 on Neon Gold with Yttling and Dave Sitek among the producers, preceded by four singles, so this set lands three months after the record. Yttling has now produced her first three albums and returned for the latest.",
+      "members": [
+        {
+          "name": "Lykke Li",
+          "role": "vocals, songwriting",
+          "since": "2007"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Youth Novels",
+          "year": 2008,
+          "note": "Debut, produced entirely by Björn Yttling; the \"Little Bit\" single came first, in 2007"
+        },
+        {
+          "title": "Wounded Rhymes",
+          "year": 2011,
+          "note": "The big-drum record, and the one carrying \"I Follow Rivers\""
+        },
+        {
+          "title": "I Never Learn",
+          "year": 2014,
+          "note": "Short and stripped, written after a breakup"
+        },
+        {
+          "title": "So Sad So Sexy",
+          "year": 2018,
+          "note": "The turn toward contemporary pop and hip-hop production"
+        },
+        {
+          "title": "Eyeye",
+          "year": 2022,
+          "note": "Recorded in her Los Angeles bedroom; an audiovisual album with 16mm looping films by Theo Lindquist"
+        },
+        {
+          "title": "The Afterparty",
+          "year": 2026,
+          "note": "Sixth album, 8 May 2026 on Neon Gold; producers include Björn Yttling, Dave Sitek, Rick Nowels and Psymun"
+        }
+      ],
+      "links": {
+        "official": "https://lykkeli.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Lykke_Li",
+        "spotify": "https://open.spotify.com/artist/6oBm8HB0yfrIc9IHbxs6in",
+        "yt_music": "https://music.youtube.com/channel/UC1uh3tMXSenbfK6s91MyHZg"
+      },
+      "songs": [
+        {
+          "title": "I Follow Rivers",
+          "album": "Wounded Rhymes",
+          "year": 2011,
+          "why": "the one everybody already knows, and the song that made her a festival booking across Europe",
+          "yt_audio": "vZYbEL06lEU",
+          "yt_video": null
+        },
+        {
+          "title": "Little Bit",
+          "album": "Youth Novels",
+          "year": 2008,
+          "why": "the debut single that broke her, and the clearest picture of the early Yttling production",
+          "yt_audio": "vJyy1yUsPvk",
+          "yt_video": null
+        },
+        {
+          "title": "No Rest for the Wicked",
+          "album": "I Never Learn",
+          "year": 2014,
+          "why": "the centrepiece of the breakup album — almost no rhythm section, all voice and reverb",
+          "yt_audio": "B_pQDpsjNHE",
+          "yt_video": null
+        },
+        {
+          "title": "Deep End",
+          "album": "So Sad So Sexy",
+          "year": 2018,
+          "why": "the pivot record's lead single, where the indie-pop framing drops away for modern pop production",
+          "yt_audio": "2acCDPtA-1U",
+          "yt_video": null
+        },
+        {
+          "title": "Lucky Again",
+          "album": "The Afterparty",
+          "year": 2026,
+          "why": "first single off the new album, so likely the spine of this set",
+          "yt_audio": "wrazVZlMbeY",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "kiri-ra",
+      "name": "Kiri Ra!",
+      "order": 34,
+      "day": "sun",
+      "stage": "other-sound",
+      "time": "20:00",
+      "origin": "Helsinki, Finland / Stockholm, Sweden",
+      "formed": "2014",
+      "genres": [
+        "free improvisation",
+        "ambient jazz",
+        "electroacoustic"
+      ],
+      "blurb": "Free-improvising ambient jazz trio: Lau Nau on modular synth and voice, Linda Fredriksson on saxophones and flutes, Matti Bye on piano and vibraphone. Their second album, nen, came out in May 2026.",
+      "detail": "The trio started as a cross-Baltic improvisation group in 2014 and took its present shape in the winter of 2016, when the Swedish Film Institute commissioned Lau Nau (Laura Naukkarinen), Linda Fredriksson and Matti Bye to score experimental amateur documentaries from its archive. The 2021 debut on OONA Recordings is made up entirely of improvised live studio takes that came out of that film work, cut at Barnängen studio in Stockholm. Second album nen followed on We Jazz Records in May 2026, assembled over roughly a decade of unhurried sessions; the band records without discussing anything beforehand, each player picking an instrument and building on repeated motifs and the space between notes. Away from the trio the three are known separately for Lau Nau's experimental folk and electronics, Fredriksson's saxophone album Juniper, and Bye's silent-film scoring.",
+      "members": [
+        {
+          "name": "Lau Nau (Laura Naukkarinen)",
+          "role": "modular synth, live electronics, voice, cello, glockenspiel"
+        },
+        {
+          "name": "Linda Fredriksson",
+          "role": "saxophones, bass clarinet, flutes, keys"
+        },
+        {
+          "name": "Matti Bye",
+          "role": "piano, synths, live electronics, vibraphone"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Kiri Ra!",
+          "year": 2021,
+          "note": "debut on OONA Recordings, entirely improvised studio takes from the Swedish Film Institute commission"
+        },
+        {
+          "title": "nen",
+          "year": 2026,
+          "note": "second album, We Jazz Records, ten years in the making"
+        }
+      ],
+      "links": {
+        "official": "https://wejazz.fi/kiri-ra/",
+        "spotify": "https://open.spotify.com/artist/1kMbCcSenu1Kk0W9RGa8VR",
+        "bandcamp": "https://wejazzrecords.bandcamp.com/album/nen",
+        "yt_music": "https://music.youtube.com/channel/UCI8jUFloPmLAEIXTlsg2xgw"
+      },
+      "songs": [
+        {
+          "title": "Haplo'os",
+          "album": "Kiri Ra!",
+          "year": 2021,
+          "why": "the track premiered ahead of the debut, and the easiest way in",
+          "yt_audio": "CNZQrQo8Nvw",
+          "yt_video": null
+        },
+        {
+          "title": "Kites over Gärdet",
+          "album": "Kiri Ra!",
+          "year": 2021,
+          "why": "the seven-minute opener, closest to the film-score work they came out of",
+          "yt_audio": "BDHNnFTpu84",
+          "yt_video": null
+        },
+        {
+          "title": "ream",
+          "album": "nen",
+          "year": 2026,
+          "why": "the one We Jazz put a visualizer out for when the new album landed",
+          "yt_audio": "hIgSFUitz1c",
+          "yt_video": null
+        },
+        {
+          "title": "niin-så",
+          "album": "nen",
+          "year": 2026,
+          "why": "opens nen and sets its quieter, more electronic register",
+          "yt_audio": "hNlClpX-h0c",
+          "yt_video": null
+        },
+        {
+          "title": "ahiahi",
+          "album": "nen",
+          "year": 2026,
+          "why": "the closer, the softest thing they have recorded",
+          "yt_audio": "FGeBBMjHZJA",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "vg",
+      "name": "VG+",
+      "order": 35,
+      "day": "sun",
+      "stage": "x-garden",
+      "time": "20:00",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "dancehall",
+        "reggae",
+        "soca"
+      ],
+      "blurb": "Dancehall and reggae DJ and selector from Helsinki, part of the Komposti Sound sound system. As a producer he made \"Bandida\" with Seksikäs-Suklaa, one of the most-streamed Finnish tracks of summer 2016.",
+      "detail": "VG+ is Veikko Grönroos, a Helsinki DJ, selector and producer who has been in the city's dancehall and reggae circles since the early 2000s; the name comes from his initials and the record-grading term \"very good plus\". He has been part of the Komposti Sound sound system since 2008 alongside Bommi-Tommi and Enrico, co-hosted their Kompostiradio show on Radio Helsinki, and held the DJ residency at the weekly Reggae Sundays club night from 2007 to 2015. His own catalogue is a run of Finnish-language singles rather than albums, headed by the 2016 Seksikäs-Suklaa collaboration \"Bandida\", which was Spotify Finland's fifth most-streamed track that summer and has since passed 15 million plays; he also produced Töölön Ketterä's \"Kuplii\" and guests on tracks by Kalevauva.fi, Prinssi Jusuf and Särre. Flow bills this as a DJ set rather than a live show, and his sets run wider than reggae and dancehall into soca, bouyon and urban club music. He plays the X Garden on Sunday 16 August at 20:00, on a day the stage is given over to dancehall and Afro sounds.",
+      "members": [
+        {
+          "name": "Veikko \"VG+\" Grönroos",
+          "role": "DJ, selector, producer"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Näänks mä unta",
+          "year": 2014,
+          "note": "debut single"
+        },
+        {
+          "title": "Täss näin",
+          "year": 2015
+        },
+        {
+          "title": "Bandida",
+          "year": 2016,
+          "note": "with Seksikäs-Suklaa; over 15 million Spotify plays"
+        },
+        {
+          "title": "50 km",
+          "year": 2016
+        },
+        {
+          "title": "Kumman kaa",
+          "year": 2017,
+          "note": "the afrobeat-leaning one"
+        },
+        {
+          "title": "Stuntit",
+          "year": 2018,
+          "note": "most recent single under his own name"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/vgplus/",
+        "spotify": "https://open.spotify.com/artist/0pgj6baVfMHvEF8XpDcTp4",
+        "yt_music": "https://music.youtube.com/channel/UCJ0UAJOK0msoPFM69MU49Ug"
+      },
+      "songs": [
+        {
+          "title": "Bandida",
+          "album": "Bandida",
+          "year": 2016,
+          "why": "the hit, and the reason most people in Finland know the name",
+          "yt_audio": "adr8j8hS79M",
+          "yt_video": null
+        },
+        {
+          "title": "Näänks mä unta",
+          "album": "Näänks mä unta",
+          "year": 2014,
+          "why": "the 2014 debut single that set the Finnish-language dancehall template",
+          "yt_audio": "sn5VC5aPlgk",
+          "yt_video": null
+        },
+        {
+          "title": "50 km",
+          "album": "50 km",
+          "year": 2016,
+          "why": "the follow-up to Bandida, and still one of his most-played solo tracks",
+          "yt_audio": "6z8o0Sm46yk",
+          "yt_video": null
+        },
+        {
+          "title": "Kumman kaa",
+          "album": "Kumman kaa",
+          "year": 2017,
+          "why": "the afrobeat-leaning one, for the side of him that is not dancehall",
+          "yt_audio": "rLbrov7ej6w",
+          "yt_video": null
+        },
+        {
+          "title": "Stuntit",
+          "album": "Stuntit",
+          "year": 2018,
+          "why": "the most recent thing released under his own name",
+          "yt_audio": "w9_o47jPAf0",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "lambrini-girls",
+      "name": "Lambrini Girls",
+      "order": 36,
+      "day": "sun",
+      "stage": "black-tent",
+      "time": "20:30",
+      "origin": "Brighton, England",
+      "formed": "2019",
+      "genres": [
+        "punk rock",
+        "noise rock",
+        "riot grrrl"
+      ],
+      "blurb": "Brighton punk duo playing short, loud, noise-rock-leaning songs about class, queer life, misogyny and workplace bullshit, expanded to a three-piece live. Their City Slang debut Who Let the Dogs Out (2025) topped the UK Rock & Metal chart.",
+      "detail": "Formed in Brighton in 2019 with a different singer and rhythm section; Phoebe Lunny took over lead vocals in 2020 and Selin Macieira-Boşgelmez joined on bass in 2022, after which the band settled as a duo working with a touring drummer. The 2023 EP You're Welcome on Big Scary Monsters collected the singles that built their reputation, and the debut album Who Let the Dogs Out arrived on City Slang in January 2025 — eleven tracks in under thirty minutes, No. 16 on the UK albums chart and No. 1 on the Rock & Metal chart. The lyrics are explicitly political: catcalling, lad culture, gender dysphoria, trans rights, far-right politics, and a 2024 single, \"God's Country\", aimed at Britain itself. They released the standalone single \"Cult of Celebrity\" in March 2026 and then cancelled much of the accompanying tour after Lunny broke her neck; the Flow booking is on the run of summer festival dates that followed.",
+      "members": [
+        {
+          "name": "Phoebe Lunny",
+          "role": "vocals, guitar (guitar since 2019, lead vocals since 2020)",
+          "since": "2019"
+        },
+        {
+          "name": "Selin Macieira-Boşgelmez",
+          "role": "bass, backing vocals",
+          "since": "2022"
+        },
+        {
+          "name": "Misha Phillips",
+          "role": "drums (touring)",
+          "since": "2023"
+        },
+        {
+          "name": "Kaitlin Pelkey",
+          "role": "bass (touring, deputising for Macieira-Boşgelmez)",
+          "since": "2025"
+        }
+      ],
+      "albums": [
+        {
+          "title": "You're Welcome",
+          "year": 2023,
+          "note": "debut EP on Big Scary Monsters; part-funded by an inheritance, cover art a burning pile of shit"
+        },
+        {
+          "title": "God's Country / Body of Mine",
+          "year": 2024,
+          "note": "double A-side single; No. 9 on the UK vinyl singles chart"
+        },
+        {
+          "title": "Who Let the Dogs Out",
+          "year": 2025,
+          "note": "debut album, City Slang, produced by Daniel Fox with the band; No. 1 UK Rock & Metal chart"
+        },
+        {
+          "title": "Cult of Celebrity",
+          "year": 2026,
+          "note": "standalone single, their most recent release"
+        }
+      ],
+      "links": {
+        "official": "https://www.lambrinigirlsband.co.uk/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Lambrini_Girls",
+        "spotify": "https://open.spotify.com/artist/6VR4TJ20WGiho2xZWMuuWb",
+        "bandcamp": "https://lambrinigirlsband.bandcamp.com/",
+        "yt_music": "https://music.youtube.com/channel/UCr33PPOQ3kfnONhM6a49CGA"
+      },
+      "songs": [
+        {
+          "title": "Company Culture",
+          "album": "Who Let the Dogs Out",
+          "year": 2025,
+          "why": "the album's first single and the obvious way in — a sarcastic three minutes on being harassed at work",
+          "yt_audio": "-kz_CrB0Vf0",
+          "yt_video": null
+        },
+        {
+          "title": "Big Dick Energy",
+          "album": "Who Let the Dogs Out",
+          "year": 2025,
+          "why": "the loudest and most quoted one, a takedown of toxic masculinity",
+          "yt_audio": "TJc0_-QvJtU",
+          "yt_video": null
+        },
+        {
+          "title": "Cuntology 101",
+          "album": "Who Let the Dogs Out",
+          "year": 2025,
+          "why": "their most-streamed track and the album's closing shot",
+          "yt_audio": "20TDd19oA1Q",
+          "yt_video": null
+        },
+        {
+          "title": "Help Me I'm Gay",
+          "album": "You're Welcome",
+          "year": 2023,
+          "why": "the early single that built the live following; they still open it by asking the queer half of the room to raise a hand",
+          "yt_audio": "BNXFB_M3RCw",
+          "yt_video": null
+        },
+        {
+          "title": "Cult of Celebrity",
+          "year": 2026,
+          "why": "the newest thing they have, released March 2026",
+          "yt_audio": "_DAuSNXBgoM",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "habibi-funk",
+      "name": "Habibi Funk",
+      "order": 37,
+      "day": "sun",
+      "stage": "backyard",
+      "time": "20:30",
+      "origin": "Berlin, Germany",
+      "formed": "2015",
+      "genres": [
+        "Arab funk & soul",
+        "disco",
+        "DJ set"
+      ],
+      "songs_by": "Fadoul",
+      "blurb": "Arab funk, soul, disco and jazz from the 1960s-80s, played off vinyl by Jannis Stürtz, who runs the Berlin reissue label of the same name. Not a band: a selector playing records he licensed and reissued himself.",
+      "detail": "Habibi Funk is both a Berlin reissue label and the DJ name of its co-founder Jannis Stürtz, so this is a record set rather than a live act. The label reissues music from the Arab world recorded roughly between the 1960s and the 1980s — Moroccan and Sudanese funk, Algerian film scores, Egyptian disco and boogie, Lebanese folk-jazz, Libyan reggae — and puts it out with long booklets instead of as anonymous world-music exotica. Stürtz licenses every release directly from the artist or their family and gives them a 50% cut of the profits, which he frames as a deliberate refusal to repeat the pattern of Western labels extracting non-European music. He began after finding a Fadoul single in a Casablanca medina in 2012; catalogue number 001 appeared in 2015 and the label had reached 31 entries by 2026. The five songs below are all by Fadoul, the Moroccan singer whose Al Zman Saib was the label's first artist album — one name out of the thirty-odd a set actually draws on.",
+      "members": [
+        {
+          "name": "Jannis Stürtz",
+          "role": "DJ (vinyl only), label co-founder"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Fadoul — Al Zman Saib",
+          "year": 2015,
+          "note": "Habibi Funk 002; Moroccan James Brown-and-Free-inflected funk, the label's first artist album"
+        },
+        {
+          "title": "Ahmed Malek — Musique Originale De Films",
+          "year": 2016,
+          "note": "Algerian film composer, the label's most-reissued artist (volumes 2 and 3 followed in 2024)"
+        },
+        {
+          "title": "Habibi Funk: An Eclectic Selection of Music from the Arab World",
+          "year": 2017,
+          "note": "the label sampler — the closest thing on record to the DJ set; part 2 in 2021"
+        },
+        {
+          "title": "Kamal Keila — Muslims and Christians",
+          "year": 2018,
+          "note": "previously unreleased Sudanese radio tapes"
+        },
+        {
+          "title": "Issam Hajali — Mouasalat Ila Jacad El Ard",
+          "year": 2019,
+          "note": "reissue of a 1977 Lebanese folk-jazz album self-released in an edition of a few hundred"
+        },
+        {
+          "title": "Charif Megarbane — Marzipan",
+          "year": 2023,
+          "note": "the label's first album of new music by a living artist rather than a reissue"
+        }
+      ],
+      "links": {
+        "wikipedia": "https://en.wikipedia.org/wiki/Habibi_Funk_Records",
+        "bandcamp": "https://habibifunkrecords.bandcamp.com/",
+        "yt_music": "https://music.youtube.com/channel/UCYEGh0TE5wmkHnmKLTr0GwQ"
+      },
+      "songs": [
+        {
+          "title": "Sid Redad",
+          "album": "Al Zman Saib",
+          "year": 2015,
+          "why": "the album opener and the track the label is best known for",
+          "yt_audio": "M-jkwM5bY1U",
+          "yt_video": null
+        },
+        {
+          "title": "Al Zman Saib",
+          "album": "Al Zman Saib",
+          "year": 2015,
+          "why": "the title track — Fadoul's Darija reworking of Free's \"All Right Now\"",
+          "yt_audio": "7nOj97E0VCI",
+          "yt_video": null
+        },
+        {
+          "title": "Tayeh",
+          "album": "Al Zman Saib",
+          "year": 2015,
+          "why": "three minutes, raw and drum-led — the shortest way in",
+          "yt_audio": "_eFRJpKECyc",
+          "yt_video": null
+        },
+        {
+          "title": "Laylat Al Jadba",
+          "album": "Al Zman Saib",
+          "year": 2015,
+          "why": "the five-minute one, where the band stretches out past the funk workouts",
+          "yt_audio": "xXmdk1q_HZI",
+          "yt_video": null
+        },
+        {
+          "title": "Maktoub Lah",
+          "album": "Al Zman Saib",
+          "year": 2015,
+          "why": "longest cut on the record at nearly seven minutes",
+          "yt_audio": "2T3NptXXIzE",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "sampo",
+      "name": "Sampo",
+      "order": 38,
+      "day": "sun",
+      "stage": "champagne",
+      "time": "21:00",
+      "origin": "Helsinki, Finland",
+      "genres": [
+        "house",
+        "tech house",
+        "minimal / rominimal"
+      ],
+      "blurb": "Helsinki house and tech-house DJ working the groovy, minimal end of the spectrum. A selector rather than a producer — no records out, only sets — who in 2026 started the Analogia label and party series.",
+      "detail": "Sampo (Sampo Yrjö-Koskinen) is a Helsinki DJ who played his first Resident Advisor-listed gigs in 2018 under the name Von Sampo, shortening it to Sampo around 2025. He is a fixture of the city's club circuit rather than a touring name: Post Bar, Kaiku, Ääniwalli and Stidilä, the PTNKY party series (he played its tenth-anniversary night in March 2026), the IKONO-run Seremonia Vappu parties, and VISIO Festival in 2025. Alongside DJing he is involved in the Helsinki collectives PTNKY and LIITTO and the clothing brand IKONO. In 2026 he launched Analogia, described on its own event listings as \"a new record label and party series run by @sampoyk, exploring the groovy, deep, and slightly twisted side of electronic music\"; the first Club Analogia night was at Post Bar on 13 June 2026 and the label's first EP is expected in autumn 2026. He has no released tracks — his own SoundCloud is empty and nothing appears under either name on Discogs, MusicBrainz or Bandcamp — so what exists on record is guest mixes: Tanzgemeinschaft's TGMS Future Stars #75 (2019), Maucast.008 for Maukas Records (2021), FABRI Mixtape Vol 5 (2022) and an IDA Radio Folder (2023).",
+      "members": [
+        {
+          "name": "Sampo Yrjö-Koskinen",
+          "role": "DJ; runs the Analogia label and party series"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/sampoyk",
+        "bandcamp": "https://analogiarecords.bandcamp.com"
+      }
+    },
+    {
+      "id": "nick-cave-the-bad-seeds",
+      "name": "Nick Cave & the Bad Seeds",
+      "order": 39,
+      "day": "sun",
+      "stage": "main",
+      "time": "21:00",
+      "origin": "Melbourne, Australia",
+      "formed": "1983",
+      "genres": [
+        "alternative rock",
+        "post-punk",
+        "gothic rock"
+      ],
+      "blurb": "Alternative and post-punk rock from Melbourne by way of West Berlin, built on Nick Cave’s preacher’s baritone and Warren Ellis’s violin and loops. Four decades of murder ballads, hymns and grief records.",
+      "detail": "Formed in 1983 out of the wreckage of Cave's previous band The Birthday Party, the Bad Seeds spent their early years based in West Berlin, making the scraped, violent records From Her to Eternity and Tender Prey. Successive line-ups pushed them from that noise towards the piano ballads of The Boatman's Call, the arena crescendos of Push the Sky Away and the ambient grief of Ghosteen, written after the death of Cave's son. Founder Blixa Bargeld left in 2003 and last original member Mick Harvey in 2009, leaving multi-instrumentalist Warren Ellis as Cave's principal co-writer and the band's de facto musical director. Live the core group is now augmented by extra keyboards and a gospel-style backing-vocal section; through the 2024-25 Wild God tour, bass was played by Radiohead's Colin Greenwood in place of Martyn P. Casey. Flow is one of a run of European festival headline dates in August 2026, listed on the band's own tour page.",
+      "members": [
+        {
+          "name": "Nick Cave",
+          "role": "vocals, piano, organ",
+          "since": "1983"
+        },
+        {
+          "name": "Warren Ellis",
+          "role": "violin, tenor guitar, flute, synthesizers, loops; Cave's main co-writer and the band's de facto musical director since Blixa Bargeld left in 2003",
+          "since": "1997"
+        },
+        {
+          "name": "Thomas Wydler",
+          "role": "drums, percussion",
+          "since": "1985"
+        },
+        {
+          "name": "Martyn P. Casey",
+          "role": "bass",
+          "since": "1990"
+        },
+        {
+          "name": "Jim Sclavunos",
+          "role": "percussion, drums, vibraphone",
+          "since": "1994"
+        },
+        {
+          "name": "George Vjestica",
+          "role": "guitar",
+          "since": "2013"
+        },
+        {
+          "name": "Larry Mullins",
+          "role": "drums, percussion, keyboards (touring member)",
+          "since": "2015"
+        },
+        {
+          "name": "Carly Paradis",
+          "role": "keyboards (touring member)",
+          "since": "2022"
+        },
+        {
+          "name": "Colin Greenwood",
+          "role": "bass on the 2024-25 Wild God tour, standing in for Martyn P. Casey; also of Radiohead",
+          "since": "2024"
+        }
+      ],
+      "albums": [
+        {
+          "title": "From Her to Eternity",
+          "year": 1984,
+          "note": "the debut, cut in London and West Berlin with Blixa Bargeld and Mick Harvey"
+        },
+        {
+          "title": "Let Love In",
+          "year": 1994,
+          "note": "their most-played record live; 'Red Right Hand' and 'Do You Love Me?'"
+        },
+        {
+          "title": "Murder Ballads",
+          "year": 1996,
+          "note": "the commercial breakthrough, on the back of the Kylie Minogue duet 'Where the Wild Roses Grow'"
+        },
+        {
+          "title": "The Boatman's Call",
+          "year": 1997,
+          "note": "the pivot to spare piano ballads"
+        },
+        {
+          "title": "Ghosteen",
+          "year": 2019,
+          "note": "synth-ambient double album written after the death of Cave's son Arthur"
+        },
+        {
+          "title": "Wild God",
+          "year": 2024,
+          "note": "the current record and the source of most of the set"
+        }
+      ],
+      "links": {
+        "official": "https://www.nickcave.com/",
+        "wikipedia": "https://en.wikipedia.org/wiki/Nick_Cave_and_the_Bad_Seeds",
+        "spotify": "https://open.spotify.com/artist/4UXJsSlnKd7ltsrHebV79Q",
+        "yt_music": "https://music.youtube.com/channel/UCha4YwIM9oyE6NSgUmzVx7g"
+      },
+      "songs": [
+        {
+          "title": "Red Right Hand",
+          "album": "Let Love In",
+          "year": 1994,
+          "why": "the obvious way in - the Peaky Blinders theme, and the one riff everyone already knows",
+          "yt_audio": "YUNFgN-Lh6c",
+          "yt_video": "RrxePKps87k"
+        },
+        {
+          "title": "The Mercy Seat",
+          "album": "Tender Prey",
+          "year": 1988,
+          "why": "the Berlin years at full tilt: seven minutes of an electric chair, and still the set's most violent moment",
+          "yt_audio": "sa5U2GrLshQ",
+          "yt_video": null
+        },
+        {
+          "title": "Into My Arms",
+          "album": "The Boatman's Call",
+          "year": 1997,
+          "why": "the other side entirely - voice and piano, the song people who own no Bad Seeds record can sing",
+          "yt_audio": "UzpHdHQANfw",
+          "yt_video": "LnHoqHscTKE"
+        },
+        {
+          "title": "Jubilee Street",
+          "album": "Push the Sky Away",
+          "year": 2013,
+          "why": "the slow-build one that ends in noise; the live centrepiece for a decade now",
+          "yt_audio": "Dq7KtFsIUqw",
+          "yt_video": null
+        },
+        {
+          "title": "Wild God",
+          "album": "Wild God",
+          "year": 2024,
+          "why": "where the band is in 2026 - the late, euphoric, gospel-choir mode the current tour is built on",
+          "yt_audio": "uAgsn7la3jg",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "kemarr",
+      "name": "Kemarr",
+      "order": 40,
+      "day": "sun",
+      "stage": "x-garden",
+      "time": "21:00",
+      "origin": "London, United Kingdom",
+      "genres": [
+        "dancehall",
+        "reggaeton",
+        "club"
+      ],
+      "blurb": "Dancehall, reggaeton, afro house and baile funk selector from southwest London, whose sets run 90s Jamaican records against rare instrumentals and dubs. A DJ and radio host with no releases of his own — the body of work is mixes.",
+      "detail": "Kemarr is a DJ, designer and art director from southwest London; his own bio traces the sound to Jamaican roots crossed with hip-hop. He came up on No Signal, the London online station, where the Kemarr Show ran to 17 episodes across 2020-21, and now holds the Lighter Dance residency on NTS Radio, first broadcast in February 2024 and running through 2026. A 2021 Crack Magazine mix for a cancelled Notting Hill Carnival is the clearest statement of the range: reggae into jungle and drum'n'bass, with dancehall from the 90s to the 2010s. Flow's own listing notes recent London shows at Boiler Room, NTS and Colour Factory, and that his day job is art director at Resident Advisor. Sources differ slightly on the geography: Crack in 2021 called him East London-based, while his own bio says he hails from southwest London.",
+      "members": [
+        {
+          "name": "Kemarr",
+          "role": "DJ and selector; designer and art director"
+        }
+      ],
+      "albums": [
+        {
+          "title": "The Kemarr Show (No Signal)",
+          "year": 2020,
+          "note": "radio show, not a release — 17 episodes on the London station No Signal across 2020-21, including a Lee Scratch Perry special"
+        },
+        {
+          "title": "Notting Hill Carnival Special",
+          "year": 2021,
+          "note": "mix, not a release — made for Crack Magazine the year Carnival was cancelled; reggae, jungle and drum'n'bass with 90s-to-2010s dancehall"
+        },
+        {
+          "title": "Lighter Dance",
+          "year": 2024,
+          "note": "NTS Radio residency, first episode February 2024, still running in 2026 and tagged from dembow and bouyon to jungle and UK funky"
+        }
+      ],
+      "links": {
+        "official": "https://soundcloud.com/k_3marr"
+      }
+    },
+    {
+      "id": "2themax-b2b-ceb-b2b-kemik",
+      "name": "2THEMAX b2b CEB b2b KEMIK",
+      "order": 41,
+      "day": "sun",
+      "stage": "front-yard",
+      "time": "21:30",
+      "origin": "Helsinki, Finland",
+      "formed": "2021",
+      "genres": [
+        "techno",
+        "trance",
+        "progressive house"
+      ],
+      "blurb": "High-energy techno, euphoric trance and hard progressive house played three-handed: a back-to-back DJ set by the three founders of Korgy, the queer Helsinki party collective that curates Flow's Sunday Front Yard.",
+      "detail": "Korgy was founded in Helsinki in 2021 and has become the city's most talked-about queer club night, a deliberately tongue-in-cheek techno-trance phenomenon known for queues around the block; it programmes the whole of Sunday at the Front Yard, and this three-way b2b takes the late slot. All three are founders and residents of it, and back-to-back here means they trade records track by track rather than playing three separate sets, working from a shared palette of high-energy techno, euphoric trance and progressive house steered by whatever the floor is doing. CEB, who previously played as Avery, also founded and resides at the Interlink club nights at Post Bar and Ääniwalli; 2THEMAX and KEMIK played b2b at GEGEN's New Year's party at Berlin's KitKat Club over 2025/26, and the crew's recent bookings run to Copenhagen and FOLD in London. Note that the year given here is Korgy's founding, not the trio's - the b2b is a line-up, not a project. None of the three is a recording artist: their output is DJ mixes on SoundCloud and the parties themselves, so there are no tracks to preview. Korgy has taken over a Flow stage once before, curating the Sunday of the X Garden in 2023.",
+      "members": [
+        {
+          "name": "2THEMAX",
+          "role": "DJ; co-founder and resident of Korgy",
+          "since": "2021"
+        },
+        {
+          "name": "CEB",
+          "role": "DJ; co-founder and resident of Korgy, and founder-resident of the Interlink club nights at Post Bar and Ääniwalli; formerly played as Avery",
+          "since": "2021"
+        },
+        {
+          "name": "KEMIK",
+          "role": "DJ; co-founder and resident of Korgy",
+          "since": "2021"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/korgy.collective/"
+      }
+    },
+    {
+      "id": "sailor-honeymoon",
+      "name": "Sailor Honeymoon",
+      "order": 42,
+      "day": "sun",
+      "stage": "balloon",
+      "time": "22:00",
+      "origin": "Seoul, South Korea",
+      "formed": "2022",
+      "genres": [
+        "punk rock",
+        "riot grrrl",
+        "garage rock"
+      ],
+      "blurb": "Punk rock and riot grrrl from Seoul: short, fast, deliberately unpolished songs about periods, bigoted friends and cockroaches, with a garage-rock fuzz and a deadpan delivery.",
+      "detail": "The band grew out of jam sessions at the Seoul venue Senggi Studio between photographer and drummer Abi Raymaker and techno DJ Zaeeun Shin, who improvised with a rotating cast of guest bassists — Meaningful Stone, HUNJIYA, Mio Si and TOMYO all passed through — before Yelim Kim settled into the chair. Their first show was Block Party Music and Art Festival in 2022; the debut single 'Cockroach' followed in 2023 and the self-titled eight-track EP in April 2024, recorded in England with producer Luke Smith and mixed by Claudius Mittendorfer. That EP took them to The Great Escape in 2024, Pentaport, and Primavera Sound in 2025. Their debut album, the thirteen-track 'The Worst of Sailor Honeymoon' on Good Good / [PIAS], is released on 14 August 2026 — two days before this set. The band frame the rough edges as the point: a rebuttal, in their words, to a pop culture that expects Korean artists to be flawless and pristine.",
+      "members": [
+        {
+          "name": "Abi Raymaker",
+          "role": "drums, vocals",
+          "since": "2022"
+        },
+        {
+          "name": "Zaeeun Shin",
+          "role": "guitar, vocals",
+          "since": "2022"
+        },
+        {
+          "name": "Yelim Kim",
+          "role": "bass, after a run of guest bassists"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Cockroach",
+          "year": 2023,
+          "note": "debut single"
+        },
+        {
+          "title": "Sailor Honeymoon",
+          "year": 2024,
+          "note": "debut EP, eight tracks, recorded in England with Luke Smith"
+        },
+        {
+          "title": "Armchair",
+          "year": 2025,
+          "note": "single, first taste of the album"
+        },
+        {
+          "title": "The Worst of Sailor Honeymoon",
+          "year": 2026,
+          "note": "debut album, thirteen tracks, out 14 August 2026 on Good Good / [PIAS]"
+        }
+      ],
+      "links": {
+        "wikipedia": "https://en.wikipedia.org/wiki/Sailor_Honeymoon",
+        "spotify": "https://open.spotify.com/artist/6qzA8cgwfUtv4M5BHgCK7C",
+        "bandcamp": "https://sailorhoneymoon.bandcamp.com/",
+        "yt_music": "https://music.youtube.com/channel/UC17iZcAt0mYmNBFiye5qcQg"
+      },
+      "songs": [
+        {
+          "title": "Bad Apple",
+          "album": "Sailor Honeymoon",
+          "year": 2024,
+          "why": "the obvious entry point and their most-played track, about working out that a friend is a bigot",
+          "yt_audio": "6iCfpA-5I48",
+          "yt_video": null
+        },
+        {
+          "title": "Cockroach",
+          "album": "Sailor Honeymoon",
+          "year": 2024,
+          "why": "the 2023 debut single that introduced them, a pest as a metaphor for people you would rather yell at than fear",
+          "yt_audio": "4pvk6E48PnI",
+          "yt_video": null
+        },
+        {
+          "title": "PMS Police",
+          "album": "Sailor Honeymoon",
+          "year": 2024,
+          "why": "two minutes that show the riot grrrl humour the band is written about for",
+          "yt_audio": "E4j047zPXdc",
+          "yt_video": "8HAjlmTpXTs"
+        },
+        {
+          "title": "Armchair",
+          "album": "The Worst of Sailor Honeymoon",
+          "year": 2026,
+          "why": "the first single off the debut album, out a year ahead of it in 2025, aimed at people who sit comfortably and tell others what to do",
+          "yt_audio": "UuD3ZGJBZ90",
+          "yt_video": null
+        },
+        {
+          "title": "I Wanna Leave You",
+          "album": "The Worst of Sailor Honeymoon",
+          "year": 2026,
+          "why": "the single that announced the album, and the closest thing to where they are now",
+          "yt_audio": "2Jopc_-Dw9c",
+          "yt_video": "zO6cXi89SXs"
+        }
+      ]
+    },
+    {
+      "id": "bonanza-boys",
+      "name": "Bonanza Boys",
+      "order": 43,
+      "day": "sun",
+      "stage": "champagne",
+      "time": "22:00",
+      "origin": "Helsinki, Finland",
+      "formed": "2020",
+      "genres": [
+        "house",
+        "techno",
+        "eclectic DJ set"
+      ],
+      "songs_by": "Fleur Amser",
+      "blurb": "Genre-hopping, house- and techno-leaning DJ duo from Helsinki: Fleur Amser and Simo Pukkinen, playing together since the Picnic Bonanza party started in 2020. Their IDA Radio show runs post-punk to dub.",
+      "detail": "Fleur Amser is Nestori Majoinen, co-owner of the Helsinki label A001 and a cinematographer as well as a DJ; his debut solo EP Alternative Ending came out on OO Recordings in January 2023, and he plays live as well as DJ sets around Kaiku and the city's club nights. Simo Pukkinen has been a fixture behind IDA Radio for years alongside his own club bookings; the two host Picnic Bonanza Radio together on IDA, eleven episodes since May 2024, built on submissions and aimed at local artists who have not been heard yet. This is their first Flow booking, 22:00-23:00, the last set of the Sunday at the Champagne Bar & Lounge. Nothing has been released under the Bonanza Boys name, so the songs listed here are Fleur Amser's own studio tracks rather than the duo's.",
+      "members": [
+        {
+          "name": "Fleur Amser",
+          "role": "DJ and producer; real name Nestori Majoinen, co-owner of the A001 label",
+          "since": "2020"
+        },
+        {
+          "name": "Simo Pukkinen",
+          "role": "DJ; longtime IDA Radio figure and club promoter",
+          "since": "2020"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Alternative Ending EP",
+          "year": 2023,
+          "note": "Fleur Amser's debut solo EP, on OO Recordings (OOR005); limited recycled-cassette run duplicated in Helsinki"
+        },
+        {
+          "title": "V/A - Love Letters to Helsinki",
+          "year": 2025,
+          "note": "first compilation on A001, the label Fleur Amser co-owns; his track on it is 'OVER'"
+        },
+        {
+          "title": "EMO-008 Various Artists",
+          "year": 2025,
+          "note": "Emotsiya various-artists release carrying 'Icecold' by DJ JVS & Fleur Amser"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/picnicbonanza/",
+        "spotify": "https://open.spotify.com/artist/60JvY2TLLZ4la3J8bypnTF",
+        "bandcamp": "https://fleuramser.bandcamp.com",
+        "yt_music": "https://music.youtube.com/search?q=Fleur%20Amser"
+      },
+      "songs": [
+        {
+          "title": "Alternative Ending",
+          "album": "Alternative Ending EP",
+          "year": 2023,
+          "why": "title track of the debut EP, the obvious entry point",
+          "yt_audio": "GQTZ39MIw5k",
+          "yt_video": null
+        },
+        {
+          "title": "Deep",
+          "album": "Alternative Ending EP",
+          "year": 2023,
+          "why": "the house side of the same EP",
+          "yt_audio": "ibGUpD4E1PI",
+          "yt_video": null
+        },
+        {
+          "title": "Don't",
+          "album": "Alternative Ending EP",
+          "year": 2023,
+          "why": "the harder, basement-facing cut from the EP",
+          "yt_audio": "PhHdWpxweyg",
+          "yt_video": null
+        },
+        {
+          "title": "Icecold",
+          "album": "EMO-008 Various Artists",
+          "year": 2025,
+          "why": "a collaboration with DJ JVS, for how he sounds off his own labels",
+          "yt_audio": "3SLHM7yAX_o",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "voice-actor",
+      "name": "Voice Actor",
+      "order": 44,
+      "day": "sun",
+      "stage": "other-sound",
+      "time": "22:00",
+      "origin": "Sheffield, United Kingdom",
+      "genres": [
+        "experimental ambient",
+        "dream pop",
+        "sound collage"
+      ],
+      "blurb": "Hushed, multilayered experimental ambient built from trip-hop and dream-pop fragments, murmured monologue and tape hiss. The project of Noa Kurzweil, who records for the Belgian label Stroom and hosts the NTS show Breaking People.",
+      "detail": "The debut, Sent From My Telephone (Stroom, 2022), is 108 tracks and over four hours long, sequenced alphabetically and built with Levi Lanser so that it plays like hundreds of consecutive voice messages. Fake Sleep (2023) is the 16-track vinyl distillation of that material plus new pieces, and the usual way in. Lust (1) (2025) swaps Lanser for the Welsh producer Squu and is leaner and dubbier, with Kurzweil's voice cut up into rhythm and texture rather than left as narration. She gives very few interviews and the project's biography is deliberately thin. Flow bills the Suvilahti set as her first audiovisual performance in Finland.",
+      "members": [
+        {
+          "name": "Noa Kurzweil",
+          "role": "voice, arrangement, production"
+        },
+        {
+          "name": "Squu",
+          "role": "production; co-made Lust (1) (2025)"
+        },
+        {
+          "name": "Levi Lanser",
+          "role": "production; co-made Sent From My Telephone and Fake Sleep, not credited on Lust (1)"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Sent From My Telephone",
+          "year": 2022,
+          "note": "debut on Stroom: 108 tracks, over four hours, in alphabetical order"
+        },
+        {
+          "title": "Fake Sleep",
+          "year": 2023,
+          "note": "16-track LP distilling the debut alongside new material"
+        },
+        {
+          "title": "Lust (1)",
+          "year": 2025,
+          "note": "made with Squu; dub-leaning and vocally processed"
+        },
+        {
+          "title": "That Veil of Yours",
+          "year": 2025,
+          "note": "guest vocal on a Carrier single for Modern Love"
+        }
+      ],
+      "links": {
+        "spotify": "https://open.spotify.com/artist/6PsuUa5ijopH2T8rVzHSZc",
+        "bandcamp": "https://voiceactor.bandcamp.com",
+        "yt_music": "https://music.youtube.com/channel/UCbHFF2QzQqBG2V7SLgYoxIw"
+      },
+      "songs": [
+        {
+          "title": "Badman",
+          "album": "Sent From My Telephone",
+          "year": 2022,
+          "why": "by a distance their most-played track, and how most listeners meet the project",
+          "yt_audio": "G0oPNV4LcVo",
+          "yt_video": null
+        },
+        {
+          "title": "Camden",
+          "album": "Fake Sleep",
+          "year": 2023,
+          "why": "the five-minute dream-pop centrepiece reviewers keep pointing at",
+          "yt_audio": "cbkYaUKVUfk",
+          "yt_video": null
+        },
+        {
+          "title": "Pelli",
+          "album": "Fake Sleep",
+          "year": 2023,
+          "why": "the six-minute closer, the ambient end of the range",
+          "yt_audio": "j2HbpoAV1Y0",
+          "yt_video": null
+        },
+        {
+          "title": "Barbara",
+          "album": "Lust (1)",
+          "year": 2025,
+          "why": "the peak of the Squu record: a spoken aside that turns into warped R&B",
+          "yt_audio": "0BHG7BSMQKQ",
+          "yt_video": null
+        },
+        {
+          "title": "Look Nice",
+          "album": "Lust (1)",
+          "year": 2025,
+          "why": "the pop-adjacent one on the current album",
+          "yt_audio": "96CIotO87rE",
+          "yt_video": null
+        }
+      ]
+    },
+    {
+      "id": "dj-tev",
+      "name": "DJ Tev",
+      "order": 45,
+      "day": "sun",
+      "stage": "x-garden",
+      "time": "22:00",
+      "origin": "Jamaica — based in Sweden",
+      "genres": [
+        "dancehall",
+        "reggae",
+        "afrobeats"
+      ],
+      "blurb": "Dancehall, reggae and Afrobeats selector, born and raised in Jamaica and now based in Sweden, who works Caribbean club nights and cultural celebrations across Scandinavia and central Europe.",
+      "detail": "DJ Tev (he styles it DJ TEV, and goes by Tev Immortal online) is a Jamaican-born selector working out of Sweden, where he plays clubs, festivals and Caribbean cultural events — Uppsala Reggae Festival and the Jamaican Independence celebrations in Stockholm among them — as well as dates in Norway, Denmark, Germany, Poland, Ukraine and France. His selection runs past reggae and dancehall into Afrobeats, soca, hip-hop, R&B, house and international party records, mixed in a fast juggling style. He is also a working dancer and dance teacher, which both he and Flow's own billing credit for how he reads a floor. He does not release records: his output is hour-long free mixtapes and the occasional re-flip of someone else's dancehall single on his YouTube channel, which has been running since at least 2020. At Flow he closes Sunday night on the X Garden.",
+      "members": [
+        {
+          "name": "DJ Tev",
+          "role": "DJ and selector; also a dancer and dance teacher"
+        }
+      ],
+      "albums": [
+        {
+          "title": "DJ Tev Only Hits 90s-2020 Hip Hop Juggling Mixtape",
+          "year": 2020,
+          "note": "earliest mix still up on his channel; the hip-hop side of the selection"
+        },
+        {
+          "title": "Last Last Afrobeats/Amapiano Mixtape",
+          "year": 2022,
+          "note": "his most-played mix by a wide margin — Burna Boy, Wizkid, Tems, Tekno"
+        },
+        {
+          "title": "Time Bomb Dancehall Mixtape",
+          "year": 2023,
+          "note": "straight dancehall: Bounty Killer, Cham, Skeng, Vybz Kartel"
+        },
+        {
+          "title": "DJ Tev Presents Brukout Fixtape 2023",
+          "year": 2023,
+          "note": "brukout selection — Aidonia, Konshens, Demarco, Spice"
+        },
+        {
+          "title": "Bubble \"Ladies Playground\" Mixtape",
+          "year": 2024,
+          "note": "bubble/gyal tunes; Armani, Roze Don, Iwaata"
+        },
+        {
+          "title": "Skin Rite Out Fixtape",
+          "year": 2026,
+          "note": "most recent, June 2026"
+        }
+      ],
+      "links": {
+        "official": "https://www.youtube.com/@djtevja"
+      }
+    },
+    {
+      "id": "korgy",
+      "name": "Korgy",
+      "order": 46,
+      "day": "sun",
+      "stage": "front-yard",
+      "origin": "Helsinki, Finland",
+      "formed": "2021",
+      "genres": [
+        "techno",
+        "trance",
+        "queer club collective"
+      ],
+      "blurb": "Helsinki techno-trance party collective, founded 2021 and known for queer club nights whose queues run round the block. At Flow it is listed as an act but appears as the curator of the entire Sunday programme at Front Yard.",
+      "detail": "Korgy is a Helsinki party and DJ collective founded in 2021 by 2THEMAX, CEB and KEMIK. It runs queer club nights at Ääniwalli, Kaiku and Post Bar — KORGY HALLOWEEN and KORGY COMPLEX among them — and has taken the same crew abroad to KitKat Club and RSO in Berlin, FOLD in London and Den Anden Side in Copenhagen, with guests including Narciss, Spikey Lee, Supergloss, Samantha Togni and Vinvar. Flow's Front Yard announcement of 17 March 2026 says Sunday at Front Yard is curated by Korgy, presenting 2THEMAX b2b CEB b2b KEMIK, NOEI, Sallidoing and Lara Silva; Flow's own pages call the b2b trio the collective's founders and NOEI, Sallidoing and Lara Silva its residents, and all four acts recur on Korgy's own Helsinki lineups. The billing therefore reads as the collective hosting rather than a set of its own: Korgy is the only Sunday Front Yard entry on Flow's published schedule with no set time, while NOEI (14:00), Sallidoing (16:00), Lara Silva (17:30), Patrick Mason (18:30), Anetha (20:00) and 2THEMAX b2b CEB b2b KEMIK (21:30) all have one — and whether the two international bookings, Patrick Mason and Anetha, sit inside the curation is not stated, since Flow announced them with the general Front Yard program yet describes the day as a whole as Korgy-curated. Korgy has no releases; its only recorded output under its own name is a SoundCloud mix series, with two entries so far, by Lara Silva and Sallidoing.",
+      "members": [
+        {
+          "name": "2THEMAX",
+          "role": "DJ, founder",
+          "since": "2021"
+        },
+        {
+          "name": "CEB",
+          "role": "DJ, founder; also organises the Interlink club night at Post Bar and Ääniwalli",
+          "since": "2021"
+        },
+        {
+          "name": "KEMIK",
+          "role": "DJ, founder",
+          "since": "2021"
+        },
+        {
+          "name": "Sallidoing",
+          "role": "DJ, Helsinki resident"
+        },
+        {
+          "name": "Lara Silva",
+          "role": "DJ, Helsinki resident"
+        },
+        {
+          "name": "NOEI",
+          "role": "DJ, Helsinki resident (one of the newer ones)"
+        },
+        {
+          "name": "Schacke",
+          "role": "DJ, international member"
+        },
+        {
+          "name": "Cristian Marras",
+          "role": "DJ, international member"
+        }
+      ],
+      "links": {
+        "official": "https://soundcloud.com/korgy_collective",
+        "soundcloud": "https://soundcloud.com/korgy_collective",
+        "instagram": "https://www.instagram.com/korgy.collective/"
+      }
+    },
+    {
+      "id": "1black-prince",
+      "name": "1Black Prince",
+      "order": 47,
+      "day": "sun",
+      "stage": "x-garden",
+      "origin": "Spanish Town, Jamaica",
+      "genres": [
+        "dancehall",
+        "afrobeats",
+        "reggae"
+      ],
+      "blurb": "Dancehall with afrobeats and hip-hop in it, from a Jamaican-born singer and deejay who came to music from professional dancing and now works out of Finland. Singles only since 2020, led by the breakout \"No Shelta\".",
+      "detail": "Born in Spanish Town, Jamaica, 1Black Prince moved from professional dancing into recording, and is now based in Finland. His catalogue is singles-only — no album or EP as of July 2026 — running from \"Stronger\" in June 2020 through a fast 2026 (\"Bad Gyal\", \"Dweet an Done\", \"Str88 Vybz\", \"Datz Beautiful\", \"Clip Dem All\", \"Nuff Money\" and \"Set Trendz\" all inside six months). \"No Shelta\" (2020) is the track Flow's own billing points at as his breakthrough, and it is still the most-watched thing on his YouTube channel; \"Favourite Position\" (2021) is his most-streamed. At Flow he is not playing a conventional set: the festival has him hosting the X Garden on the mic on Sunday, leading the dancers and running the crowd through the dancehall takeover.",
+      "members": [
+        {
+          "name": "1Black Prince",
+          "role": "vocals"
+        }
+      ],
+      "albums": [
+        {
+          "title": "Stronger",
+          "year": 2020,
+          "note": "single; earliest release on streaming"
+        },
+        {
+          "title": "No Shelta",
+          "year": 2020,
+          "note": "single; the breakthrough, and his most-viewed video"
+        },
+        {
+          "title": "Favourite Position",
+          "year": 2021,
+          "note": "single; his most-streamed track, with an official video"
+        },
+        {
+          "title": "Pan I Bank",
+          "year": 2023,
+          "note": "single; first release after a near two-year gap"
+        },
+        {
+          "title": "Igrade",
+          "year": 2024,
+          "note": "single; also issued as a sped-up edit"
+        },
+        {
+          "title": "Set Trendz",
+          "year": 2026,
+          "note": "single, July 2026 — the newest one"
+        }
+      ],
+      "links": {
+        "official": "https://www.instagram.com/1blackprincemusic/",
+        "spotify": "https://open.spotify.com/artist/5wksSqqObl2Pa8DHDbH7dC",
+        "yt_music": "https://music.youtube.com/channel/UCJxfxmz5UtPaufep6ZUQ9Zw"
+      },
+      "songs": [
+        {
+          "title": "No Shelta",
+          "year": 2020,
+          "why": "the breakthrough, and the one Flow's own page names",
+          "yt_audio": "tAO3JanB23o",
+          "yt_video": null
+        },
+        {
+          "title": "Favourite Position",
+          "year": 2021,
+          "why": "his most-streamed track and the poppiest end of the range",
+          "yt_audio": "xGhWDUKWEWk",
+          "yt_video": null
+        },
+        {
+          "title": "Stronger",
+          "year": 2020,
+          "why": "the first release, and the straighter, less party-facing side",
+          "yt_audio": "r1MFLnYXooQ",
+          "yt_video": "6ZDS-iwFJbI"
+        },
+        {
+          "title": "Igrade",
+          "year": 2024,
+          "why": "the 2024 one that travelled again on its sped-up edit",
+          "yt_audio": "5BGSwnxX_b0",
+          "yt_video": null
+        },
+        {
+          "title": "Clip Dem All",
+          "year": 2026,
+          "why": "current 2026 output — closest to what he is bringing to X Garden",
+          "yt_audio": "N7iEZDtwZ9A",
+          "yt_video": null
+        }
+      ]
+    }
+  ],
+  "playlists": [
+    {
+      "platform": "YouTube",
+      "n": 1,
+      "of": 3,
+      "count": 47,
+      "url": "https://www.youtube.com/watch_videos?video_ids=YlX8X411WrY,SZrn4zV_XHQ,XEsgUJEN8ts,vlse1SqQESE,Ar5SPbzP0PU,yFx07lwZdpA,oEO7iW4CTCM,r7-t2aQIBsU,mm42buaXmDo,6Lb1OZOTQmM,fHbv9ro7Uus,aWUMx79mz_Q,IqYfGvOJ72E,7F2sU3BAAnU,VoPrMvB6-44,SaFYscig9wc,FYITMsZd9SU,WxEcmBzs08I,X0mhCgN28WE,CAs2OXJjFrM,lrKZ-5xLZWI,avdM7AUOeHM,Up9dPYiC8LA,3lYdIA7RuEY,5E5GiApx0SI,Dl5ufq4xMmI,XUtVC496AyQ,p95eMQ7WbwM,bb4RyFjUqwY,haM2reDRq5c,KP0w_5BSRkk,IzoVuU5m2P8,NyK5lcwsjHs,-1NqRay5WGk,z2PQJlMMg0o,gfXj08w6LBs,iKp0fYtlRV4,TXjDLhxwZ7Y,QU3JmMU_Z7Y,NRUJH_whU4E,gdyDfH7bATs,uAMn1XjVZOk,W4jPEBQV8zw,P4adkQatx4Y,nSN4aPvwin0,uYVLjbfyY9M,oAXvYdtBYyY"
+    },
+    {
+      "platform": "YouTube",
+      "n": 2,
+      "of": 3,
+      "count": 50,
+      "url": "https://www.youtube.com/watch_videos?video_ids=Phh3oVCtzBg,kjxsaFB5svA,IeM0YJZGMsM,KgTXwMrj5Po,BvAlWXmy1iA,zbvS61vBlis,kofsXEiGAmg,anwbu8QCXcc,v_U6WsrwGe0,N5XCYjXC_iM,L8rqxr59HKo,wU_gcM7lmD8,rfojy3Xm9aI,LQRHL3btDIQ,ZAQ6rjz-XaU,tFR3xtwA2iU,Q7x_6hBdZh8,A6NcAnylzdY,Cxh8wDg6nFM,pIrQf7Bpb9U,CyttVbKOl7w,Ji5by6AYNNA,P5hNMWh4--Q,f_mymTYUKHo,582VYbFkGvo,ioc8FeM3G3E,d2OgHMZFIYg,UMRcMjiQKUY,pXh9EteLREA,SwDJRfvuSIc,mfBvbA5EZU8,pGs3p54-2n0,-kGu0laQoxw,3NTLjTSkU88,wGJDZVcs1MU,fOQ_-gZsnYQ,CtRn6eqVnvY,cZgUiR31m-Y,mQezde_qeXw,aFPPIPV4vlk,mFTxmDy74LI,TkmDH-uw8fs,7y2kFH1Mh1k,XnLvEhtPihQ,K-0_pBy14jo,uXpGP-UP3rc,II6tDIpKoqs,DQbXw0IIRHc,hGIm7R-sGj4,o_uNhzMfucA"
+    },
+    {
+      "platform": "YouTube",
+      "n": 3,
+      "of": 3,
+      "count": 49,
+      "url": "https://www.youtube.com/watch_videos?video_ids=vZYbEL06lEU,vJyy1yUsPvk,B_pQDpsjNHE,2acCDPtA-1U,wrazVZlMbeY,CNZQrQo8Nvw,BDHNnFTpu84,hIgSFUitz1c,hNlClpX-h0c,FGeBBMjHZJA,adr8j8hS79M,sn5VC5aPlgk,6z8o0Sm46yk,rLbrov7ej6w,w9_o47jPAf0,-kz_CrB0Vf0,TJc0_-QvJtU,20TDd19oA1Q,BNXFB_M3RCw,_DAuSNXBgoM,M-jkwM5bY1U,7nOj97E0VCI,_eFRJpKECyc,xXmdk1q_HZI,2T3NptXXIzE,YUNFgN-Lh6c,sa5U2GrLshQ,UzpHdHQANfw,Dq7KtFsIUqw,uAgsn7la3jg,6iCfpA-5I48,4pvk6E48PnI,E4j047zPXdc,UuD3ZGJBZ90,2Jopc_-Dw9c,GQTZ39MIw5k,ibGUpD4E1PI,PhHdWpxweyg,3SLHM7yAX_o,G0oPNV4LcVo,cbkYaUKVUfk,j2HbpoAV1Y0,0BHG7BSMQKQ,96CIotO87rE,tAO3JanB23o,xGhWDUKWEWk,r1MFLnYXooQ,5BGSwnxX_b0,N7iEZDtwZ9A"
+    }
+  ]
+};
+/* @al-festival:data:end */
+
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* Every string on this page comes from web research, so all of it goes through
+     esc() before it touches innerHTML. There is no field here that is allowed to
+     carry markup -- an act called "Sunn O)))" or a song with an ampersand must
+     render as itself and nothing else. */
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function attr(s) { return esc(s); }
+
+  /* Wikipedia articles live on per-language subdomains and plenty of acts have no
+     English article at all -- four on the first bill this page was built for. So
+     the link keeps whatever language actually has the article, and says which one
+     when it is not English, rather than sending the reader to a dead en. URL or
+     surprising them with Finnish. */
+  function wikiLabel(url) {
+    var m = /^https?:\/\/([a-z-]+)\.(m\.)?wikipedia\.org\//i.exec(String(url || ""));
+    var lang = m ? m[1].toLowerCase() : "";
+    return (!lang || lang === "en" || lang === "www")
+      ? "Wikipedia" : "Wikipedia (" + esc(lang) + ")";
+  }
+
+  var acts = (DATA.acts || []).slice().sort(function (a, b) {
+    return (a.order || 0) - (b.order || 0);
+  });
+  var byId = {};
+  acts.forEach(function (a) { byId[a.id] = a; });
+
+  var dayLabel = {}, stageLabel = {};
+  (DATA.days || []).forEach(function (d) { dayLabel[d.id] = d.label; });
+  (DATA.stages || []).forEach(function (s) { stageLabel[s.id] = s.label; });
+
+  /* ---- masthead ------------------------------------------------------- */
+  var eb = [];
+  if (CONFIG.dates) { eb.push(CONFIG.dates); }
+  if (CONFIG.venue) { eb.push(CONFIG.venue); }
+  $("eyebrow").textContent = eb.join(" · ");
+  $("title").textContent = CONFIG.event || "Lineup";
+  document.title = (CONFIG.event || "Lineup") + " — lineup";
+
+  var nSongs = 0;
+  acts.forEach(function (a) { nSongs += (a.songs || []).length; });
+  $("sub").textContent = acts.length + " acts · " + nSongs + " songs"
+    + ((DATA.days || []).length > 1 ? " · " + DATA.days.length + " days" : "");
+
+  if (CONFIG.source) {
+    /* Show the host rather than the whole URL -- a full schedule URL wraps over
+       three lines on a phone and buries the heading. */
+    var host = String(CONFIG.source).replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+    $("src").innerHTML = "<a href=\"" + attr(CONFIG.source) + "\" target=\"_blank\" "
+      + "rel=\"noopener\">Official schedule at " + esc(host) + "</a>";
+  }
+
+  if (CONFIG.note) {
+    var n = document.createElement("p");
+    n.className = "note";
+    n.textContent = CONFIG.note;
+    $("noteslot").appendChild(n);
+  }
+  if (CONFIG.hero === "gradient") { $("mast").classList.add("grad"); }
+  if (CONFIG.hero === "bars") { $("mast").classList.add("bars"); }
+
+  var prov = [];
+  if (CONFIG.generated) { prov.push("Generated " + CONFIG.generated); }
+  $("prov").innerHTML = prov.join(" · ")
+    + (CONFIG.source ? (prov.length ? " · " : "") + "Lineup source: <a href=\""
+        + attr(CONFIG.source) + "\" target=\"_blank\" rel=\"noopener\">"
+        + esc(CONFIG.source) + "</a>" : "");
+
+  /* ---- playlists ------------------------------------------------------ */
+  var pls = DATA.playlists || [];
+  if (pls.length) {
+    $("plsec").hidden = false;
+
+    /* Say how many songs each act contributes, but derive it -- an act with a thin
+       catalogue gets fewer than five, and a heading that claims otherwise is wrong
+       on exactly the acts a reader is least sure about. */
+    var counts = acts.map(function (a) { return (a.songs || []).length; });
+    var hi = Math.max.apply(null, counts.concat([0]));
+    var uniform = counts.length && counts.every(function (n) { return n === hi; });
+    $("plhead").textContent = "YouTube playlists — " + (uniform ? "" : "up to ") + hi
+      + " songs per act, in performance order";
+
+    $("plrow").innerHTML = pls.map(function (p) {
+      return "<a class=\"plbtn\" href=\"" + attr(p.url) + "\" target=\"_blank\" rel=\"noopener\">"
+        + esc(p.platform) + (p.of > 1 ? " <span class=\"n\">" + p.n + "/" + p.of + "</span>" : "")
+        + "</a>";
+    }).join("");
+
+    var chunked = pls.some(function (p) { return p.of > 1; });
+    $("plhint").textContent =
+      (chunked ? "Split into parts because one playlist link holds 50 videos; no act is split "
+               + "across parts. " : "")
+      + "Every song also has its own YouTube Music link below.";
+  }
+
+  /* ---- filters -------------------------------------------------------- */
+  var KEY = "alfest:" + (CONFIG.slug || "x") + ":filters";
+  var state = { day: "all", stage: "all", q: "" };
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved) {
+      if (saved.day) { state.day = saved.day; }
+      if (saved.stage) { state.stage = saved.stage; }
+    }
+  } catch (e) { /* file:// with storage disabled; defaults are fine */ }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify({ day: state.day, stage: state.stage })); }
+    catch (e) { /* not worth telling the reader about */ }
+  }
+
+  var groups = [];
+  if ((DATA.days || []).length > 1) {
+    groups.push({ kind: "day", items: DATA.days });
+  }
+  if ((DATA.stages || []).length > 1) {
+    groups.push({ kind: "stage", items: DATA.stages });
+  }
+
+  function renderChips() {
+    var html = "";
+    groups.forEach(function (g) {
+      html += "<button class=\"chip\" type=\"button\" data-kind=\"" + g.kind
+        + "\" data-v=\"all\" aria-pressed=\"" + (state[g.kind] === "all") + "\">"
+        + (g.kind === "day" ? "All days" : "All stages") + "</button>";
+      g.items.forEach(function (it) {
+        html += "<button class=\"chip\" type=\"button\" data-kind=\"" + g.kind
+          + "\" data-v=\"" + attr(it.id) + "\" aria-pressed=\"" + (state[g.kind] === it.id)
+          + "\">" + esc(it.label) + "</button>";
+      });
+    });
+    $("chips").innerHTML = html;
+  }
+
+  $("chips").addEventListener("click", function (e) {
+    var b = e.target.closest("button.chip");
+    if (!b) { return; }
+    state[b.getAttribute("data-kind")] = b.getAttribute("data-v");
+    save();
+    renderChips();
+    render();
+  });
+
+  var srch = $("srch"), srchx = $("srchx");
+
+  function applyQuery() {
+    state.q = srch.value.trim().toLowerCase();
+    srchx.hidden = !srch.value;
+    render();
+  }
+
+  srch.addEventListener("input", applyQuery);
+
+  /* Three separate ways to put the keyboard away, because on a phone a filter you
+     cannot dismiss is worse than no filter: the form's Enter/Go key, the clear
+     button, and Escape. */
+  $("srchform").addEventListener("submit", function (e) {
+    e.preventDefault();
+    srch.blur();
+  });
+  srch.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); srch.blur(); }
+    if (e.key === "Escape") { srch.value = ""; applyQuery(); srch.blur(); }
+  });
+  srchx.addEventListener("click", function () {
+    srch.value = "";
+    applyQuery();
+    srch.blur();
+  });
+
+  function matches(a) {
+    if (state.day !== "all" && a.day !== state.day) { return false; }
+    if (state.stage !== "all" && a.stage !== state.stage) { return false; }
+    if (state.q) {
+      var hay = (a.name + " " + (a.genres || []).join(" ") + " " + (a.origin || "")).toLowerCase();
+      if (hay.indexOf(state.q) === -1) { return false; }
+    }
+    return true;
+  }
+
+  /* ---- act cards ------------------------------------------------------ */
+  function songHtml(s, i) {
+    /* Album, year and the reason share one muted line -- three stacked paragraphs
+       per song is what made a 32-act page unscrollable. */
+    var meta = [];
+    if (s.album) { meta.push(s.album); }
+    if (s.year) { meta.push(s.year); }
+    var line = meta.join(" · ");
+    if (s.why) { line = line ? line + " — " + s.why : s.why; }
+
+    var links = [];
+    if (s.yt_audio) {
+      links.push("<a class=\"lnk\" target=\"_blank\" rel=\"noopener\" href=\"https://music.youtube.com/watch?v="
+        + attr(s.yt_audio) + "\">YT Music</a>");
+      links.push("<a class=\"lnk\" target=\"_blank\" rel=\"noopener\" href=\"https://www.youtube.com/watch?v="
+        + attr(s.yt_audio) + "\">YouTube</a>");
+    }
+    if (s.yt_video) {
+      links.push("<a class=\"lnk\" target=\"_blank\" rel=\"noopener\" href=\"https://www.youtube.com/watch?v="
+        + attr(s.yt_video) + "\">Video</a>");
+    }
+
+    return "<li class=\"song\">"
+      + "<div class=\"stitle\"><span class=\"shead\"><span class=\"snum\">" + (i + 1)
+      + "</span><span class=\"sname\">" + esc(s.title) + "</span></span>"
+      + (links.length ? "<span class=\"links\">" + links.join("") + "</span>" : "")
+      + "</div>"
+      + (line ? "<p class=\"smeta\">" + esc(line) + "</p>" : "")
+      + "</li>";
+  }
+
+  function cardHtml(a) {
+    var slot = [];
+    if (a.time) { slot.push(a.time); }
+    if (dayLabel[a.day] && (DATA.days || []).length > 1) { slot.push(dayLabel[a.day]); }
+    if (stageLabel[a.stage]) { slot.push(stageLabel[a.stage]); }
+
+    /* Spotify, then Wikipedia, then the official site: listen, read, then the
+       band's own page. Wikipedia is on the card and not only in the dialog
+       because it is the link most often actually wanted -- someone scanning a
+       lineup wants one tap to "who are these people", without opening a popup
+       first. Both places carry it; neither is a substitute for the other. */
+    var ext = [], ls0 = a.links || {};
+    if (ls0.yt_music) {
+      ext.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
+        + attr(ls0.yt_music) + "\">YT Music</a>");
+    }
+    if (ls0.spotify) {
+      ext.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
+        + attr(ls0.spotify) + "\">Spotify</a>");
+    }
+    if (ls0.wikipedia) {
+      ext.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
+        + attr(ls0.wikipedia) + "\">" + wikiLabel(ls0.wikipedia) + "</a>");
+    }
+    if (ls0.official) {
+      ext.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
+        + attr(ls0.official) + "\">Site</a>");
+    }
+
+    var hasDetail = a.detail || (a.members || []).length || (a.albums || []).length;
+
+    return "<article class=\"card\" id=\"act-" + attr(a.id) + "\">"
+      + "<div class=\"chead\"><span class=\"ord\">" + esc(a.order) + "</span>"
+      + "<h3 class=\"aname\">" + esc(a.name) + "</h3>"
+      + (slot.length ? "<span class=\"slot\">" + esc(slot.join(" · ")) + "</span>" : "")
+      + "</div>"
+      + ((a.genres || []).length
+          ? "<div class=\"gen\">" + a.genres.map(function (g) {
+              return "<span class=\"tag\">" + esc(g) + "</span>"; }).join("") + "</div>"
+          : "")
+      + (a.blurb ? "<p class=\"blurb\">" + esc(a.blurb) + "</p>" : "")
+      + "<div class=\"arow\">"
+      + (hasDetail ? "<button class=\"detbtn\" type=\"button\" data-act=\"" + attr(a.id)
+          + "\">Members &amp; releases</button>" : "")
+      + ext.join("")
+      + "</div>"
+      + ((a.songs || []).length
+          ? "<ul class=\"songs\">" + a.songs.map(songHtml).join("") + "</ul>" : "")
+      + "</article>";
+  }
+
+  function render() {
+    var vis = acts.filter(matches);
+    $("acts").innerHTML = vis.length
+      ? vis.map(cardHtml).join("")
+      : "<p class=\"empty\">No acts match that filter.</p>";
+    var n = 0;
+    vis.forEach(function (a) { n += (a.songs || []).length; });
+    $("count").textContent = vis.length === acts.length
+      ? acts.length + " acts"
+      : "showing " + vis.length + " of " + acts.length + " acts · " + n + " songs";
+  }
+
+  /* ---- dialog --------------------------------------------------------- */
+  var dlg = $("dlg"), scrollY = 0;
+
+  function lockScroll() {
+    /* Compensate for the scrollbar the lock removes, or the page shifts sideways
+       under the backdrop on desktop. */
+    var pad = window.innerWidth - document.documentElement.clientWidth;
+    scrollY = window.scrollY;
+    document.body.style.overflow = "hidden";
+    if (pad > 0) { document.body.style.paddingRight = pad + "px"; }
+  }
+  function unlockScroll() {
+    document.body.style.overflow = "";
+    document.body.style.paddingRight = "";
+  }
+
+  function listHtml(items, fmt) {
+    return "<ul class=\"dl\">" + items.map(fmt).join("") + "</ul>";
+  }
+
+  function openAct(id) {
+    var a = byId[id];
+    if (!a) { return; }
+    $("dlgtitle").textContent = a.name;
+
+    var meta = [];
+    if (a.origin) { meta.push(a.origin); }
+    if (a.formed) { meta.push("formed " + a.formed); }
+    if ((a.genres || []).length) { meta.push(a.genres.join(", ")); }
+
+    var html = "";
+    if (meta.length) { html += "<p class=\"dmeta\">" + esc(meta.join(" · ")) + "</p>"; }
+    if (a.detail) { html += "<p>" + esc(a.detail) + "</p>"; }
+
+    if ((a.members || []).length) {
+      html += "<h4>Line-up</h4>" + listHtml(a.members, function (m) {
+        return "<li>" + esc(m.name)
+          + (m.role ? " <span class=\"r\">" + esc(m.role)
+              + (m.since ? ", since " + esc(m.since) : "") + "</span>" : "")
+          + "</li>";
+      });
+    }
+    if ((a.albums || []).length) {
+      html += "<h4>Key releases</h4>" + listHtml(a.albums, function (r) {
+        return "<li>" + esc(r.title)
+          + (r.year ? " <span class=\"yr\">" + esc(r.year) + "</span>" : "")
+          + (r.note ? "<br><span class=\"r\">" + esc(r.note) + "</span>" : "")
+          + "</li>";
+      });
+    }
+
+    var ls = a.links || {}, ln = [];
+    [["official", "Official site"], ["wikipedia", null], ["yt_music", "YouTube Music"],
+     ["spotify", "Spotify"], ["bandcamp", "Bandcamp"]].forEach(function (p) {
+      if (ls[p[0]]) {
+        ln.push("<a class=\"ext\" target=\"_blank\" rel=\"noopener\" href=\""
+          + attr(ls[p[0]]) + "\">" + (p[1] || wikiLabel(ls[p[0]])) + "</a>");
+      }
+    });
+    if (ln.length) { html += "<h4>Links</h4><div class=\"arow\">" + ln.join("") + "</div>"; }
+
+    $("dlgbody").innerHTML = html;
+    lockScroll();
+    dlg.showModal();
+    $("dlgbody").scrollTop = 0;
+  }
+
+  $("acts").addEventListener("click", function (e) {
+    var b = e.target.closest("button.detbtn");
+    if (b) { openAct(b.getAttribute("data-act")); }
+  });
+  $("dlgx").addEventListener("click", function () { dlg.close(); });
+  dlg.addEventListener("click", function (e) {
+    /* The backdrop is the dialog element itself; a click on a child bubbles here
+       with a different target. */
+    if (e.target === dlg) { dlg.close(); }
+  });
+  dlg.addEventListener("close", function () {
+    unlockScroll();
+    window.scrollTo(0, scrollY);
+  });
+
+  /* ---- theme ---------------------------------------------------------- */
+  var btn = $("themebtn");
+  btn.addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    var next = cur === "dark" ? "light" : cur === "light" ? "" : "dark";
+    if (next) { document.documentElement.setAttribute("data-theme", next); }
+    else { document.documentElement.removeAttribute("data-theme"); }
+    btn.textContent = next ? "Theme: " + next : "Theme";
+  });
+
+  renderChips();
+  render();
+})();
+</script>
+</body>
+</html>
