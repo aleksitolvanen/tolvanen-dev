@@ -344,6 +344,7 @@ var CONFIG = {
   "venue": "Helsinki, Finland",
   "source": "https://hellsinkimetalfestival.fi/aikataulu/",
   "generated": "2026-07-30",
+  "yt_playlist": "PLXWgZ6NOz6cc",
   "hero": "bars"
 };
 /* @al-festival:config:end */
@@ -5813,6 +5814,13 @@ var DATA = {
   ],
   "playlists": [
     {
+      "platform": "YouTube Music",
+      "n": 1,
+      "of": 1,
+      "count": 159,
+      "url": "https://music.youtube.com/playlist?list=PLXWgZ6NOz6cc"
+    },
+    {
       "platform": "YouTube",
       "n": 1,
       "of": 4,
@@ -5930,7 +5938,9 @@ var DATA = {
     var counts = acts.map(function (a) { return (a.songs || []).length; });
     var hi = Math.max.apply(null, counts.concat([0]));
     var uniform = counts.length && counts.every(function (n) { return n === hi; });
-    $("plhead").textContent = "YouTube playlists — " + (uniform ? "" : "up to ") + hi
+    /* "Playlists", not "YouTube playlists": the row may also hold a real YouTube Music
+       list, and naming one platform in the heading would misdescribe the other. */
+    $("plhead").textContent = "Playlists — " + (uniform ? "" : "up to ") + hi
       + " songs per act, in performance order";
 
     $("plrow").innerHTML = pls.map(function (p) {
@@ -5940,9 +5950,11 @@ var DATA = {
     }).join("");
 
     var chunked = pls.some(function (p) { return p.of > 1; });
+    var ytm = pls.some(function (p) { return p.platform === "YouTube Music"; });
     $("plhint").textContent =
-      (chunked ? "Split into parts because one playlist link holds 50 videos; no act is split "
-               + "across parts. " : "")
+      (ytm ? "The YouTube Music list is the whole bill in one. " : "")
+      + (chunked ? "The YouTube links are split into parts because one link holds 50 videos; "
+                 + "no act is split across parts. " : "")
       + "Every song also has its own YouTube Music link below.";
   }
 
