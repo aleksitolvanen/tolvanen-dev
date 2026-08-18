@@ -29,6 +29,9 @@
  .ctrls button.wide{width:auto;padding:0 .55em;font-size:.85em;font-weight:600}
  .zbadge{position:absolute;left:.7em;top:.7em;z-index:2;color:var(--muted);font-size:.8em;
    background:#181b20cc;border:1px solid var(--border);border-radius:.3em;padding:.15em .5em}
+ .mapwrap:fullscreen{height:100vh;margin:0;border-radius:0;border:0}
+ .mapwrap.fsmode{position:fixed;inset:0;z-index:1000;height:100dvh;margin:0;border-radius:0;border:0}
+ body.noscroll{overflow:hidden}
  .legend{color:var(--muted);font-size:.85em;margin:.4em 0 0}
  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
  .note summary{cursor:pointer;font-weight:600}
@@ -75,7 +78,7 @@
 <details class="note" id="help">
 <summary>Näin kartta toimii &mdash; ja mistä se on peräisin</summary>
 <p>Pohjapiirros on Herkun <strong>oikea myymäl&auml;kartta</strong> S-ryhm&auml;n karttapalvelun aineistosta (kauppa 720571157, haettu 19.8.2026) &mdash; sama data, jonka S-ostoslista-sovellus piirt&auml;&auml;.</p>
-<p><strong>Zoomaus:</strong> nipist&auml; puhelimella, vieritä hiiren rullalla tai kahden sormen pyyhk&auml;isyll&auml;, tai k&auml;yt&auml; +/&minus;-nappeja. Raahaus siirt&auml;&auml; karttaa, ja mit&auml; l&auml;hemm&auml;s menet, sit&auml; useamman osaston nimi n&auml;kyy. &rdquo;Koko&rdquo; palauttaa yleisn&auml;kym&auml;&auml;n.</p>
+<p><strong>Zoomaus:</strong> nipist&auml; puhelimella, vieritä hiiren rullalla tai kahden sormen pyyhk&auml;isyll&auml;, tai k&auml;yt&auml; +/&minus;-nappeja. Raahaus siirt&auml;&auml; karttaa, ja mit&auml; l&auml;hemm&auml;s menet, sit&auml; useamman osaston nimi n&auml;kyy. &rdquo;Koko&rdquo; palauttaa yleisn&auml;kym&auml;&auml;n, ja <strong>&#x26F6;-nappi vie kartan koko n&auml;yt&ouml;lle</strong>, jolloin sivu ei en&auml;&auml; nappaa vierityst&auml; tai zoomia itselleen.</p>
 <p><strong>Ostokset:</strong> napauta numeropalloa (tai sen sinist&auml; aluetta), niin sen kohdan tuotteet tulevat n&auml;kyviin &mdash; uusi napautus piilottaa ne. Tuotteen voi kuitata ker&auml;tyksi napauttamalla rivi&auml;; kuittaukset s&auml;ilyv&auml;t t&auml;ll&auml; laitteella.</p>
 </details>
 
@@ -91,6 +94,7 @@
     <button id="zin" title="Lähennä (+)" aria-label="Lähennä">+</button>
     <button id="zout" title="Loitonna (−)" aria-label="Loitonna">&minus;</button>
     <button id="zfit" class="wide" title="Sovita näkymään (0)">Koko</button>
+    <button id="zfs" title="Koko näyttö (F)" aria-label="Koko näyttö">&#x26F6;</button>
   </div>
 <svg id="map" viewBox="0 0 1468 1448" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Food Market Herkun pohjakartta osastonimineen ja ostoslistan reitillä">
 <style>
@@ -1584,6 +1588,8 @@
     if (e.key === '+' || e.key === '=') zoomAt(VW / 2, VH / 2, k * 1.35);
     else if (e.key === '-') zoomAt(VW / 2, VH / 2, k / 1.35);
     else if (e.key === '0') { k = 1; tx = ty = 0; apply(); }
+    else if (e.key === 'f' || e.key === 'F') fsBtn.onclick();
+    else if (e.key === 'Escape' && wrap.classList.contains('fsmode')) cssFs(false);
   });
 
   // ---- stops: click a pin (or its blue area) to toggle its shopping items ----
@@ -1684,7 +1690,29 @@
     };
   });
 
-  addEventListener('resize', apply);
+  // ---- fullscreen: isolates the map from page scroll/zoom ------------------
+  var fsBtn = document.getElementById('zfs');
+  function refresh(){ measure(unitsPerPx()); apply(); }
+  function cssFs(on){
+    wrap.classList.toggle('fsmode', on);
+    document.body.classList.toggle('noscroll', on);
+    fsBtn.innerHTML = on ? '&times;' : '&#x26F6;';
+    setTimeout(refresh, 60);
+  }
+  function inFs(){ return document.fullscreenElement === wrap || wrap.classList.contains('fsmode'); }
+  fsBtn.onclick = function(){
+    if (inFs()) {
+      if (document.fullscreenElement) document.exitFullscreen(); else cssFs(false);
+    } else if (wrap.requestFullscreen) {
+      wrap.requestFullscreen().catch(function(){ cssFs(true); });
+    } else cssFs(true);                                   // iPhone Safari
+  };
+  document.addEventListener('fullscreenchange', function(){
+    fsBtn.innerHTML = (document.fullscreenElement === wrap) ? '&times;' : '&#x26F6;';
+    setTimeout(refresh, 60);
+  });
+
+  addEventListener('resize', function(){ setTimeout(refresh, 60); });
   apply();                       // sets --u so text has its real size
   measure(unitsPerPx());         // now widths are meaningful
   apply();
