@@ -108,6 +108,76 @@
     flex-wrap: wrap;
   }
 
+  .focus-toggle {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--moss);
+    background: var(--ash);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.42rem 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .focus-toggle:hover { color: var(--bone); border-color: var(--moss-dim); }
+
+  .focus-toggle[aria-pressed="true"] {
+    color: var(--ember);
+    border-color: var(--ember);
+  }
+
+  .focus-toggle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ember) 25%, transparent);
+  }
+
+  body.focus-mode .head,
+  body.focus-mode .count-pill,
+  body.focus-mode .view-toggle {
+    display: none;
+  }
+
+  body.focus-mode .page {
+    padding-top: 1.1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    column-gap: 1.2rem;
+    position: relative; /* anchors the full-width results overlay */
+  }
+
+  /* Boxes keep their natural width; the toolbar (search + exit button,
+     already a flex row internally) grows to soak up whatever's left —
+     "use the full space" without needing the boxes to stretch. */
+  body.focus-mode .wall-scroll { order: 1; margin: 0; padding: 0.6rem 0 0; flex: 0 1 auto; }
+  body.focus-mode .toolbar { order: 2; margin: 0; flex: 1 1 260px; }
+  body.focus-mode .toolbar .search-wrap { flex: 1 1 auto; }
+
+  /* flex-basis: 100% forces this onto its own line in a wrapping flex row —
+     the drawer always spans full width below, never squeezed beside anything. */
+  body.focus-mode .drawer { order: 4; flex: 1 1 100%; margin-top: 1rem; }
+
+  /* Results overlay: pulled out of flow entirely (position: absolute) so it
+     can NEVER push the drawer down. JS sets top/left/right to pin it exactly
+     under the search column, and caps max-height at the next element below
+     (boxes or drawer) so it fills only the empty space between them. */
+  body.focus-mode .matches {
+    order: 3;
+    position: absolute;
+    margin: 0;
+    z-index: 20;
+    box-shadow: 0 10px 24px var(--shadow);
+  }
+
+  @media (max-width: 800px) {
+    body.focus-mode .page { flex-direction: column; }
+    body.focus-mode .wall-scroll,
+    body.focus-mode .toolbar,
+    body.focus-mode .drawer { flex-basis: 100%; }
+  }
+
   .search-wrap {
     position: relative;
     flex: 1 1 320px;
@@ -449,6 +519,13 @@
 
   .drawer-items li.flash { border-left-color: var(--tarn); color: var(--tarn); }
 
+  .drawer-items mark.hl {
+    background: color-mix(in srgb, var(--tarn) 32%, transparent);
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
   .drawer-items li.capped { border-left-color: var(--ember); }
 
   .item-cap {
@@ -489,6 +566,7 @@
       <input type="checkbox" id="gridToggle" />
       <span>Alternative build &mdash; 10-column corridor, stacked pairs</span>
     </label>
+    <button id="focusToggle" class="focus-toggle" type="button" aria-pressed="false">Focus mode</button>
   </div>
 
   <div class="matches" id="matches"></div>
@@ -792,13 +870,14 @@
       drawer.innerHTML = '<div class="drawer-empty">Select a chest above to see what\'s stored inside.</div>';
       return;
     }
+    const q = searchInput.value.trim().toLowerCase();
     const itemsHtml = cat.items.map(it => {
       const flash = flashItem && it.toLowerCase() === flashItem.toLowerCase() ? "flash" : "";
       const cap = LOW_QTY_NOTES[it];
       const capClass = cap ? "capped" : "";
-      const capHtml = cap ? `<span class="item-cap">${cap}</span>` : "";
+      const capHtml = cap ? `<span class="item-cap">${highlightMatch(cap, q)}</span>` : "";
       const cls = [flash, capClass].filter(Boolean).join(" ");
-      return `<li class="${cls}">${it}${capHtml}</li>`;
+      return `<li class="${cls}">${highlightMatch(it, q)}${capHtml}</li>`;
     }).join("");
     drawer.innerHTML = `
       <div class="drawer-head">
@@ -818,6 +897,7 @@
       cells.forEach(el => el.classList.remove("dim", "hit"));
       matchesBox.classList.remove("show");
       matchesBox.innerHTML = "";
+      if (activeId) renderDrawer(activeId);
       return;
     }
 
@@ -856,6 +936,41 @@
       }).join("");
     }
     matchesBox.classList.add("show");
+    positionMatchesOverlay();
+    if (activeId) renderDrawer(activeId);
+  }
+
+  function positionMatchesOverlay() {
+    if (!document.body.classList.contains("focus-mode")) {
+      matchesBox.style.top = matchesBox.style.left = matchesBox.style.right = matchesBox.style.maxHeight = "";
+      return;
+    }
+    const pageRect = document.querySelector(".page").getBoundingClientRect();
+    const toolbarRect = document.querySelector(".toolbar").getBoundingClientRect();
+    matchesBox.style.top = (toolbarRect.bottom - pageRect.top + 8) + "px";
+    matchesBox.style.left = (toolbarRect.left - pageRect.left) + "px";
+    matchesBox.style.right = (pageRect.right - toolbarRect.right) + "px";
+    // Cap height at whatever sits below (boxes on narrow screens, drawer on wide),
+    // so the list fills only the free space and never covers either.
+    const below = [".wall-scroll", ".drawer"]
+      .map(sel => document.querySelector(sel).getBoundingClientRect())
+      .filter(r => r.height > 0 && r.top >= toolbarRect.bottom)
+      .map(r => r.top);
+    const limit = below.length ? Math.min(...below) - toolbarRect.bottom - 16 : window.innerHeight * 0.6;
+    matchesBox.style.maxHeight = Math.max(140, limit) + "px";
+  }
+
+  window.addEventListener("resize", positionMatchesOverlay);
+
+  function highlightMatch(text, q) {
+    if (!q) return text;
+    const lower = text.toLowerCase();
+    let out = "", pos = 0, idx;
+    while ((idx = lower.indexOf(q, pos)) !== -1) {
+      out += text.slice(pos, idx) + '<mark class="hl">' + text.slice(idx, idx + q.length) + "</mark>";
+      pos = idx + q.length;
+    }
+    return out + text.slice(pos);
   }
 
   function escapeHtml(s) {
@@ -868,6 +983,7 @@
     selectCategory(row.dataset.cat);
     renderDrawer(row.dataset.cat, row.dataset.item);
     document.getElementById("drawer").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    matchesBox.classList.remove("show");
   });
 
   const searchWrap = document.querySelector(".search-wrap");
@@ -876,6 +992,16 @@
   searchInput.addEventListener("input", (e) => {
     searchWrap.classList.toggle("has-text", e.target.value.length > 0);
     runSearch(e.target.value);
+  });
+
+  searchInput.addEventListener("focus", () => {
+    if (searchInput.value.trim()) runSearch(searchInput.value);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!searchWrap.contains(e.target) && !matchesBox.contains(e.target)) {
+      matchesBox.classList.remove("show");
+    }
   });
 
   searchClear.addEventListener("click", () => {
@@ -894,6 +1020,26 @@
     else url.searchParams.delete("view");
     history.replaceState(null, "", url);
     renderWall();
+  });
+
+  const focusToggle = document.getElementById("focusToggle");
+
+  function setFocusMode(active) {
+    document.body.classList.toggle("focus-mode", active);
+    focusToggle.setAttribute("aria-pressed", String(active));
+    focusToggle.textContent = active ? "Exit focus mode" : "Focus mode";
+    positionMatchesOverlay();
+  }
+
+  setFocusMode(new URLSearchParams(location.search).get("focus") === "1");
+
+  focusToggle.addEventListener("click", () => {
+    const active = !document.body.classList.contains("focus-mode");
+    setFocusMode(active);
+    const url = new URL(location.href);
+    if (active) url.searchParams.set("focus", "1");
+    else url.searchParams.delete("focus");
+    history.replaceState(null, "", url);
   });
 
   // Self-check: catch silent data-sync slips (a renamed/removed item that leaves
