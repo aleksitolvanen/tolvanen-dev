@@ -870,7 +870,9 @@
       drawer.innerHTML = '<div class="drawer-empty">Select a chest above to see what\'s stored inside.</div>';
       return;
     }
-    const q = searchInput.value.trim().toLowerCase();
+    // A clicked match row highlights that one item (flash) — suppress the
+    // free-text substring marks so the selection stands alone.
+    const q = flashItem ? "" : searchInput.value.trim().toLowerCase();
     const itemsHtml = cat.items.map(it => {
       const flash = flashItem && it.toLowerCase() === flashItem.toLowerCase() ? "flash" : "";
       const cap = LOW_QTY_NOTES[it];
