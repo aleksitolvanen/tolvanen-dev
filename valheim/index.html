@@ -342,14 +342,12 @@
 
   .wall.grid-mode {
     grid-auto-flow: row;
-    grid-template-columns: repeat(6, minmax(72px, 1fr));
+    grid-template-columns: repeat(4, minmax(72px, 1fr));
     grid-template-rows: repeat(3, 62px);
     gap: 6px;
     width: 100%;
-    max-width: 740px;
+    max-width: 500px;
   }
-
-  .wall.grid-mode .cell.detached { margin-left: 18px; }
 
   .wall.grid-mode .cell {
     min-height: 62px;
@@ -546,8 +544,7 @@
   @media (max-width: 640px) {
     .page { padding: 1.6rem 1rem 3rem; }
     .drawer-items { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-    .wall.grid-mode { grid-template-columns: repeat(6, minmax(0, 1fr)); max-width: 100%; }
-    .wall.grid-mode .cell.detached { margin-left: 8px; }
+    .wall.grid-mode { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 100%; }
   }
 </style>
 </head>
@@ -612,22 +609,17 @@
         "Carapace", "Mandible", "Soft Tissue", "Freeze Gland", "Morgen Heart", "Morgen Sinew", "Asksvin Bladder",
         "Ancient Seed", "Dragon Egg", "Fuling Totem"] },
 
-    { id: "tar",     col: 4, pos: "top",    label: "TAR",    name: "Tar",
-      desc: "Only sink is darkwood building (1–4 per piece) — one pit's 69–108 haul lasts unless you roof in shingle.",
-      items: ["Tar"] },
-    { id: "hardware",col: 4, pos: "bottom", label: "HRDWR",  name: "Building Hardware",
-      desc: "Nails are smelted to order and stop at Iron tier — this stays under control.",
-      items: ["Bronze Nails", "Iron Nails", "Chain"] },
+    { id: "hardware",col: 4, pos: "bottom", label: "BUILD",  name: "Building & Furnishing",
+      desc: "Nails, chain, tar and unplaced furnishings — everything you grab when working on the base.",
+      items: ["Bronze Nails", "Iron Nails", "Chain", "Tar",
+        "Banners", "Rugs", "Trophies awaiting a wall mount", "Tankard", "Horn of Celebration", "Dvergr Tankard", "Serving Tray"] },
 
-    { id: "fiber",   col: 5, pos: "top",    label: "FIBER",  name: "Fiber (Flax)",
-      desc: "Bulk Flax for crafting — the same item is also earmarked in Seeds for replanting.",
-      items: ["Flax"] },
-    { id: "seeds",   col: 5, pos: "bottom", label: "SEEDS",  name: "Seeds",
-      desc: "Replanting reserve only — Barley's bulk harvest goes to the food box.",
-      items: ["Barley", "Flax", "Carrot Seed", "Turnip Seeds", "Onion Seeds", "Vineberry Seeds",
+    { id: "farm",    col: 6, pos: "top",    label: "FARM",   name: "Farming",
+      desc: "Bulk Flax plus every planting seed, one stop before the field — Barley's harvest goes to the food box.",
+      items: ["Flax", "Barley", "Carrot Seed", "Turnip Seeds", "Onion Seeds", "Vineberry Seeds",
         "Acorn", "Beech Seeds", "Birch Seeds", "Fir Cone", "Pine Cone"] },
 
-    { id: "trophy",  col: 6, pos: "top",    label: "TROPHY", name: "Trophies",
+    { id: "trophy",  col: 5, pos: "top",    label: "TROPHY", name: "Trophies",
       desc: "Never needed in mass — 1 each for stones and display, extras feed the Obliterator.",
       items: ["Neck Trophy", "Boar Trophy", "Deer Trophy", "Eikthyr Trophy",
         "Greydwarf Trophy", "Greydwarf Brute Trophy", "Greydwarf Shaman Trophy", "Skeleton Trophy", "Troll Trophy", "The Elder Trophy",
@@ -637,21 +629,18 @@
         "Seeker Trophy", "Seeker Soldier Trophy", "Tick Trophy", "Gjall Trophy", "Hare Trophy", "Dvergr Trophy", "The Queen Trophy",
         "Morgen Trophy", "Warlock Trophy", "Cultist Trophy", "Fallen Valkyrie Trophy", "Volture Trophy", "Marksman Trophy", "Warrior Trophy", "Vile Trophy", "Rancid Remains Trophy", "Bonemaw Trophy", "Fader Trophy",
         "Barka Trophy", "Elaking Trophy", "Seal Trophy", "Lava Blob Trophy", "Bear Trophy"] },
-    { id: "value",   col: 6, pos: "bottom", label: "VALUE",  name: "Valuables & Gems",
+    { id: "value",   col: 5, pos: "bottom", label: "VALUE",  name: "Valuables & Gems",
       desc: "Amber, Amber Pearl and Ruby are the only items traders buy — worth hoarding.",
       items: ["Coins", "Silver Necklace", "Amber", "Amber Pearl", "Ruby", "Bell Fragment"] },
 
-    { id: "tools",   col: 7, pos: "bottom", label: "TOOLS",  name: "Tools",
-      desc: "Pickaxes, every axe, and everything that isn't a wearable or a weapon.",
+    { id: "gear",    col: 4, pos: "top",    label: "GEAR",   name: "Gear & Tools",
+      desc: "Every weapon, shield, armor piece and tool in one chest — all one-per-item, so it stacks small.",
       items: ["Antler Pickaxe", "Bronze Pickaxe", "Iron Pickaxe", "Black Metal Pickaxe",
         "Stone Axe", "Flint Axe", "Bronze Axe", "Iron Axe", "Black Metal Axe", "Battleaxe", "Crystal Battleaxe",
         "Jotun Bane", "Black Metal Battleaxe", "Skull Splittur", "Nord Axe", "Nord Greataxe", "Early Axes", "Berserkir Axes",
         "Hammer", "Hoe", "Cultivator", "Butcher Knife", "Scythe", "Fishing Rod", "Fishing Bait",
-        "Torch", "Dvergr Lantern", "Wishbone"] },
-
-    { id: "gear",    col: 7, pos: "top",    label: "GEAR",   name: "Gear — Weapons, Shields & Armor",
-      desc: "Every weapon, shield and armor piece in one chest — axes live in Tools.",
-      items: ["Bronze Sword", "Iron Sword", "Silver Sword", "Black Metal Sword", "Mistwalker", "Nidhögg", "Dyrnwyn", "Nord Sword", "Krom", "Slayer", "Nord Greatsword",
+        "Torch", "Dvergr Lantern", "Wishbone",
+        "Bronze Sword", "Iron Sword", "Silver Sword", "Black Metal Sword", "Mistwalker", "Nidhögg", "Dyrnwyn", "Nord Sword", "Krom", "Slayer", "Nord Greatsword",
         "Club", "Bronze Mace", "Iron Mace", "Frostner", "Porcupine", "Flametal Mace", "Nord Mace", "Stagbreaker", "Iron Sledge", "Demolisher", "Nord Sledge",
         "Flint Spear", "Bronze Spear", "Ancient Bark Spear", "Fang Spear", "Carapace Spear", "Splitnir", "Nord Spear",
         "Bronze Atgeir", "Iron Atgeir", "Black Metal Atgeir", "Himminafl", "Nord Atgeir",
@@ -684,12 +673,8 @@
         "Hood of the Vanguard", "Chestpiece of the Vanguard", "Trousers of the Vanguard",
         "Headdress of the Caller", "Robes of the Caller", "Trousers of the Caller", "Cape of the Caller"] },
 
-    { id: "decor",   col: 8, pos: "bottom", label: "DECOR", name: "Furniture / Unplaced Decor",
-      desc: "Build pieces and table-dressing waiting to be mounted or placed.",
-      items: ["Banners", "Rugs", "Trophies awaiting a wall mount", "Tankard", "Horn of Celebration", "Dvergr Tankard", "Serving Tray"] },
-
-    { id: "drop",    col: 9, pos: "full",   label: "DROP",  name: "Drop",
-      desc: "The drop zone for anything without a home yet — the last thing you pass on the way out.",
+    { id: "drop",    col: 6, pos: "bottom", label: "DROP",  name: "Drop",
+      desc: "One chest for anything without a home yet — empty it into the wall when you sort.",
       items: ["Unsorted new drops", "Anything awaiting its own category"] },
   ];
 
@@ -759,35 +744,28 @@
   // columns grouped by similarity so related categories sit together — combat gear,
   // creature-harvested materials, crafting/fletching supplies, and collectibles each
   // fill a column, with the farming pair and Drop (stacked, two chests) sharing the last.
-  // 5x3 grid of single chests, one per category. Drop is not part of the wall —
-  // its two chests stand detached to the right (the last, visually offset column).
+  // 4x3 grid, one chest per category. Column 1 is the workshop, and Drop sits
+  // in the bottom-right corner of the wall.
   const GRID_COLUMNS = [
-    ["gear", "tools", "hardware"],
+    ["gear", "hardware", "arrows"],
     ["hides", "bone", "parts"],
-    ["feathers", "resin", "arrows"],
-    ["tar", "fiber", "seeds"],
-    ["trophy", "value", "decor"],
-    ["drop"],
+    ["feathers", "resin", "farm"],
+    ["trophy", "value", "drop"],
   ];
-  const GRID_SPANS = { drop: 3 };
+  const GRID_SPANS = {};
   const GRID_ROWS = 3;
 
   function buildGridWall() {
     const byId = id => CATEGORIES.find(c => c.id === id);
     GRID_COLUMNS.forEach((colIds, colIdx) => {
       const col = colIdx + 1;
-      const detached = colIdx === GRID_COLUMNS.length - 1;
       let row = 1;
       colIds.forEach(id => {
         const span = GRID_SPANS[id] || 1;
-        const cell = makeCell(byId(id), col, span > 1 ? `${row} / span ${span}` : row, span);
-        if (detached) cell.classList.add("detached");
-        wall.appendChild(cell);
+        wall.appendChild(makeCell(byId(id), col, span > 1 ? `${row} / span ${span}` : row, span));
         row += span;
       });
-      if (!detached) {
-        while (row <= GRID_ROWS) wall.appendChild(makeCell(null, col, row++, 1));
-      }
+      while (row <= GRID_ROWS) wall.appendChild(makeCell(null, col, row++, 1));
     });
   }
 
