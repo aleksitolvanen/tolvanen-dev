@@ -499,7 +499,9 @@
     padding: 0.9rem 1.5rem 0;
     color: var(--moss);
     font-size: 0.92rem;
-    max-width: 62ch;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .drawer-items {
@@ -589,7 +591,7 @@
       desc: "Every Boar, Deer and Greydwarf Brute drops one of these — the steadiest accumulator on the wall.",
       items: ["Deer Hide", "Leather Scraps", "Troll Hide", "Wolf Pelt", "Lox Pelt", "Scale Hide", "Bear Hide", "Moose Hide", "Seal Pelt"] },
     { id: "bone",    col: 1, pos: "bottom", label: "BONE",   name: "Bone",
-      desc: "Draugr drops, split out from Hides so it doesn't get buried under the faster-growing category above it.",
+      desc: "Draugr and skeleton drops, split out from Hides so it doesn't get buried.",
       items: ["Bone Fragments", "Withered Bone", "Charred Bones"] },
 
     { id: "resin",   col: 2, pos: "top",    label: "RESIN",  name: "Resin",
@@ -600,12 +602,12 @@
       items: ["Feathers", "Celestial Feather"] },
 
     { id: "arrows",  col: 3, pos: "top",    label: "ARROWS", name: "Arrows & Ammo",
-      desc: "Fletched in batches of 20+ — easy to over-produce, so it gets the top slot. Crossbow Bolts live here too, same storage role as arrows.",
+      desc: "Batch-crafted 20 at a time, crossbow Bolts included — easy to over-produce.",
       items: ["Wood Arrow", "Flinthead Arrow", "Bronze Arrow", "Ironhead Arrow", "Obsidian Arrow",
         "Needle Arrow", "Carapace Arrow", "Charred Arrow", "Fire Arrow", "Frost Arrow", "Poison Arrow",
         "Silver Arrow", "Bone Bolt", "Iron Bolt", "Blackmetal Bolt", "Carapace Bolt"] },
     { id: "parts",   col: 3, pos: "bottom", label: "ORGANS", name: "Creature Parts & Organs",
-      desc: "Monster byproducts, tied to specific kills rather than constant drops. A few of these are boss-summon items — see the &#9873; mark on the exact count needed.",
+      desc: "Monster byproducts — the marked ones are boss summons with capped counts.",
       items: ["Guck", "Ooze", "Root", "Neck Tail", "Entrails", "Bloodbag", "Blood Clot", "Bilebag",
         "Carapace", "Mandible", "Soft Tissue", "Freeze Gland", "Morgen Heart", "Morgen Sinew", "Asksvin Bladder",
         "Ancient Seed", "Dragon Egg", "Fuling Totem"] },
@@ -614,19 +616,19 @@
       desc: "Harvested from pits faster than it gets used for Frostner or the Iron Sledge.",
       items: ["Tar"] },
     { id: "hardware",col: 4, pos: "bottom", label: "HRDWR",  name: "Building Hardware",
-      desc: "Nails get smelted to order for a specific build, so this stays under control — nails stop at Iron tier, no higher tier exists.",
+      desc: "Nails are smelted to order and stop at Iron tier — this stays under control.",
       items: ["Bronze Nails", "Iron Nails", "Chain"] },
 
     { id: "fiber",   col: 5, pos: "top",    label: "FIBER",  name: "Fiber (Flax)",
-      desc: "Each harvest yields raw fiber in bulk — grows faster than the seed stock below it. Flax is dual-purpose, the same item also earmarked in Seeds below for replanting. Barley isn't here — it's a food crop, so its bulk harvest goes to your food box instead.",
+      desc: "Bulk Flax for crafting — the same item is also earmarked in Seeds for replanting.",
       items: ["Flax"] },
     { id: "seeds",   col: 5, pos: "bottom", label: "SEEDS",  name: "Seeds",
-      desc: "Replanting only eats a few seeds back per harvest, so this stays fairly flat. Flax is shared with Fiber above; Barley's harvest goes to your food box, only the replanting reserve lives here.",
+      desc: "Replanting reserve only — Barley's bulk harvest goes to the food box.",
       items: ["Barley", "Flax", "Carrot Seed", "Turnip Seeds", "Onion Seeds", "Vineberry Seeds",
         "Acorn", "Beech Seeds", "Birch Seeds", "Fir Cone", "Pine Cone"] },
 
     { id: "trophy",  col: 6, pos: "top",    label: "TROPHY", name: "Trophies",
-      desc: "Not needed in mass: boss trophies take exactly 1 each at the sacrificial stones, creature trophies 1 each for display, and a few one-off recipes need 1–2 (see the marked ones). Extras can go in the Obliterator for 1 coal each. Deep North trophy coverage may still be incomplete — it's only weeks old.",
+      desc: "Never needed in mass — 1 each for stones and display, extras feed the Obliterator.",
       items: ["Neck Trophy", "Boar Trophy", "Deer Trophy", "Eikthyr Trophy",
         "Greydwarf Trophy", "Greydwarf Brute Trophy", "Greydwarf Shaman Trophy", "Skeleton Trophy", "Troll Trophy", "The Elder Trophy",
         "Draugr Trophy", "Draugr Elite Trophy", "Leech Trophy", "Blob Trophy", "Abomination Trophy", "Surtling Trophy", "Wraith Trophy", "Bonemass Trophy",
@@ -636,11 +638,11 @@
         "Morgen Trophy", "Warlock Trophy", "Cultist Trophy", "Fallen Valkyrie Trophy", "Volture Trophy", "Marksman Trophy", "Warrior Trophy", "Vile Trophy", "Rancid Remains Trophy", "Bonemaw Trophy", "Fader Trophy",
         "Barka Trophy", "Elaking Trophy", "Seal Trophy", "Lava Blob Trophy", "Bear Trophy"] },
     { id: "value",   col: 6, pos: "bottom", label: "VALUE",  name: "Valuables & Gems",
-      desc: "Coins, jewelry, and the gems — Amber, Amber Pearl and Ruby are the only three items any trader buys, so they're worth hoarding for coin. Crystal isn't here on purpose: it behaves like ore/building stock, so it lives in your metal box instead.",
+      desc: "Amber, Amber Pearl and Ruby are the only items traders buy — worth hoarding.",
       items: ["Coins", "Silver Necklace", "Amber", "Amber Pearl", "Ruby", "Bell Fragment"] },
 
     { id: "tools",   col: 7, pos: "bottom", label: "TOOLS",  name: "Tools",
-      desc: "Pickaxes, every axe (combat variants included), and everything else that isn't a wearable or a weapon.",
+      desc: "Pickaxes, every axe, and everything that isn't a wearable or a weapon.",
       items: ["Antler Pickaxe", "Bronze Pickaxe", "Iron Pickaxe", "Black Metal Pickaxe",
         "Stone Axe", "Flint Axe", "Bronze Axe", "Iron Axe", "Black Metal Axe", "Battleaxe", "Crystal Battleaxe",
         "Jotun Bane", "Black Metal Battleaxe", "Skull Splittur", "Nord Axe", "Nord Greataxe", "Early Axes", "Berserkir Axes",
@@ -648,7 +650,7 @@
         "Torch", "Dvergr Lantern", "Wishbone"] },
 
     { id: "gear",    col: 7, pos: "top",    label: "GEAR",   name: "Gear — Weapons, Shields & Armor",
-      desc: "Every weapon, shield and armor piece in the game in one chest — gear is one-per-item, so even a full armory stacks small. Axes live in Tools instead, since most of them double as the axe you actually chop wood with.",
+      desc: "Every weapon, shield and armor piece in one chest — axes live in Tools.",
       items: ["Bronze Sword", "Iron Sword", "Silver Sword", "Black Metal Sword", "Mistwalker", "Nidhögg", "Dyrnwyn", "Nord Sword", "Krom", "Slayer", "Nord Greatsword",
         "Club", "Bronze Mace", "Iron Mace", "Frostner", "Porcupine", "Flametal Mace", "Nord Mace", "Stagbreaker", "Iron Sledge", "Demolisher", "Nord Sledge",
         "Flint Spear", "Bronze Spear", "Ancient Bark Spear", "Fang Spear", "Carapace Spear", "Splitnir", "Nord Spear",
@@ -683,11 +685,11 @@
         "Headdress of the Caller", "Robes of the Caller", "Trousers of the Caller", "Cape of the Caller"] },
 
     { id: "decor",   col: 8, pos: "bottom", label: "DECOR", name: "Furniture / Unplaced Decor",
-      desc: "Build pieces and table-dressing you're holding onto before you've mounted or placed them.",
+      desc: "Build pieces and table-dressing waiting to be mounted or placed.",
       items: ["Banners", "Rugs", "Trophies awaiting a wall mount", "Tankard", "Horn of Celebration", "Dvergr Tankard", "Serving Tray"] },
 
     { id: "drop",    col: 9, pos: "full",   label: "DROP",  name: "Drop",
-      desc: "The drop zone for whatever doesn't have a home yet. In the 5×3 grid its three chests stand as a full detached column beside the wall; in the corridor it gets the full rightmost column — either way it's the last thing you pass on the way out.",
+      desc: "The drop zone for anything without a home yet — the last thing you pass on the way out.",
       items: ["Unsorted new drops", "Anything awaiting its own category"] },
   ];
 
