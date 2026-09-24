@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unkirk Storage Wall</title>
+<style>
+  :root {
+    --iron: #1c211f;
+    --ash: #262b26;
+    --ash-2: #2f352e;
+    --bone: #e9e3d0;
+    --moss: #97a08f;
+    --moss-dim: #6c7568;
+    --ember: #c97a3d;
+    --ember-dim: #a4622f;
+    --tarn: #6fa3ac;
+    --line: #3a4038;
+    --shadow: rgba(0,0,0,0.45);
+
+    --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  :root[data-theme="light"] {
+    --iron: #ece4cf;
+    --ash: #f8f2e2;
+    --ash-2: #efe6d0;
+    --bone: #2a2620;
+    --moss: #5b6152;
+    --moss-dim: #83897a;
+    --ember: #a85a26;
+    --ember-dim: #8c4a1e;
+    --tarn: #3f6b76;
+    --line: #d9cfb2;
+    --shadow: rgba(90, 70, 40, 0.18);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --iron: #ece4cf;
+      --ash: #f8f2e2;
+      --ash-2: #efe6d0;
+      --bone: #2a2620;
+      --moss: #5b6152;
+      --moss-dim: #83897a;
+      --ember: #a85a26;
+      --ember-dim: #8c4a1e;
+      --tarn: #3f6b76;
+      --line: #d9cfb2;
+      --shadow: rgba(90, 70, 40, 0.18);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--iron);
+    color: var(--bone);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  header.head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 2.2rem;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ember);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: 0.01em;
+  }
+
+  .sub {
+    color: var(--moss);
+    max-width: 62ch;
+    font-size: 0.98rem;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin: 1.6rem 0 1.8rem;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1 1 320px;
+    min-width: 220px;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    stroke: var(--moss-dim);
+    pointer-events: none;
+  }
+
+  #search {
+    width: 100%;
+    background: var(--ash);
+    border: 1px solid var(--line);
+    color: var(--bone);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    padding: 0.68rem 2.1rem 0.68rem 2.35rem;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  #search::placeholder { color: var(--moss-dim); }
+
+  #search:focus-visible {
+    border-color: var(--ember);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ember) 22%, transparent);
+  }
+
+  #searchClear {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: transparent;
+    color: var(--moss-dim);
+    font-size: 1.15rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 4px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #searchClear:hover { color: var(--bone); background: var(--ash-2); }
+
+  #searchClear:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ember) 35%, transparent);
+  }
+
+  .search-wrap.has-text #searchClear { display: flex; }
+
+  .count-pill {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--moss);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.42rem 0.85rem;
+    white-space: nowrap;
+  }
+
+  .count-pill b { color: var(--bone); font-weight: 600; }
+
+  .matches {
+    margin: -0.6rem 0 1.6rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.3rem;
+    border: 1px solid var(--line);
+    background: var(--ash);
+    border-radius: 6px;
+    padding: 0.5rem;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .matches.show { display: flex; }
+
+  .match-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    text-align: left;
+    font-family: var(--font-body);
+    color: var(--bone);
+    font-size: 0.88rem;
+  }
+
+  .match-row:hover, .match-row:focus-visible {
+    background: var(--ash-2);
+    outline: none;
+  }
+
+  .match-row .item-name { flex: 0 0 auto; font-weight: 600; }
+  .match-row .item-loc { color: var(--moss); font-family: var(--font-mono); font-size: 0.78rem; }
+  .match-row .item-cat { color: var(--tarn); font-size: 0.82rem; margin-left: auto; }
+
+  .no-match {
+    color: var(--moss-dim);
+    font-size: 0.86rem;
+    padding: 0.5rem 0.6rem;
+  }
+
+  /* --- the wall --- */
+
+  .wall-scroll {
+    overflow-x: auto;
+    padding-bottom: 0.6rem;
+    margin: 0 -1.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .wall {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 96px;
+    grid-template-rows: auto 1fr 1fr;
+    gap: 8px 10px;
+    width: max-content;
+  }
+
+  .col-number {
+    grid-row: 1;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--moss-dim);
+    letter-spacing: 0.05em;
+  }
+
+  .cell {
+    grid-column: auto;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ash-2) 88%, transparent) 0%, var(--ash) 100%);
+    padding: 0.6rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 0.4rem;
+    min-height: 96px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.12s ease, border-color 0.15s ease, opacity 0.2s ease, box-shadow 0.15s ease;
+  }
+
+  .cell:hover { transform: translateY(-2px); border-color: var(--moss-dim); }
+
+  .cell:focus-visible {
+    outline: none;
+    border-color: var(--ember);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ember) 25%, transparent);
+  }
+
+  .cell.active {
+    border-color: var(--ember);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--ember) 16%, var(--ash-2)) 0%, var(--ash) 100%);
+    box-shadow: 0 4px 14px var(--shadow);
+  }
+
+  .cell.dim { opacity: 0.28; }
+  .cell.hit { border-color: var(--tarn); box-shadow: 0 0 0 2px color-mix(in srgb, var(--tarn) 35%, transparent); }
+
+  .cell.empty {
+    cursor: default;
+    border-style: dashed;
+    background: transparent;
+    opacity: 0.55;
+  }
+  .cell.empty:hover { transform: none; border-color: var(--line); }
+
+  .cell-label {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.74rem;
+    letter-spacing: 0.03em;
+    text-align: center;
+    line-height: 1.15;
+  }
+
+  .box-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+  }
+
+  .box {
+    flex: 1;
+    min-height: 14px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bone) 5%, var(--ash-2)) 0%, var(--ash) 100%);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--bone) 7%, transparent);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .cell.active .box {
+    border-color: var(--ember);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--ember) 24%, var(--ash-2)) 0%, var(--ash) 100%);
+  }
+
+  .cell.hit .box { border-color: var(--tarn); }
+
+  .cell.empty .box {
+    border-style: dashed;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .wall-caption {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--moss-dim);
+    margin-top: 0.7rem;
+  }
+
+  /* --- detail drawer --- */
+
+  .drawer {
+    margin-top: 2rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--ash);
+    overflow: hidden;
+  }
+
+  .drawer-empty {
+    padding: 2.2rem 1.6rem;
+    text-align: center;
+    color: var(--moss-dim);
+    font-size: 0.92rem;
+  }
+
+  .drawer-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.3rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+
+  .drawer-head h2 {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .drawer-meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--tarn);
+    white-space: nowrap;
+  }
+
+  .drawer-desc {
+    padding: 0.9rem 1.5rem 0;
+    color: var(--moss);
+    font-size: 0.92rem;
+    max-width: 62ch;
+  }
+
+  .drawer-items {
+    padding: 1rem 1.5rem 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    grid-auto-rows: min-content;
+    gap: 0.5rem 1rem;
+    max-height: 46vh;
+    overflow-y: auto;
+  }
+
+  .drawer-items li {
+    list-style: none;
+    padding: 0.45rem 0 0.45rem 1rem;
+    border-left: 2px solid var(--line);
+    font-size: 0.92rem;
+  }
+
+  .drawer-items li.flash { border-left-color: var(--tarn); color: var(--tarn); }
+
+  footer.foot {
+    margin-top: 2.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--moss-dim);
+  }
+
+  @media (max-width: 640px) {
+    .page { padding: 1.6rem 1rem 3rem; }
+    .drawer-items { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="head">
+    <div class="eyebrow">Unkirk &middot; Chest Reference</div>
+    <h1>The Storage Wall</h1>
+    <p class="sub">Food, ore &amp; metal, wood, and stone stored separately. Click a chest to see
+      what belongs in it, or search for an item to find its home.</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search" type="text" placeholder="Search an item&hellip; e.g. amber, arrows, chain" autocomplete="off" />
+      <button id="searchClear" type="button" aria-label="Clear search" title="Clear search">&times;</button>
+    </div>
+    <div class="count-pill" id="countPill"><b>19</b> categories &middot; <b id="itemCount">0</b> items tracked</div>
+  </div>
+
+  <div class="matches" id="matches"></div>
+
+  <div class="wall-scroll">
+    <div class="wall" id="wall"></div>
+  </div>
+
+  <div class="drawer" id="drawer">
+    <div class="drawer-empty">Select a chest above to see what's stored inside.</div>
+  </div>
+</div>
+
+<script>
+  const CATEGORIES = [
+    { id: "hides",   col: 1, pos: "top",    label: "HIDES",  name: "Hides & Pelts",
+      desc: "Every Boar, Deer and Greydwarf Brute drops one of these — the steadiest accumulator on the wall.",
+      items: ["Deer Hide", "Leather Scraps", "Troll Hide", "Wolf Pelt", "Lox Pelt", "Scale Hide", "Bear Hide", "Moose Hide", "Seal Pelt"] },
+    { id: "bone",    col: 1, pos: "bottom", label: "BONE",   name: "Bone",
+      desc: "Draugr drops, split out from Hides so it doesn't get buried under the faster-growing category above it.",
+      items: ["Bone Fragments", "Withered Bone", "Charred Bones"] },
+
+    { id: "resin",   col: 2, pos: "top",    label: "RESIN",  name: "Resin",
+      desc: "Greydwarves are the most-killed enemy in the game — this fills faster than Feathers below it.",
+      items: ["Resin", "Charcoal Resin"] },
+    { id: "feathers",col: 2, pos: "bottom", label: "FEATHR", name: "Feathers",
+      desc: "Needs a bit of bird-hunting to farm, so it grows slower than Resin.",
+      items: ["Feathers", "Celestial Feather"] },
+
+    { id: "arrows",  col: 3, pos: "top",    label: "ARROWS", name: "Arrows & Ammo",
+      desc: "Fletched in batches of 20+ — easy to over-produce, so it gets the top slot. Crossbow Bolts live here too, same storage role as arrows.",
+      items: ["Wood Arrow", "Flinthead Arrow", "Bronze Arrow", "Ironhead Arrow", "Obsidian Arrow",
+        "Needle Arrow", "Carapace Arrow", "Charred Arrow", "Fire Arrow", "Frost Arrow", "Poison Arrow",
+        "Silver Arrow", "Bone Bolt", "Iron Bolt", "Blackmetal Bolt", "Carapace Bolt"] },
+    { id: "parts",   col: 3, pos: "bottom", label: "ORGANS", name: "Creature Parts & Organs",
+      desc: "Monster byproducts, tied to specific kills rather than constant drops.",
+      items: ["Guck", "Ooze", "Root", "Neck Tail", "Entrails", "Bloodbag", "Blood Clot", "Bilebag",
+        "Carapace", "Mandible", "Soft Tissue", "Freeze Gland", "Morgen Heart", "Morgen Sinew", "Asksvin Bladder"] },
+
+    { id: "tar",     col: 4, pos: "top",    label: "TAR",    name: "Tar",
+      desc: "Harvested from pits faster than it gets used for Frostner or the Iron Sledge.",
+      items: ["Tar"] },
+    { id: "hardware",col: 4, pos: "bottom", label: "HRDWR",  name: "Building Hardware",
+      desc: "Nails get smelted to order for a specific build, so this stays under control — nails stop at Iron tier, no higher tier exists.",
+      items: ["Bronze Nails", "Iron Nails", "Chain"] },
+
+    { id: "fiber",   col: 5, pos: "top",    label: "FIBER",  name: "Fiber (Flax)",
+      desc: "Each harvest yields raw fiber in bulk — grows faster than the seed stock below it.",
+      items: ["Flax"] },
+    { id: "seeds",   col: 5, pos: "bottom", label: "SEEDS",  name: "Seeds",
+      desc: "Replanting only eats a few seeds back per harvest, so this stays fairly flat. Barley and Flax are dual-purpose — same item as the harvested crop above, earmark a few here for replanting.",
+      items: ["Barley", "Flax", "Carrot Seed", "Turnip Seeds", "Onion Seeds", "Vineberry Seeds",
+        "Acorn", "Beech Seeds", "Birch Seeds", "Fir Cone", "Pine Cone"] },
+
+    { id: "trophy",  col: 6, pos: "top",    label: "TROPHY", name: "Trophies",
+      desc: "Duplicates keep dropping from any farming grind, even species you've already logged. Deep North trophy coverage may still be incomplete — it's only weeks old.",
+      items: ["Neck Trophy", "Boar Trophy", "Deer Trophy", "Eikthyr Trophy",
+        "Greydwarf Trophy", "Greydwarf Brute Trophy", "Greydwarf Shaman Trophy", "Skeleton Trophy", "Troll Trophy", "The Elder Trophy",
+        "Draugr Trophy", "Draugr Elite Trophy", "Leech Trophy", "Blob Trophy", "Abomination Trophy", "Surtling Trophy", "Wraith Trophy", "Bonemass Trophy",
+        "Wolf Trophy", "Fenring Trophy", "Drake Trophy", "Stone Golem Trophy", "Moder Trophy",
+        "Deathsquito Trophy", "Fuling Trophy", "Fuling Berserker Trophy", "Fuling Shaman Trophy", "Lox Trophy", "Yagluth Trophy",
+        "Seeker Trophy", "Seeker Soldier Trophy", "Tick Trophy", "Gjall Trophy", "Hare Trophy", "Dvergr Trophy", "The Queen Trophy",
+        "Morgen Trophy", "Warlock Trophy", "Cultist Trophy", "Fallen Valkyrie Trophy", "Volture Trophy", "Marksman Trophy", "Warrior Trophy", "Vile Trophy", "Rancid Remains Trophy", "Bonemaw Trophy", "Fader Trophy",
+        "Barka Trophy", "Elaking Trophy", "Seal Trophy", "Lava Blob Trophy", "Bear Trophy"] },
+    { id: "gems",    col: 6, pos: "bottom", label: "GEMS",   name: "Gems",
+      desc: "Rarer finds than trophies — crypt and cave loot only. Crystal isn't here on purpose: it behaves like ore/building stock, so it lives in your metal box instead.",
+      items: ["Amber", "Amber Pearl", "Ruby"] },
+
+    { id: "value",   col: 7, pos: "bottom", label: "VALUE",  name: "Valuables & Currency",
+      desc: "Naturally bounded — coins and jewelry don't snowball the way raw materials do.",
+      items: ["Coins", "Silver Necklace"] },
+
+    { id: "weapon",  col: 8, pos: "top",    label: "WEAPON", name: "Weapons",
+      desc: "Every weapon in the game, Bronze Sword through the newest Nord-tier gear — search here for any of them by name. Axes live in Tools instead, since most of them double as the axe you actually chop wood with.",
+      items: ["Bronze Sword", "Iron Sword", "Silver Sword", "Black Metal Sword", "Mistwalker", "Nidhögg", "Dyrnwyn", "Nord Sword", "Krom", "Slayer", "Nord Greatsword",
+        "Club", "Bronze Mace", "Iron Mace", "Frostner", "Porcupine", "Flametal Mace", "Nord Mace", "Stagbreaker", "Iron Sledge", "Demolisher", "Nord Sledge",
+        "Flint Spear", "Bronze Spear", "Ancient Bark Spear", "Fang Spear", "Carapace Spear", "Splitnir", "Nord Spear",
+        "Bronze Atgeir", "Iron Atgeir", "Black Metal Atgeir", "Himminafl", "Nord Atgeir",
+        "Flint Knife", "Copper Knife", "Abyssal Razor", "Silver Knife", "Black Metal Knife", "Nord Dagger", "Skoll and Hati",
+        "Bare Fists", "Paws of the Bear", "Flesh Rippers", "Vilebone Maulclaws", "Nord Knucklechains",
+        "Crude Bow", "Finewood Bow", "Huntsman Bow", "Draugr Fang", "Spinesnap", "Ash Fang", "Nord Bow",
+        "Arbalest", "Ripper", "Nord Crossbow",
+        "Staff of Embers", "Staff of Frost", "Dundr", "Staff of the Wild", "Staff of Fracturing", "Lightning Strike", "Echo Spike", "Staff of Protection", "Dead Raiser", "Trollstav", "Spirit Caller", "Northern Vengeance"] },
+    { id: "shield",  col: 8, pos: "bottom", label: "SHIELD", name: "Shields",
+      desc: "Every shield in the game, round/buckler/tower across all tiers.",
+      items: ["Wood Shield", "Banded Shield", "Shield of Roots", "Silver Shield", "Black Metal Shield", "Carapace Shield", "Flametal Shield", "Nord Shield",
+        "Bronze Buckler", "Iron Buckler", "Carapace Buckler", "Nord Buckler",
+        "Wood Tower Shield", "Bone Tower Shield", "Iron Tower Shield", "Serpent Scale Shield", "Black Metal Tower Shield", "Flametal Tower Shield", "Nord Greatshield"] },
+
+    { id: "armor",   col: 9, pos: "top",    label: "ARMOR",  name: "Armor",
+      desc: "A full 3-piece set goes obsolete together at every biome tier — every set from Rags through the Deep North lives here.",
+      items: ["Rag Tunic", "Rag Pants",
+        "Leather Helmet", "Leather Tunic", "Leather Pants", "Deer Hide Cape",
+        "Headdress of the Bear", "Patterns of the Bear", "Loincloth of the Bear",
+        "Troll Leather Helmet", "Troll Leather Tunic", "Troll Leather Pants", "Troll Hide Cape",
+        "Bronze Helmet", "Bronze Plate Cuirass", "Bronze Plate Leggings",
+        "Root Mask", "Root Harnesk", "Root Leggings",
+        "Iron Helmet", "Iron Scale Mail", "Iron Greaves",
+        "Fenris Hood", "Fenris Coat", "Fenris Leggings",
+        "Drake Helmet", "Wolf Hide Chestpiece", "Wolf Hide Trousers", "Wolf Fur Cape",
+        "Padded Helmet", "Padded Cuirass", "Padded Greaves", "Linen Cape",
+        "Lox Fur Hood", "Lox Fur Jacket", "Lox Fur Trousers", "Lox Cape",
+        "Vilebone Visage", "Vilebone Cage", "Vilebone Drapes",
+        "Carapace Helmet", "Carapace Breastplate", "Carapace Greaves",
+        "Eitr-weave Hood", "Eitr-weave Robe", "Eitr-weave Trousers", "Feather Cape",
+        "Hood of Embla", "Robes of Embla", "Trousers of Embla",
+        "Hood of Ask", "Breastplate of Ask", "Trousers of Ask", "Asksvin Cloak",
+        "Flametal Helmet", "Flametal Breastplate", "Flametal Greaves", "Ashen Cape",
+        "Helmet of the Protector", "Breastplate of the Protector", "Trousers of the Protector", "Moose Hide Cape",
+        "Hood of the Vanguard", "Chestpiece of the Vanguard", "Trousers of the Vanguard",
+        "Headdress of the Caller", "Robes of the Caller", "Trousers of the Caller", "Cape of the Caller"] },
+    { id: "tools",   col: 9, pos: "bottom", label: "TOOLS",  name: "Tools",
+      desc: "Pickaxes, every axe (combat variants included), and everything else that isn't a wearable or a weapon.",
+      items: ["Antler Pickaxe", "Bronze Pickaxe", "Iron Pickaxe", "Black Metal Pickaxe",
+        "Stone Axe", "Flint Axe", "Bronze Axe", "Iron Axe", "Black Metal Axe", "Battleaxe", "Crystal Battleaxe",
+        "Jotun Bane", "Black Metal Battleaxe", "Skull Splittur", "Nord Axe", "Nord Greataxe", "Early Axes", "Berserkir Axes",
+        "Hammer", "Hoe", "Cultivator", "Butcher Knife", "Scythe", "Fishing Rod", "Fishing Bait",
+        "Torch", "Dvergr Lantern", "Wishbone"] },
+
+    { id: "decor",   col: 10, pos: "bottom", label: "DECOR", name: "Furniture / Unplaced Decor",
+      desc: "Build pieces and table-dressing you're holding onto before you've mounted or placed them.",
+      items: ["Banners", "Rugs", "Trophies awaiting a wall mount", "Tankard", "Horn of Celebration", "Dvergr Tankard", "Serving Tray"] },
+
+    { id: "drop",    col: 11, pos: "full",   label: "DROP",  name: "Drop",
+      desc: "The one column with no fixed contents — a genuine drop zone for whatever doesn't have a home yet. Gets the full 4-box column since it's the least predictable of the bunch, rightmost so it's the last thing you pass.",
+      items: ["Unsorted new drops", "Anything awaiting its own category"] },
+  ];
+
+  const wall = document.getElementById("wall");
+  const drawer = document.getElementById("drawer");
+  const searchInput = document.getElementById("search");
+  const matchesBox = document.getElementById("matches");
+  const itemCountEl = document.getElementById("itemCount");
+
+  const totalItems = CATEGORIES.reduce((n, c) => n + c.items.length, 0);
+  itemCountEl.textContent = totalItems;
+
+  function buildWall() {
+    const lastCol = Math.max(...CATEGORIES.map(c => c.col));
+    for (let col = 1; col <= lastCol; col++) {
+      const numEl = document.createElement("div");
+      numEl.className = "col-number";
+      numEl.style.gridColumn = col;
+      numEl.textContent = String(col).padStart(2, "0");
+      wall.appendChild(numEl);
+
+      const full = CATEGORIES.find(c => c.col === col && c.pos === "full");
+      if (full) {
+        wall.appendChild(makeCell(full, col, "2 / 4", 4));
+        continue;
+      }
+
+      const top = CATEGORIES.find(c => c.col === col && c.pos === "top");
+      const bottom = CATEGORIES.find(c => c.col === col && c.pos === "bottom");
+
+      wall.appendChild(makeCell(top, col, 2, 2));
+      wall.appendChild(makeCell(bottom, col, 3, 2));
+    }
+  }
+
+  function makeCell(cat, col, row, boxCount) {
+    const el = document.createElement("div");
+    el.style.gridColumn = col;
+    el.style.gridRow = row;
+
+    const boxesHtml = Array.from({ length: boxCount }, () => '<div class="box"></div>').join("");
+
+    if (!cat) {
+      el.className = "cell empty";
+      el.innerHTML = `<div class="cell-label" style="color:var(--moss-dim)">&mdash;</div><div class="box-stack">${boxesHtml}</div>`;
+      el.title = "Reserved for growth";
+      return el;
+    }
+
+    el.className = "cell";
+    el.tabIndex = 0;
+    el.dataset.id = cat.id;
+    el.setAttribute("role", "button");
+    el.setAttribute("aria-label", cat.name);
+    el.innerHTML = `<div class="cell-label">${cat.label}</div><div class="box-stack">${boxesHtml}</div>`;
+    el.addEventListener("click", () => selectCategory(cat.id));
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectCategory(cat.id); }
+    });
+    return el;
+  }
+
+  let activeId = null;
+
+  function selectCategory(id) {
+    activeId = id;
+    document.querySelectorAll(".cell").forEach(el => {
+      el.classList.toggle("active", el.dataset.id === id);
+    });
+    renderDrawer(id);
+  }
+
+  function renderDrawer(id, flashItem) {
+    const cat = CATEGORIES.find(c => c.id === id);
+    if (!cat) {
+      drawer.innerHTML = '<div class="drawer-empty">Select a chest above to see what\'s stored inside.</div>';
+      return;
+    }
+    const itemsHtml = cat.items.map(it => {
+      const flash = flashItem && it.toLowerCase() === flashItem.toLowerCase() ? " flash" : "";
+      return `<li class="${flash.trim()}">${it}</li>`;
+    }).join("");
+    drawer.innerHTML = `
+      <div class="drawer-head">
+        <h2>${cat.name}</h2>
+        <div class="drawer-meta">column ${String(cat.col).padStart(2, "0")} &middot; ${cat.pos} slot</div>
+      </div>
+      <div class="drawer-desc">${cat.desc}</div>
+      <ul class="drawer-items">${itemsHtml}</ul>
+    `;
+  }
+
+  function runSearch(query) {
+    const q = query.trim().toLowerCase();
+    const cells = document.querySelectorAll(".cell:not(.empty)");
+
+    if (!q) {
+      cells.forEach(el => el.classList.remove("dim", "hit"));
+      matchesBox.classList.remove("show");
+      matchesBox.innerHTML = "";
+      return;
+    }
+
+    const matchedCatIds = new Set();
+    const itemHits = [];
+
+    CATEGORIES.forEach(cat => {
+      const catNameHit = cat.name.toLowerCase().includes(q) || cat.label.toLowerCase().includes(q);
+      const itemHitsForCat = cat.items.filter(it => it.toLowerCase().includes(q));
+      if (catNameHit || itemHitsForCat.length) matchedCatIds.add(cat.id);
+      itemHitsForCat.forEach(it => itemHits.push({ item: it, cat }));
+    });
+
+    cells.forEach(el => {
+      const isHit = matchedCatIds.has(el.dataset.id);
+      el.classList.toggle("dim", !isHit);
+      el.classList.toggle("hit", isHit);
+    });
+
+    if (itemHits.length === 0) {
+      matchesBox.innerHTML = '<div class="no-match">No item matches &ldquo;' + escapeHtml(query) + '&rdquo;.</div>';
+    } else {
+      matchesBox.innerHTML = itemHits.map(({ item, cat }) => `
+        <button class="match-row" data-cat="${cat.id}" data-item="${escapeHtml(item)}">
+          <span class="item-name">${item}</span>
+          <span class="item-loc">col ${String(cat.col).padStart(2, "0")} &middot; ${cat.pos}</span>
+          <span class="item-cat">${cat.name}</span>
+        </button>
+      `).join("");
+    }
+    matchesBox.classList.add("show");
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  }
+
+  matchesBox.addEventListener("click", (e) => {
+    const row = e.target.closest(".match-row");
+    if (!row) return;
+    selectCategory(row.dataset.cat);
+    renderDrawer(row.dataset.cat, row.dataset.item);
+    document.getElementById("drawer").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+
+  const searchWrap = document.querySelector(".search-wrap");
+  const searchClear = document.getElementById("searchClear");
+
+  searchInput.addEventListener("input", (e) => {
+    searchWrap.classList.toggle("has-text", e.target.value.length > 0);
+    runSearch(e.target.value);
+  });
+
+  searchClear.addEventListener("click", () => {
+    searchInput.value = "";
+    searchWrap.classList.remove("has-text");
+    runSearch("");
+    searchInput.focus();
+  });
+
+  buildWall();
+</script>
+</body>
+</html>
