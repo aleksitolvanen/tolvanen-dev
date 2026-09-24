@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Unkirk Storage Wall</title>
+<title>Valheim — Unkirk Storage Wall</title>
 <style>
   :root {
     --iron: #1c211f;
@@ -11,7 +11,7 @@
     --ash-2: #2f352e;
     --bone: #e9e3d0;
     --moss: #97a08f;
-    --moss-dim: #6c7568;
+    --moss-dim: #8a9284;
     --ember: #c97a3d;
     --ember-dim: #a4622f;
     --tarn: #6fa3ac;
@@ -44,7 +44,7 @@
       --ash-2: #efe6d0;
       --bone: #2a2620;
       --moss: #5b6152;
-      --moss-dim: #83897a;
+      --moss-dim: #5a6050;
       --ember: #a85a26;
       --ember-dim: #8c4a1e;
       --tarn: #3f6b76;
@@ -185,6 +185,26 @@
 
   .count-pill b { color: var(--bone); font-weight: 600; }
 
+  .view-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--moss);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .view-toggle input {
+    accent-color: var(--ember);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+  }
+
+  .view-toggle:hover { color: var(--bone); }
+
   .matches {
     margin: -0.6rem 0 1.6rem;
     display: none;
@@ -234,8 +254,9 @@
 
   .wall-scroll {
     overflow-x: auto;
+    padding-top: 0.6rem;
     padding-bottom: 0.6rem;
-    margin: 0 -1.5rem;
+    margin: -0.6rem -1.5rem 0;
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
@@ -248,6 +269,25 @@
     gap: 8px 10px;
     width: max-content;
   }
+
+  .wall.grid-mode {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(5, minmax(72px, 1fr));
+    grid-template-rows: repeat(4, 62px);
+    gap: 6px;
+    width: 100%;
+    max-width: 620px;
+  }
+
+  .wall.grid-mode .cell {
+    min-height: 62px;
+    padding: 0.3rem 0.3rem;
+    gap: 0.2rem;
+  }
+
+  .wall.grid-mode .cell-label { font-size: 0.62rem; letter-spacing: 0.01em; }
+
+  .wall.grid-mode .box { min-height: 8px; }
 
   .col-number {
     grid-row: 1;
@@ -292,6 +332,7 @@
 
   .cell.dim { opacity: 0.28; }
   .cell.hit { border-color: var(--tarn); box-shadow: 0 0 0 2px color-mix(in srgb, var(--tarn) 35%, transparent); }
+  .cell.active.hit { border-color: var(--ember); box-shadow: 0 4px 14px var(--shadow); }
 
   .cell.empty {
     cursor: default;
@@ -333,18 +374,12 @@
   }
 
   .cell.hit .box { border-color: var(--tarn); }
+  .cell.active.hit .box { border-color: var(--ember); }
 
   .cell.empty .box {
     border-style: dashed;
     background: transparent;
     box-shadow: none;
-  }
-
-  .wall-caption {
-    font-family: var(--font-mono);
-    font-size: 0.74rem;
-    color: var(--moss-dim);
-    margin-top: 0.7rem;
   }
 
   /* --- detail drawer --- */
@@ -414,23 +449,30 @@
 
   .drawer-items li.flash { border-left-color: var(--tarn); color: var(--tarn); }
 
-  footer.foot {
-    margin-top: 2.5rem;
+  .drawer-items li.capped { border-left-color: var(--ember); }
+
+  .item-cap {
+    display: block;
     font-family: var(--font-mono);
-    font-size: 0.74rem;
-    color: var(--moss-dim);
+    font-size: 0.7rem;
+    color: var(--ember);
+    margin-top: 0.15rem;
   }
+
+  .item-cap::before { content: "\26A0  "; }
+
 
   @media (max-width: 640px) {
     .page { padding: 1.6rem 1rem 3rem; }
     .drawer-items { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .wall.grid-mode { grid-template-columns: repeat(5, minmax(0, 1fr)); max-width: 100%; }
   }
 </style>
 </head>
 <body>
 <div class="page">
   <header class="head">
-    <div class="eyebrow">Unkirk &middot; Chest Reference</div>
+    <div class="eyebrow">Valheim &middot; Unkirk world &middot; Chest Reference</div>
     <h1>The Storage Wall</h1>
     <p class="sub">Food, ore &amp; metal, wood, and stone stored separately. Click a chest to see
       what belongs in it, or search for an item to find its home.</p>
@@ -442,7 +484,11 @@
       <input id="search" type="text" placeholder="Search an item&hellip; e.g. amber, arrows, chain" autocomplete="off" />
       <button id="searchClear" type="button" aria-label="Clear search" title="Clear search">&times;</button>
     </div>
-    <div class="count-pill" id="countPill"><b>19</b> categories &middot; <b id="itemCount">0</b> items tracked</div>
+    <div class="count-pill" id="countPill"><b id="catCount">0</b> categories &middot; <b id="itemCount">0</b> items tracked</div>
+    <label class="view-toggle">
+      <input type="checkbox" id="gridToggle" />
+      <span>Alternative build &mdash; 10-column corridor, stacked pairs</span>
+    </label>
   </div>
 
   <div class="matches" id="matches"></div>
@@ -478,9 +524,10 @@
         "Needle Arrow", "Carapace Arrow", "Charred Arrow", "Fire Arrow", "Frost Arrow", "Poison Arrow",
         "Silver Arrow", "Bone Bolt", "Iron Bolt", "Blackmetal Bolt", "Carapace Bolt"] },
     { id: "parts",   col: 3, pos: "bottom", label: "ORGANS", name: "Creature Parts & Organs",
-      desc: "Monster byproducts, tied to specific kills rather than constant drops.",
+      desc: "Monster byproducts, tied to specific kills rather than constant drops. A few of these are boss-summon items — see the &#9873; mark on the exact count needed.",
       items: ["Guck", "Ooze", "Root", "Neck Tail", "Entrails", "Bloodbag", "Blood Clot", "Bilebag",
-        "Carapace", "Mandible", "Soft Tissue", "Freeze Gland", "Morgen Heart", "Morgen Sinew", "Asksvin Bladder"] },
+        "Carapace", "Mandible", "Soft Tissue", "Freeze Gland", "Morgen Heart", "Morgen Sinew", "Asksvin Bladder",
+        "Ancient Seed", "Dragon Egg", "Fuling Totem"] },
 
     { id: "tar",     col: 4, pos: "top",    label: "TAR",    name: "Tar",
       desc: "Harvested from pits faster than it gets used for Frostner or the Iron Sledge.",
@@ -490,10 +537,10 @@
       items: ["Bronze Nails", "Iron Nails", "Chain"] },
 
     { id: "fiber",   col: 5, pos: "top",    label: "FIBER",  name: "Fiber (Flax)",
-      desc: "Each harvest yields raw fiber in bulk — grows faster than the seed stock below it.",
+      desc: "Each harvest yields raw fiber in bulk — grows faster than the seed stock below it. Flax is dual-purpose, the same item also earmarked in Seeds below for replanting. Barley isn't here — it's a food crop, so its bulk harvest goes to your food box instead.",
       items: ["Flax"] },
     { id: "seeds",   col: 5, pos: "bottom", label: "SEEDS",  name: "Seeds",
-      desc: "Replanting only eats a few seeds back per harvest, so this stays fairly flat. Barley and Flax are dual-purpose — same item as the harvested crop above, earmark a few here for replanting.",
+      desc: "Replanting only eats a few seeds back per harvest, so this stays fairly flat. Flax is shared with Fiber above; Barley's harvest goes to your food box, only the replanting reserve lives here.",
       items: ["Barley", "Flax", "Carrot Seed", "Turnip Seeds", "Onion Seeds", "Vineberry Seeds",
         "Acorn", "Beech Seeds", "Birch Seeds", "Fir Cone", "Pine Cone"] },
 
@@ -509,8 +556,15 @@
         "Barka Trophy", "Elaking Trophy", "Seal Trophy", "Lava Blob Trophy", "Bear Trophy"] },
     { id: "gems",    col: 6, pos: "bottom", label: "GEMS",   name: "Gems",
       desc: "Rarer finds than trophies — crypt and cave loot only. Crystal isn't here on purpose: it behaves like ore/building stock, so it lives in your metal box instead.",
-      items: ["Amber", "Amber Pearl", "Ruby"] },
+      items: ["Amber", "Amber Pearl", "Ruby", "Bell Fragment"] },
 
+    { id: "tools",   col: 7, pos: "top",    label: "TOOLS",  name: "Tools",
+      desc: "Pickaxes, every axe (combat variants included), and everything else that isn't a wearable or a weapon — grows faster than the coins and jewelry below it.",
+      items: ["Antler Pickaxe", "Bronze Pickaxe", "Iron Pickaxe", "Black Metal Pickaxe",
+        "Stone Axe", "Flint Axe", "Bronze Axe", "Iron Axe", "Black Metal Axe", "Battleaxe", "Crystal Battleaxe",
+        "Jotun Bane", "Black Metal Battleaxe", "Skull Splittur", "Nord Axe", "Nord Greataxe", "Early Axes", "Berserkir Axes",
+        "Hammer", "Hoe", "Cultivator", "Butcher Knife", "Scythe", "Fishing Rod", "Fishing Bait",
+        "Torch", "Dvergr Lantern", "Wishbone"] },
     { id: "value",   col: 7, pos: "bottom", label: "VALUE",  name: "Valuables & Currency",
       desc: "Naturally bounded — coins and jewelry don't snowball the way raw materials do.",
       items: ["Coins", "Silver Necklace"] },
@@ -554,33 +608,42 @@
         "Helmet of the Protector", "Breastplate of the Protector", "Trousers of the Protector", "Moose Hide Cape",
         "Hood of the Vanguard", "Chestpiece of the Vanguard", "Trousers of the Vanguard",
         "Headdress of the Caller", "Robes of the Caller", "Trousers of the Caller", "Cape of the Caller"] },
-    { id: "tools",   col: 9, pos: "bottom", label: "TOOLS",  name: "Tools",
-      desc: "Pickaxes, every axe (combat variants included), and everything else that isn't a wearable or a weapon.",
-      items: ["Antler Pickaxe", "Bronze Pickaxe", "Iron Pickaxe", "Black Metal Pickaxe",
-        "Stone Axe", "Flint Axe", "Bronze Axe", "Iron Axe", "Black Metal Axe", "Battleaxe", "Crystal Battleaxe",
-        "Jotun Bane", "Black Metal Battleaxe", "Skull Splittur", "Nord Axe", "Nord Greataxe", "Early Axes", "Berserkir Axes",
-        "Hammer", "Hoe", "Cultivator", "Butcher Knife", "Scythe", "Fishing Rod", "Fishing Bait",
-        "Torch", "Dvergr Lantern", "Wishbone"] },
-
-    { id: "decor",   col: 10, pos: "bottom", label: "DECOR", name: "Furniture / Unplaced Decor",
+    { id: "decor",   col: 9, pos: "bottom", label: "DECOR", name: "Furniture / Unplaced Decor",
       desc: "Build pieces and table-dressing you're holding onto before you've mounted or placed them.",
       items: ["Banners", "Rugs", "Trophies awaiting a wall mount", "Tankard", "Horn of Celebration", "Dvergr Tankard", "Serving Tray"] },
 
-    { id: "drop",    col: 11, pos: "full",   label: "DROP",  name: "Drop",
+    { id: "drop",    col: 10, pos: "full",   label: "DROP",  name: "Drop",
       desc: "The one column with no fixed contents — a genuine drop zone for whatever doesn't have a home yet. Gets the full 4-box column since it's the least predictable of the bunch, rightmost so it's the last thing you pass.",
       items: ["Unsorted new drops", "Anything awaiting its own category"] },
   ];
+
+  // Items with a known, fixed use — mostly boss summons — where farming a full
+  // stack is wasted effort. Marked with a badge in the drawer instead of a plain bullet.
+  const LOW_QTY_NOTES = {
+    "Deer Trophy": "Eikthyr summon — needs 2",
+    "Ancient Seed": "The Elder summon — needs 3",
+    "Withered Bone": "Bonemass summon — needs 10",
+    "Dragon Egg": "Moder summon — needs 3, 200 weight each, don't stockpile",
+    "Fuling Totem": "Yagluth summon — needs 5",
+    "Seeker Soldier Trophy": "The Queen summon — needs 3",
+    "Bell Fragment": "Fader summon — needs 9 (3 Bells, 3 Fragments each)",
+    "Ruby": "Only recipe is the Treasure Chest (decor) — needs 5",
+    "Amber Pearl": "Only real use is the Celebratory Cap — one cosmetic hat",
+    "Chain": "Feeds a handful of one-off gear/station builds, not a steady sink",
+  };
 
   const wall = document.getElementById("wall");
   const drawer = document.getElementById("drawer");
   const searchInput = document.getElementById("search");
   const matchesBox = document.getElementById("matches");
   const itemCountEl = document.getElementById("itemCount");
+  const catCountEl = document.getElementById("catCount");
 
   const totalItems = CATEGORIES.reduce((n, c) => n + c.items.length, 0);
   itemCountEl.textContent = totalItems;
+  catCountEl.textContent = CATEGORIES.length;
 
-  function buildWall() {
+  function buildCorridorWall() {
     const lastCol = Math.max(...CATEGORIES.map(c => c.col));
     for (let col = 1; col <= lastCol; col++) {
       const numEl = document.createElement("div");
@@ -603,10 +666,44 @@
     }
   }
 
+  // Alternative physical setup: a 5x4 grid of single chests instead of the corridor,
+  // columns grouped by similarity so related categories sit together — combat gear,
+  // creature-harvested materials, crafting/fletching supplies, and collectibles each
+  // fill a column, with the farming pair and Drop (stacked, two chests) sharing the last.
+  const GRID_COLUMNS = [
+    ["weapon", "shield", "armor", "tools"],
+    ["hides", "bone", "feathers", "parts"],
+    ["arrows", "resin", "tar", "hardware"],
+    ["trophy", "gems", "value", "decor"],
+    ["fiber", "seeds"],
+  ];
+
+  function buildGridWall() {
+    const byId = id => CATEGORIES.find(c => c.id === id);
+    GRID_COLUMNS.forEach((colIds, colIdx) => {
+      const col = colIdx + 1;
+      colIds.forEach((id, rowIdx) => wall.appendChild(makeCell(byId(id), col, rowIdx + 1, 1)));
+    });
+    wall.appendChild(makeCell(byId("drop"), GRID_COLUMNS.length, "3 / span 2", 2));
+  }
+
+  function renderWall() {
+    wall.innerHTML = "";
+    const isGrid = !gridToggle.checked;
+    wall.classList.toggle("grid-mode", isGrid);
+    if (isGrid) buildGridWall(); else buildCorridorWall();
+
+    if (activeId) {
+      document.querySelectorAll(".cell").forEach(el => el.classList.toggle("active", el.dataset.id === activeId));
+      renderDrawer(activeId);
+    }
+    if (searchInput.value.trim()) runSearch(searchInput.value);
+  }
+
   function makeCell(cat, col, row, boxCount) {
     const el = document.createElement("div");
-    el.style.gridColumn = col;
-    el.style.gridRow = row;
+    if (col != null) el.style.gridColumn = col;
+    if (row != null) el.style.gridRow = row;
 
     const boxesHtml = Array.from({ length: boxCount }, () => '<div class="box"></div>').join("");
 
@@ -640,6 +737,21 @@
     renderDrawer(id);
   }
 
+  function getLocationLabel(cat) {
+    if (!gridToggle.checked) {
+      if (cat.id === "drop") {
+        return `column ${String(GRID_COLUMNS.length).padStart(2, "0")} &middot; rows 3&ndash;4, stacked`;
+      }
+      for (let c = 0; c < GRID_COLUMNS.length; c++) {
+        const r = GRID_COLUMNS[c].indexOf(cat.id);
+        if (r !== -1) return `column ${String(c + 1).padStart(2, "0")} &middot; row ${r + 1}`;
+      }
+      return "";
+    }
+    if (cat.pos === "full") return `column ${String(cat.col).padStart(2, "0")} &middot; full column`;
+    return `column ${String(cat.col).padStart(2, "0")} &middot; ${cat.pos} slot`;
+  }
+
   function renderDrawer(id, flashItem) {
     const cat = CATEGORIES.find(c => c.id === id);
     if (!cat) {
@@ -647,13 +759,17 @@
       return;
     }
     const itemsHtml = cat.items.map(it => {
-      const flash = flashItem && it.toLowerCase() === flashItem.toLowerCase() ? " flash" : "";
-      return `<li class="${flash.trim()}">${it}</li>`;
+      const flash = flashItem && it.toLowerCase() === flashItem.toLowerCase() ? "flash" : "";
+      const cap = LOW_QTY_NOTES[it];
+      const capClass = cap ? "capped" : "";
+      const capHtml = cap ? `<span class="item-cap">${cap}</span>` : "";
+      const cls = [flash, capClass].filter(Boolean).join(" ");
+      return `<li class="${cls}">${it}${capHtml}</li>`;
     }).join("");
     drawer.innerHTML = `
       <div class="drawer-head">
         <h2>${cat.name}</h2>
-        <div class="drawer-meta">column ${String(cat.col).padStart(2, "0")} &middot; ${cat.pos} slot</div>
+        <div class="drawer-meta">${getLocationLabel(cat)}</div>
       </div>
       <div class="drawer-desc">${cat.desc}</div>
       <ul class="drawer-items">${itemsHtml}</ul>
@@ -676,7 +792,10 @@
 
     CATEGORIES.forEach(cat => {
       const catNameHit = cat.name.toLowerCase().includes(q) || cat.label.toLowerCase().includes(q);
-      const itemHitsForCat = cat.items.filter(it => it.toLowerCase().includes(q));
+      const itemHitsForCat = cat.items.filter(it => {
+        const noteText = (LOW_QTY_NOTES[it] || "").toLowerCase();
+        return it.toLowerCase().includes(q) || noteText.includes(q);
+      });
       if (catNameHit || itemHitsForCat.length) matchedCatIds.add(cat.id);
       itemHitsForCat.forEach(it => itemHits.push({ item: it, cat }));
     });
@@ -690,13 +809,17 @@
     if (itemHits.length === 0) {
       matchesBox.innerHTML = '<div class="no-match">No item matches &ldquo;' + escapeHtml(query) + '&rdquo;.</div>';
     } else {
-      matchesBox.innerHTML = itemHits.map(({ item, cat }) => `
+      matchesBox.innerHTML = itemHits.map(({ item, cat }) => {
+        const cap = LOW_QTY_NOTES[item];
+        const capHtml = cap ? `<span class="item-cap">${cap}</span>` : "";
+        return `
         <button class="match-row" data-cat="${cat.id}" data-item="${escapeHtml(item)}">
-          <span class="item-name">${item}</span>
-          <span class="item-loc">col ${String(cat.col).padStart(2, "0")} &middot; ${cat.pos}</span>
+          <span class="item-name">${item}${capHtml}</span>
+          <span class="item-loc">${getLocationLabel(cat)}</span>
           <span class="item-cat">${cat.name}</span>
         </button>
-      `).join("");
+      `;
+      }).join("");
     }
     matchesBox.classList.add("show");
   }
@@ -728,7 +851,32 @@
     searchInput.focus();
   });
 
-  buildWall();
+  const gridToggle = document.getElementById("gridToggle");
+  gridToggle.checked = new URLSearchParams(location.search).get("view") === "corridor";
+
+  gridToggle.addEventListener("change", () => {
+    const url = new URL(location.href);
+    if (gridToggle.checked) url.searchParams.set("view", "corridor");
+    else url.searchParams.delete("view");
+    history.replaceState(null, "", url);
+    renderWall();
+  });
+
+  // Self-check: catch silent data-sync slips (a renamed/removed item that leaves
+  // a stale LOW_QTY_NOTES key, or a category id missing from GRID_COLUMNS) as soon
+  // as the page loads, instead of a badge or grid cell just quietly not appearing.
+  (function validateData() {
+    const allIds = new Set(CATEGORIES.map(c => c.id));
+    const gridIds = new Set(GRID_COLUMNS.flat().concat(["drop"]));
+    for (const id of allIds) console.assert(gridIds.has(id), `Category "${id}" is missing from GRID_COLUMNS`);
+    for (const id of gridIds) console.assert(allIds.has(id), `GRID_COLUMNS references unknown category "${id}"`);
+    const allItems = new Set(CATEGORIES.flatMap(c => c.items));
+    for (const item of Object.keys(LOW_QTY_NOTES)) {
+      console.assert(allItems.has(item), `LOW_QTY_NOTES has "${item}" but no category lists it`);
+    }
+  })();
+
+  renderWall();
 </script>
 </body>
 </html>
