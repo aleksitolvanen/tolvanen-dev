@@ -342,12 +342,14 @@
 
   .wall.grid-mode {
     grid-auto-flow: row;
-    grid-template-columns: repeat(5, minmax(72px, 1fr));
-    grid-template-rows: repeat(4, 62px);
+    grid-template-columns: repeat(6, minmax(72px, 1fr));
+    grid-template-rows: repeat(3, 62px);
     gap: 6px;
     width: 100%;
-    max-width: 620px;
+    max-width: 740px;
   }
+
+  .wall.grid-mode .cell.detached { margin-left: 18px; }
 
   .wall.grid-mode .cell {
     min-height: 62px;
@@ -542,7 +544,8 @@
   @media (max-width: 640px) {
     .page { padding: 1.6rem 1rem 3rem; }
     .drawer-items { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-    .wall.grid-mode { grid-template-columns: repeat(5, minmax(0, 1fr)); max-width: 100%; }
+    .wall.grid-mode { grid-template-columns: repeat(6, minmax(0, 1fr)); max-width: 100%; }
+    .wall.grid-mode .cell.detached { margin-left: 8px; }
   }
 </style>
 </head>
@@ -632,23 +635,20 @@
         "Seeker Trophy", "Seeker Soldier Trophy", "Tick Trophy", "Gjall Trophy", "Hare Trophy", "Dvergr Trophy", "The Queen Trophy",
         "Morgen Trophy", "Warlock Trophy", "Cultist Trophy", "Fallen Valkyrie Trophy", "Volture Trophy", "Marksman Trophy", "Warrior Trophy", "Vile Trophy", "Rancid Remains Trophy", "Bonemaw Trophy", "Fader Trophy",
         "Barka Trophy", "Elaking Trophy", "Seal Trophy", "Lava Blob Trophy", "Bear Trophy"] },
-    { id: "gems",    col: 6, pos: "bottom", label: "GEMS",   name: "Gems",
-      desc: "Rarer finds than trophies — crypt and cave loot only. Crystal isn't here on purpose: it behaves like ore/building stock, so it lives in your metal box instead.",
-      items: ["Amber", "Amber Pearl", "Ruby", "Bell Fragment"] },
+    { id: "value",   col: 6, pos: "bottom", label: "VALUE",  name: "Valuables & Gems",
+      desc: "Coins, jewelry, and the gems — Amber, Amber Pearl and Ruby are the only three items any trader buys, so they're worth hoarding for coin. Crystal isn't here on purpose: it behaves like ore/building stock, so it lives in your metal box instead.",
+      items: ["Coins", "Silver Necklace", "Amber", "Amber Pearl", "Ruby", "Bell Fragment"] },
 
-    { id: "tools",   col: 7, pos: "top",    label: "TOOLS",  name: "Tools",
-      desc: "Pickaxes, every axe (combat variants included), and everything else that isn't a wearable or a weapon — grows faster than the coins and jewelry below it.",
+    { id: "tools",   col: 7, pos: "bottom", label: "TOOLS",  name: "Tools",
+      desc: "Pickaxes, every axe (combat variants included), and everything else that isn't a wearable or a weapon.",
       items: ["Antler Pickaxe", "Bronze Pickaxe", "Iron Pickaxe", "Black Metal Pickaxe",
         "Stone Axe", "Flint Axe", "Bronze Axe", "Iron Axe", "Black Metal Axe", "Battleaxe", "Crystal Battleaxe",
         "Jotun Bane", "Black Metal Battleaxe", "Skull Splittur", "Nord Axe", "Nord Greataxe", "Early Axes", "Berserkir Axes",
         "Hammer", "Hoe", "Cultivator", "Butcher Knife", "Scythe", "Fishing Rod", "Fishing Bait",
         "Torch", "Dvergr Lantern", "Wishbone"] },
-    { id: "value",   col: 7, pos: "bottom", label: "VALUE",  name: "Valuables & Currency",
-      desc: "Naturally bounded — coins and jewelry don't snowball the way raw materials do.",
-      items: ["Coins", "Silver Necklace"] },
 
-    { id: "weapon",  col: 8, pos: "top",    label: "WEAPON", name: "Weapons",
-      desc: "Every weapon in the game, Bronze Sword through the newest Nord-tier gear — search here for any of them by name. Axes live in Tools instead, since most of them double as the axe you actually chop wood with.",
+    { id: "gear",    col: 7, pos: "top",    label: "GEAR",   name: "Gear — Weapons, Shields & Armor",
+      desc: "Every weapon, shield and armor piece in the game in one chest — gear is one-per-item, so even a full armory stacks small. Axes live in Tools instead, since most of them double as the axe you actually chop wood with.",
       items: ["Bronze Sword", "Iron Sword", "Silver Sword", "Black Metal Sword", "Mistwalker", "Nidhögg", "Dyrnwyn", "Nord Sword", "Krom", "Slayer", "Nord Greatsword",
         "Club", "Bronze Mace", "Iron Mace", "Frostner", "Porcupine", "Flametal Mace", "Nord Mace", "Stagbreaker", "Iron Sledge", "Demolisher", "Nord Sledge",
         "Flint Spear", "Bronze Spear", "Ancient Bark Spear", "Fang Spear", "Carapace Spear", "Splitnir", "Nord Spear",
@@ -657,16 +657,11 @@
         "Bare Fists", "Paws of the Bear", "Flesh Rippers", "Vilebone Maulclaws", "Nord Knucklechains",
         "Crude Bow", "Finewood Bow", "Huntsman Bow", "Draugr Fang", "Spinesnap", "Ash Fang", "Nord Bow",
         "Arbalest", "Ripper", "Nord Crossbow",
-        "Staff of Embers", "Staff of Frost", "Dundr", "Staff of the Wild", "Staff of Fracturing", "Lightning Strike", "Echo Spike", "Staff of Protection", "Dead Raiser", "Trollstav", "Spirit Caller", "Northern Vengeance"] },
-    { id: "shield",  col: 8, pos: "bottom", label: "SHIELD", name: "Shields",
-      desc: "Every shield in the game, round/buckler/tower across all tiers.",
-      items: ["Wood Shield", "Banded Shield", "Shield of Roots", "Silver Shield", "Black Metal Shield", "Carapace Shield", "Flametal Shield", "Nord Shield",
+        "Staff of Embers", "Staff of Frost", "Dundr", "Staff of the Wild", "Staff of Fracturing", "Lightning Strike", "Echo Spike", "Staff of Protection", "Dead Raiser", "Trollstav", "Spirit Caller", "Northern Vengeance",
+        "Wood Shield", "Banded Shield", "Shield of Roots", "Silver Shield", "Black Metal Shield", "Carapace Shield", "Flametal Shield", "Nord Shield",
         "Bronze Buckler", "Iron Buckler", "Carapace Buckler", "Nord Buckler",
-        "Wood Tower Shield", "Bone Tower Shield", "Iron Tower Shield", "Serpent Scale Shield", "Black Metal Tower Shield", "Flametal Tower Shield", "Nord Greatshield"] },
-
-    { id: "armor",   col: 9, pos: "top",    label: "ARMOR",  name: "Armor",
-      desc: "A full 3-piece set goes obsolete together at every biome tier — every set from Rags through the Deep North lives here.",
-      items: ["Rag Tunic", "Rag Pants",
+        "Wood Tower Shield", "Bone Tower Shield", "Iron Tower Shield", "Serpent Scale Shield", "Black Metal Tower Shield", "Flametal Tower Shield", "Nord Greatshield",
+        "Rag Tunic", "Rag Pants",
         "Leather Helmet", "Leather Tunic", "Leather Pants", "Deer Hide Cape",
         "Headdress of the Bear", "Patterns of the Bear", "Loincloth of the Bear",
         "Troll Leather Helmet", "Troll Leather Tunic", "Troll Leather Pants", "Troll Hide Cape",
@@ -686,12 +681,13 @@
         "Helmet of the Protector", "Breastplate of the Protector", "Trousers of the Protector", "Moose Hide Cape",
         "Hood of the Vanguard", "Chestpiece of the Vanguard", "Trousers of the Vanguard",
         "Headdress of the Caller", "Robes of the Caller", "Trousers of the Caller", "Cape of the Caller"] },
-    { id: "decor",   col: 9, pos: "bottom", label: "DECOR", name: "Furniture / Unplaced Decor",
+
+    { id: "decor",   col: 8, pos: "bottom", label: "DECOR", name: "Furniture / Unplaced Decor",
       desc: "Build pieces and table-dressing you're holding onto before you've mounted or placed them.",
       items: ["Banners", "Rugs", "Trophies awaiting a wall mount", "Tankard", "Horn of Celebration", "Dvergr Tankard", "Serving Tray"] },
 
-    { id: "drop",    col: 10, pos: "full",   label: "DROP",  name: "Drop",
-      desc: "The one column with no fixed contents — a genuine drop zone for whatever doesn't have a home yet. Gets the full 4-box column since it's the least predictable of the bunch, rightmost so it's the last thing you pass.",
+    { id: "drop",    col: 9, pos: "full",   label: "DROP",  name: "Drop",
+      desc: "The drop zone for whatever doesn't have a home yet. In the 5×3 grid its three chests stand as a full detached column beside the wall; in the corridor it gets the full rightmost column — either way it's the last thing you pass on the way out.",
       items: ["Unsorted new drops", "Anything awaiting its own category"] },
   ];
 
@@ -761,21 +757,36 @@
   // columns grouped by similarity so related categories sit together — combat gear,
   // creature-harvested materials, crafting/fletching supplies, and collectibles each
   // fill a column, with the farming pair and Drop (stacked, two chests) sharing the last.
+  // 5x3 grid of single chests, one per category. Drop is not part of the wall —
+  // its two chests stand detached to the right (the last, visually offset column).
   const GRID_COLUMNS = [
-    ["weapon", "shield", "armor", "tools"],
-    ["hides", "bone", "feathers", "parts"],
-    ["arrows", "resin", "tar", "hardware"],
-    ["trophy", "gems", "value", "decor"],
-    ["fiber", "seeds"],
+    ["gear", "tools", "hardware"],
+    ["hides", "bone", "parts"],
+    ["feathers", "resin", "arrows"],
+    ["tar", "fiber", "seeds"],
+    ["trophy", "value", "decor"],
+    ["drop"],
   ];
+  const GRID_SPANS = { drop: 3 };
+  const GRID_ROWS = 3;
 
   function buildGridWall() {
     const byId = id => CATEGORIES.find(c => c.id === id);
     GRID_COLUMNS.forEach((colIds, colIdx) => {
       const col = colIdx + 1;
-      colIds.forEach((id, rowIdx) => wall.appendChild(makeCell(byId(id), col, rowIdx + 1, 1)));
+      const detached = colIdx === GRID_COLUMNS.length - 1;
+      let row = 1;
+      colIds.forEach(id => {
+        const span = GRID_SPANS[id] || 1;
+        const cell = makeCell(byId(id), col, span > 1 ? `${row} / span ${span}` : row, span);
+        if (detached) cell.classList.add("detached");
+        wall.appendChild(cell);
+        row += span;
+      });
+      if (!detached) {
+        while (row <= GRID_ROWS) wall.appendChild(makeCell(null, col, row++, 1));
+      }
     });
-    wall.appendChild(makeCell(byId("drop"), GRID_COLUMNS.length, "3 / span 2", 2));
   }
 
   function renderWall() {
@@ -866,12 +877,18 @@
 
   function getLocationLabel(cat) {
     if (!gridToggle.checked) {
-      if (cat.id === "drop") {
-        return `column ${String(GRID_COLUMNS.length).padStart(2, "0")} &middot; rows 3&ndash;4, stacked`;
-      }
       for (let c = 0; c < GRID_COLUMNS.length; c++) {
-        const r = GRID_COLUMNS[c].indexOf(cat.id);
-        if (r !== -1) return `column ${String(c + 1).padStart(2, "0")} &middot; row ${r + 1}`;
+        let row = 1;
+        for (const id of GRID_COLUMNS[c]) {
+          const span = GRID_SPANS[id] || 1;
+          if (id === cat.id) {
+            const colLabel = `column ${String(c + 1).padStart(2, "0")}`;
+            return span > 1
+              ? `${colLabel} &middot; rows ${row}&ndash;${row + span - 1}, stacked`
+              : `${colLabel} &middot; row ${row}`;
+          }
+          row += span;
+        }
       }
       return "";
     }
@@ -1064,7 +1081,7 @@
   // as the page loads, instead of a badge or grid cell just quietly not appearing.
   (function validateData() {
     const allIds = new Set(CATEGORIES.map(c => c.id));
-    const gridIds = new Set(GRID_COLUMNS.flat().concat(["drop"]));
+    const gridIds = new Set(GRID_COLUMNS.flat());
     for (const id of allIds) console.assert(gridIds.has(id), `Category "${id}" is missing from GRID_COLUMNS`);
     for (const id of gridIds) console.assert(allIds.has(id), `GRID_COLUMNS references unknown category "${id}"`);
     const allItems = new Set(CATEGORIES.flatMap(c => c.items));
