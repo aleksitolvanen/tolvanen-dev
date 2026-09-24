@@ -720,9 +720,45 @@
     el.innerHTML = `<div class="cell-label">${cat.label}</div><div class="box-stack">${boxesHtml}</div>`;
     el.addEventListener("click", () => selectCategory(cat.id));
     el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectCategory(cat.id); }
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        selectCategory(cat.id);
+      } else if (e.key.startsWith("Arrow")) {
+        e.preventDefault();
+        const next = findCellInDirection(el, e.key);
+        if (next) {
+          next.focus();
+          selectCategory(next.dataset.id);
+        }
+      }
     });
     return el;
+  }
+
+  // Geometry-based, not grid-index-based, so it works unmodified in both the
+  // corridor layout and the alternative 5x4 grid (including spanning cells like Drop).
+  function findCellInDirection(current, key) {
+    const center = el => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    };
+    const cur = center(current);
+    const candidates = Array.from(document.querySelectorAll(".cell:not(.empty)")).filter(el => el !== current);
+
+    let best = null, bestScore = Infinity;
+    for (const el of candidates) {
+      const c = center(el);
+      const dx = c.x - cur.x, dy = c.y - cur.y;
+      let primary, perpendicular;
+      if (key === "ArrowRight") { primary = dx; perpendicular = dy; }
+      else if (key === "ArrowLeft") { primary = -dx; perpendicular = dy; }
+      else if (key === "ArrowDown") { primary = dy; perpendicular = dx; }
+      else if (key === "ArrowUp") { primary = -dy; perpendicular = dx; }
+      if (primary <= 1) continue; // must actually be in that direction
+      const score = primary + Math.abs(perpendicular) * 1.5;
+      if (score < bestScore) { bestScore = score; best = el; }
+    }
+    return best;
   }
 
   let activeId = null;
