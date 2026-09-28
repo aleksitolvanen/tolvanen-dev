@@ -342,11 +342,11 @@
 
   .wall.grid-mode {
     grid-auto-flow: row;
-    grid-template-columns: repeat(4, minmax(72px, 1fr));
+    grid-template-columns: repeat(5, minmax(72px, 1fr));
     grid-template-rows: repeat(3, 62px);
     gap: 6px;
     width: 100%;
-    max-width: 500px;
+    max-width: 620px;
   }
 
   .wall.grid-mode .cell {
@@ -544,7 +544,7 @@
   @media (max-width: 640px) {
     .page { padding: 1.6rem 1rem 3rem; }
     .drawer-items { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-    .wall.grid-mode { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 100%; }
+    .wall.grid-mode { grid-template-columns: repeat(5, minmax(0, 1fr)); max-width: 100%; }
   }
 </style>
 </head>
@@ -586,10 +586,12 @@
   const CATEGORIES = [
     { id: "hides",   col: 1, pos: "top",    label: "HIDES",  name: "Hides & Pelts",
       desc: "Every Boar, Deer and Greydwarf Brute drops one of these — the steadiest accumulator on the wall.",
-      items: ["Deer Hide", "Leather Scraps", "Troll Hide", "Wolf Pelt", "Lox Pelt", "Scale Hide", "Bear Hide", "Moose Hide", "Seal Pelt", "Asksvin Hide", "Serpent Scale"] },
+      items: ["Deer Hide", "Leather Scraps", "Troll Hide", "Wolf Pelt", "Lox Pelt", "Scale Hide", "Bear Hide", "Moose Hide", "Seal Pelt", "Asksvin Hide", "Serpent Scale",
+        "Leather Straps"] },
     { id: "bone",    col: 1, pos: "bottom", label: "BONE",   name: "Bone",
       desc: "Draugr and skeleton drops, split out from Hides so it doesn't get buried.",
-      items: ["Bone Fragments", "Withered Bone", "Charred Bones"] },
+      items: ["Bone Fragments", "Withered Bone", "Charred Bone",
+        "Charred Skull"] },
 
     { id: "resin",   col: 2, pos: "top",    label: "RESIN",  name: "Resin",
       desc: "Greydwarves are the most-killed enemy in the game — this fills faster than Feathers below it.",
@@ -602,10 +604,11 @@
       desc: "Batch-crafted 20 at a time, crossbow Bolts and ballista Missiles included — easy to over-produce.",
       items: ["Wood Arrow", "Flinthead Arrow", "Bronzehead Arrow", "Ironhead Arrow", "Obsidian Arrow",
         "Needle Arrow", "Carapace Arrow", "Charred Arrow", "Fire Arrow", "Frost Arrow", "Poison Arrow",
-        "Silver Arrow", "Bone Bolt", "Iron Bolt", "Blackmetal Bolt", "Carapace Bolt",
+        "Silver Arrow", "Bone Bolt", "Iron Bolt", "Black Metal Bolt", "Carapace Bolt",
         "Wooden Missile", "Black Metal Missile",
         "Ooze Bomb", "Bile Bomb", "Basalt Bomb", "Smoke Bomb",
-        "Blob Bomb: Poison", "Blob Bomb: Elite Poison", "Blob Bomb: Frost", "Blob Bomb: Tar", "Corked Vial"] },
+        "Blob Bomb: Poison", "Blob Bomb: Elite Poison", "Blob Bomb: Frost", "Blob Bomb: Tar", "Corked Vial",
+        "Bloodgold Arrow", "Bloodgold Bolt", "Charred Bolt", "Flametal Missile", "Bloodgold Missile", "Explosive Payload", "Grausten Payload", "Bloodgold Payload", "Ember Charge", "Blob Bomb: Lava", "Blob Bomb: Pulp", "Snowball"] },
     { id: "parts",   col: 3, pos: "bottom", label: "ORGANS", name: "Creature Parts & Organs",
       desc: "Monster byproducts — the marked ones are boss summons with capped counts.",
       items: ["Guck", "Ooze", "Root", "Neck Tail", "Entrails", "Bloodbag", "Blood Clot", "Bilebag",
@@ -614,20 +617,23 @@
         "Greydwarf Eye", "Ymir Flesh", "Chitin", "Hard Antler",
         "Needle", "Wolf Fang", "Bear Paw", "Fenris Hair", "Fenris Claw",
         "Majestic Carapace", "Kindled Ribs", "Torn Spirit", "Sacrificial Blood",
-        "Ectoplasm", "Bukeperries", "Toadstool"] },
+        "Ectoplasm", "Bukeperries", "Toadstool",
+        "Writhan Roots", "Luminous Larva", "Long Claws", "Malicious Blood", "Dead Pulp", "Moose Sinew", "Elaking Hair Bundle", "Frozen Branch", "Bonemaw Scale", "Bonemaw Tooth", "Asksvin Neck", "Asksvin Pelvis", "Asksvin Ribcage", "Asksvin Skull"] },
 
     { id: "hardware",col: 4, pos: "bottom", label: "BUILD",  name: "Building & Furnishing",
       desc: "Nails, chain, tar and unplaced furnishings — everything you grab when working on the base.",
       items: ["Bronze Nails", "Iron Nails", "Chain", "Tar", "Surtling Core", "Black Core", "Wisp",
         "Red Jute", "Blue Jute", "Crystal", "Mechanical Spring", "Ceramic Plate", "Shield Core", "Sharpening Stone", "Dvergr Extractor", "Thunder Stone",
-        "Candle Wick", "Barrel Hoops", "Iron Pit", "Barber Kit", "Basic Fireworks", "Coloured Fireworks (blue, cyan, green, purple, red, yellow)",
-        "Banners", "Rugs", "Trophies awaiting a wall mount", "Tankard", "Horn of Celebration", "Dvergr Tankard", "Serving Tray"] },
+        "Candle Wick", "Barrel Hoops", "Iron Pit", "Barber Kit", "Basic Fireworks", "Blue Fireworks", "Cyan Fireworks", "Green Fireworks", "Purple Fireworks", "Red Fireworks", "Yellow Fireworks",
+        "Banners", "Rugs", "Trophies awaiting a wall mount", "Tankard", "Horn of Celebration", "Dvergr Tankard", "Serving Tray",
+        "Frostcore", "Frysling Core", "Molten Core", "Liquid Frost", "Sulfur", "Proustite Powder", "Charred Cogwheel", "Pot Shard"] },
 
     { id: "farm",    col: 6, pos: "top",    label: "FARM",   name: "Farming",
       desc: "Bulk Flax plus every planting seed, one stop before the field — Barley's harvest goes to the food box.",
-      items: ["Flax", "Linen Thread", "Barley", "Carrot Seed", "Turnip Seeds", "Onion Seeds", "Vineberry Seeds",
+      items: ["Flax", "Linen Thread", "Barley", "Carrot Seeds", "Turnip Seeds", "Onion Seeds", "Vineberry Seeds",
         "Jotun Puffs", "Magecap",
-        "Acorn", "Beech Seeds", "Birch Seeds", "Fir Cone", "Pine Cone", "Ivy Seeds", "Queen Bee", "Egg"] },
+        "Acorns", "Beech Seeds", "Birch Seeds", "Fir Cone", "Pine Cone", "Ivy Seeds", "Queen Bee", "Egg",
+        "Kale Seeds", "Oat Seeds", "Seed Poteitr", "Timberwood Cone", "Nornathread", "Asksvin Egg"] },
 
     { id: "trophy",  col: 5, pos: "top",    label: "TROPHY", name: "Trophies",
       desc: "Never needed in mass — 1 each for stones and display, extras feed the Obliterator.",
@@ -637,10 +643,11 @@
         "Wolf Trophy", "Fenring Trophy", "Drake Trophy", "Stone Golem Trophy", "Moder Trophy",
         "Deathsquito Trophy", "Fuling Trophy", "Fuling Berserker Trophy", "Fuling Shaman Trophy", "Lox Trophy", "Yagluth Trophy",
         "Seeker Trophy", "Seeker Soldier Trophy", "Tick Trophy", "Gjall Trophy", "Hare Trophy", "Dvergr Trophy", "The Queen Trophy",
-        "Morgen Trophy", "Charred Warlock Trophy", "Cultist Trophy", "Fallen Valkyrie Trophy", "Volture Trophy", "Charred Marksman Trophy", "Charred Warrior Trophy", "Vile Trophy", "Rancid Remains Trophy", "Bonemaw Trophy", "Fader Trophy",
+        "Morgen Trophy", "Warlock Trophy", "Cultist Trophy", "Fallen Valkyrie Trophy", "Volture Trophy", "Marksman Trophy", "Warrior Trophy", "Vile Trophy", "Rancid Remains Trophy", "Bonemaw Trophy", "Fader Trophy",
         "Barka Trophy", "Elaking Trophy", "Seal Trophy", "Lava Blob Trophy", "Bear Trophy",
         "Asksvin Trophy", "Brenna Trophy", "Geirrhafa Trophy", "Ghost Trophy", "Growth Trophy",
-        "Kvastur Trophy", "Serpent Trophy", "Thungr Trophy", "Ulv Trophy", "Zil Trophy"] },
+        "Kvastur Trophy", "Serpent Trophy", "Thungr Trophy", "Ulv Trophy", "Zil Trophy",
+        "Writhan Trophy", "Forest Troll Trophy", "Frost Troll Trophy", "Frost Blob Trophy", "Pulp Trophy", "Moose Trophy", "Eyeless One Trophy", "Krigen Trophy", "Hexen Trophy"] },
     { id: "value",   col: 5, pos: "bottom", label: "VALUE",  name: "Valuables & Gems",
       desc: "Amber, Amber Pearl and Ruby are the only items traders buy — worth hoarding.",
       items: ["Coins", "Silver Necklace", "Amber", "Amber Pearl", "Ruby", "Bell Fragment", "Dragon Tear",
@@ -648,7 +655,8 @@
         "Wooden Battle Idol", "Bronze Battle Idol", "Iron Battle Idol", "Silver Battle Idol",
         "Black Metal Battle Idol", "Black Marble Battle Idol", "Flametal Battle Idol", "Bloodgold Battle Idol",
         "Wooden Protection Idol", "Bronze Protection Idol", "Iron Protection Idol", "Silver Protection Idol",
-        "Black Metal Protection Idol", "Black Marble Protection Idol", "Flametal Protection Idol", "Bloodgold Protection Idol"] },
+        "Black Metal Protection Idol", "Black Marble Protection Idol", "Flametal Protection Idol", "Bloodgold Protection Idol",
+        "Ancient Coin", "Grimvarn", "Solryth", "Veydris", "Draumyx", "Frostfire Essence", "Thunderblood Essence", "Memorial Coal", "Mysterious Rock"] },
 
     { id: "gear",    col: 4, pos: "top",    label: "GEAR",   name: "Gear & Tools",
       desc: "Every weapon, shield, armor piece and tool in one chest — all one-per-item, so it stacks small.",
@@ -656,8 +664,8 @@
         "Stone Axe", "Flint Axe", "Bronze Axe", "Iron Axe", "Black Metal Axe", "Battleaxe", "Crystal Battleaxe",
         "Jotun Bane", "Black Metal Battleaxe", "Skull Splittur", "Nord Axe", "Nord Greataxe", "Early Axes", "Berserkir Axes",
         "Hammer", "Hoe", "Cultivator", "Butcher Knife", "Scythe", "Scythe Handle", "Fishing Rod", "Fishing Bait",
-        "Cold Fishing Bait", "Frosty Fishing Bait", "Heavy Fishing Bait", "Magic Fishing Bait", "Misty Fishing Bait",
-        "Mossy Fishing Bait", "Smokey Fishing Bait", "Stingy Fishing Bait", "Sticky Fishing Bait",
+        "Cold Fishing Bait", "Frosty Fishing Bait", "Heavy Fishing Bait", "Hot Fishing Bait", "Misty Fishing Bait",
+        "Mossy Fishing Bait", "Stingy Fishing Bait", "Sticky Fishing Bait",
         "Torch", "Sparkler", "Dvergr Lantern", "Wishbone", "Swamp Key", "Sealbreaker",
         "Megingjord", "Dverger Circlet", "Wisplight", "Lox Saddle", "Asksvin Saddle",
         "Bronze Sword", "Iron Sword", "Silver Sword", "Black Metal Sword", "Mistwalker", "Nidhögg", "Dyrnwyn", "Nord Sword", "Krom", "Slayer", "Nord Greatsword",
@@ -665,18 +673,18 @@
         "Flint Spear", "Bronze Spear", "Ancient Bark Spear", "Abyssal Harpoon", "Fang Spear", "Carapace Spear", "Splitnir", "Nord Spear",
         "Bronze Atgeir", "Iron Atgeir", "Black Metal Atgeir", "Himminafl", "Nord Atgeir",
         "Flint Knife", "Copper Knife", "Abyssal Razor", "Silver Knife", "Black Metal Knife", "Nord Dagger", "Skoll and Hati",
-        "Bare Fists", "Paws of the Bear", "Flesh Rippers", "Vilebone Maulclaws", "Nord Knucklechains",
+        "Fists", "Paws of the Bear", "Flesh Rippers", "Vilebone Maulclaws", "Nord Knucklechains",
         "Crude Bow", "Finewood Bow", "Huntsman Bow", "Draugr Fang", "Spinesnap", "Ash Fang", "Nord Bow",
         "Arbalest", "Ripper", "Nord Crossbow",
         "Staff of Embers", "Staff of Frost", "Dundr", "Staff of the Wild", "Staff of Fracturing", "Lightning Strike", "Echo Spike", "Staff of Protection", "Dead Raiser", "Trollstav", "Spirit Caller", "Northern Vengeance",
         "Wood Shield", "Banded Shield", "Shield of Roots", "Silver Shield", "Black Metal Shield", "Carapace Shield", "Flametal Shield", "Nord Shield",
         "Bronze Buckler", "Iron Buckler", "Carapace Buckler", "Nord Buckler",
         "Wood Tower Shield", "Bone Tower Shield", "Iron Tower Shield", "Serpent Scale Shield", "Black Metal Tower Shield", "Flametal Tower Shield", "Nord Greatshield",
-        "Rag Tunic", "Rag Pants",
-        "Leather Helmet", "Leather Tunic", "Leather Pants", "Deer Hide Cape",
+        "Rag Tunic", "Rag Trousers",
+        "Leather Helmet", "Leather Tunic", "Leather Trousers", "Deer Hide Cape",
         "Headdress of the Bear", "Patterns of the Bear", "Loincloth of the Bear",
-        "Troll Leather Helmet", "Troll Leather Tunic", "Troll Leather Pants", "Troll Hide Cape",
-        "Bronze Helmet", "Bronze Plate Cuirass", "Bronze Plate Leggings",
+        "Troll Leather Hood", "Troll Leather Tunic", "Troll Leather Trousers", "Troll Hide Cape",
+        "Bronze Helmet", "Bronze Plate Tunic", "Bronze Plate Leggings",
         "Root Mask", "Root Harnesk", "Root Leggings",
         "Iron Helmet", "Iron Scale Mail", "Iron Greaves",
         "Fenris Hood", "Fenris Coat", "Fenris Leggings",
@@ -693,10 +701,19 @@
         "Hood of the Vanguard", "Chestpiece of the Vanguard", "Trousers of the Vanguard",
         "Headdress of the Caller", "Robes of the Caller", "Trousers of the Caller", "Cape of the Caller",
         "Fishing Hat", "Celebratory Cap", "Midsummer Crown", "Yule Hat", "Headband", "Straw Hat", "Pointy Hat",
-        "Simple Cap (purple, red)", "Fur Cap (brown, grey)", "Extravagant Cap (green, orange)",
-        "Tied Headscarf (blue, yellow)", "Twisted Headscarf (green, red)",
-        "Simple Dress (blue, brown, natural, yellow)", "Beaded Dress (blue, brown, yellow)", "Shawl Dress (blue, brown, yellow)", "Harvest Dress",
-        "Simple Tunic (blue, natural, red, yellow)", "Beaded Tunic (blue, red, yellow)", "Cape Tunic (blue, red, yellow)", "Harvest Tunic"] },
+        "Simple Red Cap", "Simple Purple Cap", "Brown Fur Cap", "Grey Fur Cap", "Extravagant Green Cap", "Extravagant Orange Cap",
+        "Blue Tied Headscarf", "Yellow Tied Headscarf", "Green Twisted Headscarf", "Red Twisted Headscarf",
+        "Plain Brown Dress", "Brown Dress with Shawl", "Brown Dress with Beads", "Plain Blue Dress", "Blue Dress with Shawl", "Blue Dress with Beads",
+        "Plain Yellow Dress", "Yellow Dress with Shawl", "Yellow Dress with Beads", "Simple Undyed Dress", "Harvest Dress",
+        "Plain Blue Tunic", "Blue Tunic with Cape", "Blue Tunic with Beads", "Plain Red Tunic", "Red Tunic with Cape", "Red Tunic with Beads",
+        "Plain Yellow Tunic", "Yellow Tunic with Cape", "Yellow Tunic with Beads", "Simple Undyed Tunic", "Harvest Tunic",
+        "Curious Axe Head", "Mysterious Axe Head", "Stone Pickaxe", "Snow Shovel", "Grappling Hook", "Moose Saddle", "Hildir's Brass Key", "Hildir's Silver Key", "Hildir's Bronze Key", "Intricate Key", "Wooden Sword", "Wooden Greatsword", "Wooden Axe", "Wooden Battleaxe", "Wooden Mace", "Wooden Sledge", "Wooden Spear", "Wooden Atgeir", "Wooden Knife", "Bleeding Berserkir Axes", "Thundering Berserkir Axes", "Primal Berserkir Axes", "Nidhögg the Bleeding", "Nidhögg the Thundering", "Nidhögg the Primal", "Brutal Slayer", "Scourging Slayer", "Primal Slayer", "Splitnir the Bleeding", "Splitnir the Storming", "Splitnir the Primal", "Bloodgeon", "Storm Star", "Klossen", "Blood Fang", "Storm Fang", "Root Fang", "Wound Ripper", "Storm Ripper", "Root Ripper", "Voidcaller", "Frostthrower Staff", "Frostfire Sword", "Frostfire Greatsword", "Frostfire Axe", "Frostfire Greataxe", "Frostfire Mace", "Frostfire Sledge", "Frostfire Spear", "Frostfire Atgeir", "Frostfire Dagger", "Frostfire Knucklechains", "Frostfire Bow", "Frostfire Crossbow", "Thunderblood Sword", "Thunderblood Greatsword", "Thunderblood Axe", "Thunderblood Greataxe", "Thunderblood Mace", "Thunderblood Sledge", "Thunderblood Spear", "Thunderblood Atgeir", "Thunderblood Dagger", "Thunderblood Knucklechains", "Thunderblood Bow", "Thunderblood Crossbow", "Nord moulds (Mould: …)", "Unfinished Nord casts (Cast: …)", "Horned Bronze Helmet", "Crown of Roots", "Crown of Valheim", "Bronze Pendant", "Heart of the Forest", "Iron Brooch", "Nimble Anklet", "Wolf Sight", "Crystal Heart", "Resounding Shackle", "Fins of Destiny", "Pulsating Earrings", "Bracelets of the Brave", "Evasion Mantle", "Jörmundling", "Brimstone", "Neckstabber", "Witch Crown"] },
+
+    { id: "brew",    col: 7, pos: "top",    label: "BREW",   name: "Brewing & Feast Ingredients",
+      desc: "Mead and feast makings that aren't a meal on their own — the Bog Witch's herbs, spices and oddities, plus Thistle and Dandelion.",
+      items: ["Thistle", "Dandelion", "Pungent Pebbles", "Fragrant Bundle", "Fresh Seaweed", "Cured Squirrel Hamstring", "Powdered Dragon Eggshells",
+        "Woodland Herb Blend", "Seafarer's Herbs", "Mountain Peak Pepper Powder", "Grasslands Herbalist Harvest", "Herbs of the Hidden Hills",
+        "Fiery Spice Powder", "Seasoning of the Gourd"] },
 
     { id: "drop",    col: 6, pos: "bottom", label: "DROP",  name: "Drop",
       desc: "One chest for anything without a home yet — empty it into the wall when you sort.",
@@ -727,6 +744,8 @@
     "Cultist Trophy": "Fenris Hood needs 1",
     "Fenring Trophy": "Wolf Sight needs 1",
     "Stone Golem Trophy": "Crystal Heart needs 1",
+    "Wolf Sight": "One trinket slot — one is enough",
+    "Crystal Heart": "One trinket slot — one is enough",
     "Scythe Handle": "Scythe is its only use — Bog Witch sells it after Moder",
     "Barber Kit": "Barber station needs 1 — from Hildir",
     "Iron Pit": "Iron Fire Pit needs 1 each — can't go through a wood portal",
@@ -737,7 +756,7 @@
     "Mandible": "A handful of one-off Mistlands gear crafts",
     "Morgen Heart": "Flametal Breastplate is its only recipe",
     "Vineberry Seeds": "1 seed = 1 tree, and trees drop seeds back — a few is plenty",
-    "Acorn": "1 seed = 1 tree, and trees drop seeds back — a few is plenty",
+    "Acorns": "1 seed = 1 tree, and trees drop seeds back — a few is plenty",
     "Beech Seeds": "1 seed = 1 tree, and trees drop seeds back — a few is plenty",
     "Birch Seeds": "1 seed = 1 tree, and trees drop seeds back — a few is plenty",
     "Fir Cone": "1 seed = 1 tree, and trees drop seeds back — a few is plenty",
@@ -782,13 +801,14 @@
   // columns grouped by similarity so related categories sit together — combat gear,
   // creature-harvested materials, crafting/fletching supplies, and collectibles each
   // fill a column, with the farming pair and Drop (stacked, two chests) sharing the last.
-  // 4x3 grid, one chest per category. Column 1 is the workshop, and Drop sits
+  // 5x3 grid, one chest per category. Column 1 is the workshop, and Drop sits
   // in the bottom-right corner of the wall.
   const GRID_COLUMNS = [
     ["gear", "arrows", "hardware"],
     ["hides", "bone", "parts"],
     ["feathers", "resin", "farm"],
     ["trophy", "value", "drop"],
+    ["brew"],
   ];
   const GRID_SPANS = {};
   const GRID_ROWS = 3;
